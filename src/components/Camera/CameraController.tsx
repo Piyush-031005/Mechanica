@@ -1,7 +1,7 @@
 "use client";
 
 import { useFrame } from "@react-three/fiber";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useMemo } from "react";
 import * as THREE from "three";
 import Lenis from "lenis";
 
@@ -10,15 +10,40 @@ export function CameraController() {
   const scrollProgress = useRef(0);
   const noiseTime = useRef(0);
 
+  // Define a cinematic spline path for the camera
+  const cameraPath = useMemo(() => {
+    return new THREE.CatmullRomCurve3([
+      new THREE.Vector3(0, 0, 5),          // Start (above/away)
+      new THREE.Vector3(3, 1, -2),         // Pan right, approaching flower
+      new THREE.Vector3(0, 0, -6),         // Close up on flower
+      new THREE.Vector3(-4, -1, -12),      // Swing left around flower
+      new THREE.Vector3(0, 2, -30),        // Rise up towards next artifact (Dragonfly)
+      new THREE.Vector3(5, -2, -45),       // Dive down
+      new THREE.Vector3(0, 0, -55)         // Approach The Eye
+    ]);
+  }, []);
+
+  // Define a secondary spline for where the camera should LOOK
+  const lookAtPath = useMemo(() => {
+    return new THREE.CatmullRomCurve3([
+      new THREE.Vector3(0, 0, -10),        // Look at Flower
+      new THREE.Vector3(0, 0, -10),        // Keep looking at Flower
+      new THREE.Vector3(0, 0, -10),        // Keep looking at Flower
+      new THREE.Vector3(0, 0, -35),        // Shift focus to Dragonfly area
+      new THREE.Vector3(0, 0, -35),        // Look at Dragonfly
+      new THREE.Vector3(0, 0, -60),        // Shift focus to The Eye
+      new THREE.Vector3(0, 0, -60)         // Look at The Eye
+    ]);
+  }, []);
+
   useEffect(() => {
     const lenis = new Lenis({
-      lerp: 0.05, // Super smooth
+      lerp: 0.05,
       smoothWheel: true,
     });
     lenisRef.current = lenis;
 
     lenis.on("scroll", (e: any) => {
-      // e.progress goes from 0 to 1
       scrollProgress.current = e.progress;
     });
 
@@ -32,29 +57,31 @@ export function CameraController() {
       lenisRef.current.raf(state.clock.elapsedTime * 1000);
     }
 
-    // 1. Cinematic Drift & Breathing (Noise)
     noiseTime.current += delta * 0.5;
     const breatheX = Math.sin(noiseTime.current * 0.5) * 0.05;
     const breatheY = Math.cos(noiseTime.current * 0.4) * 0.05;
 
-    // 2. Map scroll progress to a global camera path.
-    // For now, simply move the camera through z-space based on scroll.
-    // Progress goes 0 -> 1. Let's map it to Z from 5 to -50.
-    const targetZ = 5 - scrollProgress.current * 55;
+    // Get position on spline based on scroll progress (0 to 1)
+    const currentProg = scrollProgress.current;
     
-    // We add the breathing on top
-    const targetX = breatheX;
-    const targetY = breatheY;
+    const targetPos = cameraPath.getPointAt(currentProg);
+    const lookAtTarget = lookAtPath.getPointAt(currentProg);
+    
+    // Add breathing to position
+    targetPos.x += breatheX;
+    targetPos.y += breatheY;
 
-    // Lerp the camera towards the target position for extra buttery smoothness
-    state.camera.position.lerp(
-      new THREE.Vector3(targetX, targetY, targetZ),
-      0.05
-    );
+    // Lerp camera position
+    state.camera.position.lerp(targetPos, 0.05);
     
-    // Camera always looks somewhat forward but we can add micro-shakes
-    const lookTarget = new THREE.Vector3(0, 0, targetZ - 10);
-    state.camera.lookAt(lookTarget);
+    // Lerp lookAt by manually calculating target quaternion (smoother than lookAt lerping vectors sometimes)
+    // For simplicity we will lerp the lookAt vector and use lookAt directly.
+    const currentLookAt = new THREE.Vector3();
+    state.camera.getWorldDirection(currentLookAt);
+    currentLookAt.add(state.camera.position); // convert direction to target point
+    
+    currentLookAt.lerp(lookAtTarget, 0.05);
+    state.camera.lookAt(currentLookAt);
   });
 
   return null;
