@@ -43,26 +43,20 @@ const fragmentShader = `
     // Calculate distance from center for radial gradient
     float dist = length(centeredUv);
     
-    // Deep Indigo: #050b14, Bright Cyan: #0088aa
-    vec3 colorDark = vec3(0.02, 0.04, 0.08); // Deep indigo
-    vec3 colorLight = vec3(0.0, 0.2, 0.3);   // Subtle cyan/teal
+    // Vintage Prussian Blue Theme
+    // Deep center: #0A1B2A, Outer edges: #020C17
+    vec3 colorLight = vec3(0.04, 0.11, 0.16); // Center (lighter Prussian)
+    vec3 colorDark = vec3(0.01, 0.05, 0.09);  // Edges (very dark Prussian)
     
     // Radial mix
-    vec3 baseColor = mix(colorLight, colorDark, smoothstep(0.0, 0.8, dist));
+    vec3 baseColor = mix(colorLight, colorDark, smoothstep(0.0, 1.2, dist));
     
-    // Add procedural paper noise
-    float n = noise(uv * 500.0 + uTime * 0.1);
-    baseColor += n * 0.03;
+    // Add procedural paper noise (vintage grain)
+    float n = noise(uv * 800.0 + uTime * 0.05);
+    baseColor += n * 0.04;
     
-    // Scanning volumetric light effect (horizontal bar moving down)
-    float scanline = sin(uv.y * 800.0 + uTime * 5.0) * 0.02;
-    baseColor += scanline;
-    
-    float scanBar = exp(-pow(uv.y - fract(uTime * 0.1), 2.0) * 200.0) * 0.05;
-    baseColor += vec3(0.0, 1.0, 1.0) * scanBar;
-    
-    // Vignette
-    baseColor *= smoothstep(0.8, 0.2, dist);
+    // Subtle vignette
+    baseColor *= smoothstep(1.0, 0.3, dist);
 
     gl_FragColor = vec4(baseColor, 1.0);
   }

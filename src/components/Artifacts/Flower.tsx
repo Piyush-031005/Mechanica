@@ -78,15 +78,15 @@ export function Flower() {
       {/* Dynamic Engineering Measurements Overlay */}
       <Html position={[2, 2, 0]} center style={{ pointerEvents: 'none' }}>
         <div style={{
-          color: '#00ffff',
+          color: '#D4AF37', // Brass color
           fontFamily: 'monospace',
           fontSize: '10px',
-          borderLeft: '1px solid #00ffff',
+          borderLeft: '1px solid #D4AF37',
           paddingLeft: '10px',
           opacity: discoveryState >= 1 ? 1 : 0,
           transition: 'opacity 0.5s',
           whiteSpace: 'nowrap',
-          textShadow: '0 0 5px #00ffff'
+          textShadow: '0 0 2px #000000'
         }}>
           RAD: 1.204m<br/>
           CORE: {discoveryState >= 3 ? 'CRITICAL' : 'STABLE'}<br/>
@@ -99,10 +99,12 @@ export function Flower() {
       <mesh ref={coreRef}>
         <icosahedronGeometry args={[0.5, 2]} />
         <meshStandardMaterial 
-          color={discoveryState >= 2 ? "#ff0055" : "#00ffff"} 
+          color={discoveryState >= 2 ? "#D4AF37" : "#B87333"} // Brass/Copper
           wireframe={discoveryState < 2} 
           transparent 
           opacity={0.8} 
+          metalness={0.9}
+          roughness={0.2}
         />
       </mesh>
       
@@ -110,8 +112,8 @@ export function Flower() {
         <icosahedronGeometry args={[0.4, 1]} />
         <meshStandardMaterial 
           color="#ffffff" 
-          emissive={discoveryState >= 2 ? "#ff0055" : "#00ffff"} 
-          emissiveIntensity={discoveryState >= 3 ? 5 : 2} 
+          emissive={discoveryState >= 2 ? "#D4AF37" : "#001122"} 
+          emissiveIntensity={discoveryState >= 3 ? 2 : 0.5} 
         />
       </mesh>
       
@@ -161,17 +163,21 @@ function Petal({ petal, discoveryState }: { petal: any, discoveryState: number }
       <mesh>
         <capsuleGeometry args={[0.1, 1, 4, 8]} />
         <meshStandardMaterial 
-          color={discoveryState >= 2 ? "#333333" : "#021B30"} 
-          emissive={discoveryState >= 2 ? "#000000" : "#005577"}
+          color={discoveryState >= 2 ? "#555555" : "#D4AF37"} // Brass base
+          emissive={discoveryState >= 2 ? "#000000" : "#332200"} // Subtle warm emissive
           emissiveIntensity={0.2}
           wireframe={discoveryState < 2} 
-          metalness={discoveryState >= 2 ? 1 : 0}
-          roughness={discoveryState >= 2 ? 0.2 : 1}
+          metalness={0.9}
+          roughness={0.3}
         />
       </mesh>
       <mesh position={[0, 0, 0.1]}>
         <capsuleGeometry args={[0.02, 1.1, 4, 4]} />
-        <meshBasicMaterial color={discoveryState >= 2 ? "#ffaa00" : "#00ffff"} />
+        <meshStandardMaterial 
+          color={discoveryState >= 2 ? "#B87333" : "#F5F5DC"} // Copper or Cream line
+          metalness={0.5} 
+          roughness={0.5} 
+        />
       </mesh>
     </group>
   );
@@ -198,13 +204,13 @@ function Gear({ radius, teeth, speed, discoveryState, globalExplosion, zOffset =
       {/* We use a cylinder with radial segments equal to teeth * 2 to simulate gear teeth when wireframed */}
       <cylinderGeometry args={[radius, radius, 0.1, teeth * 2, 1, false]} />
       <meshStandardMaterial 
-        color={discoveryState >= 2 ? "#555555" : "#00ffff"}
-        emissive={discoveryState >= 2 ? "#111111" : "#003344"}
+        color={discoveryState >= 2 ? "#555555" : "#D4AF37"}
+        emissive={discoveryState >= 2 ? "#111111" : "#111100"}
         wireframe={discoveryState < 2}
         transparent
-        opacity={0.6}
-        metalness={0.8}
-        roughness={0.2}
+        opacity={0.8}
+        metalness={1.0}
+        roughness={0.4}
       />
     </mesh>
   );

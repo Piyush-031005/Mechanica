@@ -17,9 +17,11 @@ export function CameraController() {
       new THREE.Vector3(3, 1, -2),         // Pan right, approaching flower
       new THREE.Vector3(0, 0, -6),         // Close up on flower
       new THREE.Vector3(-4, -1, -12),      // Swing left around flower
-      new THREE.Vector3(0, 2, -30),        // Rise up towards next artifact (Dragonfly)
-      new THREE.Vector3(5, -2, -45),       // Dive down
-      new THREE.Vector3(0, 0, -55)         // Approach The Eye
+      new THREE.Vector3(2, 2, -25),        // Weave through first pillars right
+      new THREE.Vector3(-2, -1, -35),      // Look at Dragonfly
+      new THREE.Vector3(0, 1, -45),        // Weave through pillars center
+      new THREE.Vector3(4, -1, -48),       // Approach Owl from side
+      new THREE.Vector3(0, 0, -55)         // Look at Eye
     ]);
   }, []);
 
@@ -31,6 +33,8 @@ export function CameraController() {
       new THREE.Vector3(0, 0, -10),        // Keep looking at Flower
       new THREE.Vector3(0, 0, -35),        // Shift focus to Dragonfly area
       new THREE.Vector3(0, 0, -35),        // Look at Dragonfly
+      new THREE.Vector3(0, 0, -50),        // Shift focus to Owl
+      new THREE.Vector3(0, 0, -50),        // Look at Owl
       new THREE.Vector3(0, 0, -60),        // Shift focus to The Eye
       new THREE.Vector3(0, 0, -60)         // Look at The Eye
     ]);
