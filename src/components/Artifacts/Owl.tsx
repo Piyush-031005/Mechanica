@@ -3,7 +3,7 @@
 import { useRef, useState, useEffect } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
-import { Html } from "@react-three/drei";
+import { Html, Edges } from "@react-three/drei";
 
 export function Owl() {
   const headRef = useRef<THREE.Group>(null);
@@ -33,15 +33,15 @@ export function Owl() {
   });
 
   return (
-    <group position={[0, -2, -50]}>
+    <group position={[0, -50, -45]}>
       <Html position={[0, 4, 0]} center style={{ pointerEvents: 'none' }}>
         <div style={{
-          color: '#D4AF37',
+          color: '#000000',
           fontFamily: 'monospace',
           fontSize: '10px',
           textAlign: 'center',
           whiteSpace: 'nowrap',
-          textShadow: '0 0 5px rgba(0,0,0,0.8)'
+          textShadow: '0 0 5px rgba(255,255,255,0.8)'
         }}>
           NIGHT-WATCH SYSTEM<br/>
           ACTIVE TRACKING
@@ -51,14 +51,16 @@ export function Owl() {
       {/* Body */}
       <mesh position={[0, 0.5, 0]}>
         <cylinderGeometry args={[1, 1.5, 3, 16]} />
-        <meshStandardMaterial color="#333333" metalness={0.9} roughness={0.5} wireframe={true} />
+        <meshStandardMaterial color="#ffffff" metalness={0.1} roughness={0.9} />
+        <Edges color="black" />
       </mesh>
       
       {/* Armor Plates on Body */}
       {Array.from({ length: 8 }).map((_, i) => (
         <mesh key={i} position={[0, 0.5 - (i * 0.3), 0]} rotation={[0.1, i * 0.5, 0]}>
           <cylinderGeometry args={[1.1 + (i * 0.05), 1.2 + (i * 0.05), 0.2, 8]} />
-          <meshStandardMaterial color="#111111" metalness={0.8} roughness={0.3} />
+          <meshStandardMaterial color="#ffffff" metalness={0.1} roughness={0.9} />
+          <Edges color="black" />
         </mesh>
       ))}
 
@@ -67,13 +69,15 @@ export function Owl() {
         {/* Dome */}
         <mesh>
           <sphereGeometry args={[1.2, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2]} />
-          <meshStandardMaterial color="#D4AF37" metalness={1.0} roughness={0.2} />
+          <meshStandardMaterial color="#ffffff" metalness={0.1} roughness={0.9} />
+          <Edges color="black" />
         </mesh>
         
         {/* Base of Head */}
         <mesh rotation={[Math.PI, 0, 0]}>
            <sphereGeometry args={[1.2, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2]} />
-           <meshStandardMaterial color="#111111" metalness={0.8} roughness={0.6} wireframe />
+           <meshStandardMaterial color="#ffffff" metalness={0.1} roughness={0.9} />
+           <Edges color="black" />
         </mesh>
 
         {/* Left Eye (Lens) */}
@@ -85,7 +89,7 @@ export function Owl() {
           {/* Glowing Aperture */}
           <mesh position={[0, 0, 0.1]}>
             <sphereGeometry args={[0.1, 8, 8]} />
-            <meshStandardMaterial color="#ffffff" emissive="#FF3333" emissiveIntensity={5} />
+            <meshStandardMaterial color="#ffffff" emissive="#FF0000" emissiveIntensity={2} />
           </mesh>
         </group>
         
@@ -98,14 +102,15 @@ export function Owl() {
           {/* Glowing Aperture */}
           <mesh position={[0, 0, 0.1]}>
             <sphereGeometry args={[0.1, 8, 8]} />
-            <meshStandardMaterial color="#ffffff" emissive="#FF3333" emissiveIntensity={5} />
+            <meshStandardMaterial color="#ffffff" emissive="#FF0000" emissiveIntensity={2} />
           </mesh>
         </group>
         
         {/* Beak Mechanism */}
         <mesh position={[0, -0.3, 1.2]} rotation={[Math.PI / 4, 0, 0]}>
           <coneGeometry args={[0.2, 0.5, 4]} />
-          <meshStandardMaterial color="#B87333" metalness={0.9} roughness={0.2} />
+          <meshStandardMaterial color="#ffffff" metalness={0.1} roughness={0.9} />
+          <Edges color="black" />
         </mesh>
       </group>
       

@@ -13,12 +13,14 @@ import { TheEye } from "@/components/Artifacts/TheEye";
 import { ArchiveLogs } from "@/components/Artifacts/ArchiveLogs";
 import { SecretManager } from "@/components/Mechanics/SecretManager";
 import { AudioSystem } from "@/components/Mechanics/AudioSystem";
+import { BlueprintHUD } from "@/components/UI/BlueprintHUD";
 
 export default function Home() {
   return (
     <main style={{ height: "1000vh", width: "100vw" }}>
       <AudioSystem />
-      <div style={{ position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", background: "#001122" }}>
+      <BlueprintHUD />
+      <div style={{ position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", background: "#ffffff" }}>
         <Canvas
           shadows
           gl={{ antialias: true, alpha: false }}

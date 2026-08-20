@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useRef } from "react";
-import * as THREE from "three";
+import { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
+import { Edges } from "@react-three/drei";
+import * as THREE from "three";
 
 export function ArchiveHall() {
   const pillarsRef = useRef<THREE.InstancedMesh>(null);
@@ -10,24 +11,26 @@ export function ArchiveHall() {
   const numPillars = 40;
   
   // Calculate pillar positions
-  const dummy = useMemo(() => new THREE.Object3D(), []);
+  const tempObj = useMemo(() => new THREE.Object3D(), []);
   
   useFrame(() => {
     if (pillarsRef.current) {
+      let index = 0;
       for (let i = 0; i < numPillars; i++) {
-        // We want two rows of pillars (left and right)
-        const isLeft = i % 2 === 0;
-        const rowPairIndex = Math.floor(i / 2); // 0 to 19
+        // Form a circular vertical shaft
+        const angle = (i / numPillars) * Math.PI * 2;
+        const radius = 10 + Math.random() * 5; // Distance from center of shaft
         
-        const x = isLeft ? -15 : 15;
-        const z = -5 - (rowPairIndex * 6); // Space them out along Z axis
-        const y = 0;
+        // Arrange pillars along the Y-axis going down
+        const x = Math.cos(angle) * radius;
+        const z = -45 + Math.sin(angle) * radius; // Center of shaft is at Z = -45
+        const y = -i * 2; // Drop down 2 units per pillar
         
-        dummy.position.set(x, y, z);
-        dummy.scale.set(1, 1, 1);
-        dummy.updateMatrix();
+        tempObj.position.set(x, y, z);
+        tempObj.rotation.set(0, angle, 0); // Face the center
+        tempObj.updateMatrix();
         
-        pillarsRef.current.setMatrixAt(i, dummy.matrix);
+        pillarsRef.current.setMatrixAt(index++, tempObj.matrix);
       }
       pillarsRef.current.instanceMatrix.needsUpdate = true;
     }
@@ -35,17 +38,16 @@ export function ArchiveHall() {
 
   return (
     <group>
-      {/* Archway Rings */}
-      {Array.from({ length: 10 }).map((_, i) => (
-        <mesh key={i} position={[0, 0, -10 - (i * 12)]} rotation={[0, 0, 0]}>
-          <torusGeometry args={[18, 0.2, 16, 100, Math.PI]} />
+      {/* Archway Rings going down */}
+      {Array.from({ length: 20 }).map((_, i) => (
+        <mesh key={i} position={[0, -i * 5, -45]} rotation={[Math.PI / 2, 0, 0]} castShadow receiveShadow>
+          <torusGeometry args={[12, 0.5, 16, 64]} />
           <meshStandardMaterial 
-            color="#D4AF37" // Brass archways
-            metalness={0.9} 
-            roughness={0.4} 
-            transparent
-            opacity={0.3}
+            color="#ffffff" 
+            metalness={0.1} 
+            roughness={0.9} 
           />
+          <Edges color="black" />
         </mesh>
       ))}
 
@@ -53,20 +55,13 @@ export function ArchiveHall() {
       <instancedMesh ref={pillarsRef} args={[undefined, undefined, numPillars]} castShadow receiveShadow>
         <boxGeometry args={[2, 30, 2]} />
         <meshStandardMaterial 
-          color="#050b14" 
-          metalness={0.8} 
-          roughness={0.2} 
+          color="#ffffff" 
+          metalness={0.1} 
+          roughness={0.9} 
           wireframe={false} 
         />
+        <Edges color="black" />
       </instancedMesh>
-      
-      {/* Procedural Floor/Ceiling Cables */}
-      {Array.from({ length: 5 }).map((_, i) => (
-        <mesh key={i} position={[(i - 2) * 5, -5, -50]} rotation={[Math.PI / 2, 0, 0]}>
-          <cylinderGeometry args={[0.05, 0.05, 100, 8]} />
-          <meshStandardMaterial color="#B87333" metalness={0.7} roughness={0.5} />
-        </mesh>
-      ))}
     </group>
   );
 }

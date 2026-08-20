@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
-import { useCursor, Html } from "@react-three/drei";
+import { useCursor, Html, Edges } from "@react-three/drei";
 import * as THREE from "three";
 import { useStore } from "@/store/useStore";
 
@@ -58,7 +58,7 @@ export function Dragonfly() {
     >
       <Html position={[0, -2, 0]} center style={{ pointerEvents: 'none' }}>
         <div style={{
-          color: '#D4AF37', // Brass color
+          color: '#000000',
           fontFamily: 'monospace',
           fontSize: '10px',
           textAlign: 'center',
@@ -76,14 +76,16 @@ export function Dragonfly() {
         {/* Core */}
         <mesh>
           <capsuleGeometry args={[0.2, 1, 4, 8]} />
-          <meshStandardMaterial color="#333333" emissive="#111111" wireframe={!active} metalness={0.9} roughness={0.3} />
+          <meshStandardMaterial color="#ffffff" emissive={active ? "#FF0000" : "#000000"} metalness={0.1} roughness={0.9} />
+          <Edges color="black" />
         </mesh>
         
         {/* Segmented Tail */}
         {Array.from({ length: 5 }).map((_, i) => (
           <mesh key={i} position={[0, -0.6 - i * 0.4, 0]}>
             <cylinderGeometry args={[0.1 - i * 0.015, 0.08 - i * 0.015, 0.3, 8]} />
-            <meshStandardMaterial color="#B87333" metalness={0.8} roughness={0.5} wireframe={!active} />
+            <meshStandardMaterial color="#ffffff" metalness={0.1} roughness={0.9} />
+            <Edges color="black" />
           </mesh>
         ))}
       </group>
@@ -94,28 +96,32 @@ export function Dragonfly() {
         <group position={[0.2, 0, 0.5]}>
           <mesh position={[1.5, 0, 0]} rotation={[Math.PI / 2, 0, 0]}>
             <capsuleGeometry args={[0.3, 2.5, 4, 8]} />
-            <meshStandardMaterial color="#F5F5DC" metalness={0.2} roughness={0.8} wireframe transparent opacity={0.4} />
+            <meshStandardMaterial color="#ffffff" metalness={0.1} roughness={0.9} transparent opacity={0.8} />
+            <Edges color={active ? "#00FF00" : "black"} />
           </mesh>
         </group>
         {/* Front Left */}
         <group position={[-0.2, 0, 0.5]} rotation={[0, Math.PI, 0]}>
           <mesh position={[1.5, 0, 0]} rotation={[Math.PI / 2, 0, 0]}>
             <capsuleGeometry args={[0.3, 2.5, 4, 8]} />
-            <meshStandardMaterial color="#F5F5DC" metalness={0.2} roughness={0.8} wireframe transparent opacity={0.4} />
+            <meshStandardMaterial color="#ffffff" metalness={0.1} roughness={0.9} transparent opacity={0.8} />
+            <Edges color={active ? "#00FF00" : "black"} />
           </mesh>
         </group>
         {/* Back Right */}
         <group position={[0.2, 0, -0.5]} rotation={[0, -0.2, 0]}>
           <mesh position={[1.2, 0, 0]} rotation={[Math.PI / 2, 0, 0]}>
             <capsuleGeometry args={[0.25, 2, 4, 8]} />
-            <meshStandardMaterial color="#F5F5DC" metalness={0.2} roughness={0.8} wireframe transparent opacity={0.3} />
+            <meshStandardMaterial color="#ffffff" metalness={0.1} roughness={0.9} transparent opacity={0.8} />
+            <Edges color={active ? "#00FF00" : "black"} />
           </mesh>
         </group>
         {/* Back Left */}
         <group position={[-0.2, 0, -0.5]} rotation={[0, Math.PI + 0.2, 0]}>
           <mesh position={[1.2, 0, 0]} rotation={[Math.PI / 2, 0, 0]}>
             <capsuleGeometry args={[0.25, 2, 4, 8]} />
-            <meshStandardMaterial color="#F5F5DC" metalness={0.2} roughness={0.8} wireframe transparent opacity={0.3} />
+            <meshStandardMaterial color="#ffffff" metalness={0.1} roughness={0.9} transparent opacity={0.8} />
+            <Edges color={active ? "#00FF00" : "black"} />
           </mesh>
         </group>
       </group>

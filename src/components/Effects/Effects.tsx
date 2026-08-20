@@ -7,22 +7,18 @@ import * as THREE from "three";
 export function Effects() {
   return (
     <EffectComposer disableNormalPass multisampling={4}>
-      {/* Film grain noise for the documentary archive feel */}
-      <Noise premultiply blendFunction={BlendFunction.ADD} opacity={0.4} />
+      {/* Subtle paper grain noise */}
+      <Noise premultiply blendFunction={BlendFunction.MULTIPLY} opacity={0.1} />
       
-      {/* 
-        Macro-lens Depth of Field (DoF).
-        We focus at a specific distance to blur the distant architecture 
-        and the objects right in front of the lens.
-      */}
-      <DepthOfField 
-        focusDistance={0.02} // Focus point
-        focalLength={0.02}   // Lens focal length
-        bokehScale={2}       // Blur intensity
+      {/* Restored crisp bloom for the red/green glowing circuits */}
+      <Bloom 
+        luminanceThreshold={0.5} 
+        luminanceSmoothing={0.9} 
+        intensity={1.0} 
       />
       
-      {/* Darken the edges to focus the eye on the center artifact */}
-      <Vignette eskil={false} offset={0.2} darkness={1.3} />
+      {/* Clean subtle vignette */}
+      <Vignette eskil={false} offset={0.1} darkness={0.8} />
       
       {/* Slight color separation on the edges for a cinematic lens look */}
       <ChromaticAberration 

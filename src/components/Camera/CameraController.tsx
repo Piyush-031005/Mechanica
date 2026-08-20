@@ -4,6 +4,7 @@ import { useFrame } from "@react-three/fiber";
 import { useEffect, useRef, useMemo } from "react";
 import * as THREE from "three";
 import Lenis from "lenis";
+import { useStore } from "@/store/useStore";
 
 export function CameraController() {
   const lenisRef = useRef<Lenis | null>(null);
@@ -17,11 +18,12 @@ export function CameraController() {
       new THREE.Vector3(3, 1, -2),         // Pan right, approaching flower
       new THREE.Vector3(0, 0, -6),         // Close up on flower
       new THREE.Vector3(-4, -1, -12),      // Swing left around flower
-      new THREE.Vector3(2, 2, -25),        // Weave through first pillars right
+      new THREE.Vector3(0, 1, -25),        // Approach Dragonfly
       new THREE.Vector3(-2, -1, -35),      // Look at Dragonfly
-      new THREE.Vector3(0, 1, -45),        // Weave through pillars center
-      new THREE.Vector3(4, -1, -48),       // Approach Owl from side
-      new THREE.Vector3(0, 0, -55)         // Look at Eye
+      new THREE.Vector3(0, 0, -42),        // Reach the edge of the drop
+      new THREE.Vector3(0, -10, -45),      // Start diving down
+      new THREE.Vector3(0, -30, -45),      // Falling past Owl
+      new THREE.Vector3(0, -60, -45)       // Deep into the abyss
     ]);
   }, []);
 
@@ -33,10 +35,11 @@ export function CameraController() {
       new THREE.Vector3(0, 0, -10),        // Keep looking at Flower
       new THREE.Vector3(0, 0, -35),        // Shift focus to Dragonfly area
       new THREE.Vector3(0, 0, -35),        // Look at Dragonfly
-      new THREE.Vector3(0, 0, -50),        // Shift focus to Owl
-      new THREE.Vector3(0, 0, -50),        // Look at Owl
-      new THREE.Vector3(0, 0, -60),        // Shift focus to The Eye
-      new THREE.Vector3(0, 0, -60)         // Look at The Eye
+      new THREE.Vector3(0, 0, -35),        // Keep looking at Dragonfly
+      new THREE.Vector3(0, -20, -45),      // Look down into the drop
+      new THREE.Vector3(0, -50, -45),      // Look at Owl during drop
+      new THREE.Vector3(0, -60, -45),      // Keep looking down
+      new THREE.Vector3(0, -100, -45)      // Look deep down
     ]);
   }, []);
 
@@ -86,6 +89,9 @@ export function CameraController() {
     
     currentLookAt.lerp(lookAtTarget, 0.05);
     state.camera.lookAt(currentLookAt);
+    
+    // Send to HUD via store
+    useStore.getState().setCameraPos(state.camera.position.z, state.camera.position.y);
   });
 
   return null;

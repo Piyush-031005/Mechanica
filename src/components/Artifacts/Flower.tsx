@@ -2,7 +2,7 @@
 
 import { useRef, useMemo, useState } from "react";
 import { useFrame } from "@react-three/fiber";
-import { useCursor, Html } from "@react-three/drei";
+import { useCursor, Html, Edges } from "@react-three/drei";
 import * as THREE from "three";
 import { useStore } from "@/store/useStore";
 
@@ -78,15 +78,15 @@ export function Flower() {
       {/* Dynamic Engineering Measurements Overlay */}
       <Html position={[2, 2, 0]} center style={{ pointerEvents: 'none' }}>
         <div style={{
-          color: '#D4AF37', // Brass color
+          color: '#000000', // Black text
           fontFamily: 'monospace',
           fontSize: '10px',
-          borderLeft: '1px solid #D4AF37',
+          borderLeft: '1px solid #FF0000', // Red accent
           paddingLeft: '10px',
           opacity: discoveryState >= 1 ? 1 : 0,
           transition: 'opacity 0.5s',
           whiteSpace: 'nowrap',
-          textShadow: '0 0 2px #000000'
+          textShadow: '0 0 2px #ffffff'
         }}>
           RAD: 1.204m<br/>
           CORE: {discoveryState >= 3 ? 'CRITICAL' : 'STABLE'}<br/>
@@ -99,22 +99,23 @@ export function Flower() {
       <mesh ref={coreRef}>
         <icosahedronGeometry args={[0.5, 2]} />
         <meshStandardMaterial 
-          color={discoveryState >= 2 ? "#D4AF37" : "#B87333"} // Brass/Copper
-          wireframe={discoveryState < 2} 
+          color="#ffffff" // Stark white
           transparent 
           opacity={0.8} 
-          metalness={0.9}
-          roughness={0.2}
+          metalness={0.1}
+          roughness={0.9}
         />
+        <Edges color="black" />
       </mesh>
       
       <mesh>
         <icosahedronGeometry args={[0.4, 1]} />
         <meshStandardMaterial 
           color="#ffffff" 
-          emissive={discoveryState >= 2 ? "#D4AF37" : "#001122"} 
+          emissive={discoveryState >= 2 ? "#FF0000" : "#000000"} 
           emissiveIntensity={discoveryState >= 3 ? 2 : 0.5} 
         />
+        <Edges color={discoveryState >= 2 ? "#FF0000" : "black"} />
       </mesh>
       
       {/* Procedural Gears in Core */}
@@ -163,21 +164,22 @@ function Petal({ petal, discoveryState }: { petal: any, discoveryState: number }
       <mesh>
         <capsuleGeometry args={[0.1, 1, 4, 8]} />
         <meshStandardMaterial 
-          color={discoveryState >= 2 ? "#555555" : "#D4AF37"} // Brass base
-          emissive={discoveryState >= 2 ? "#000000" : "#332200"} // Subtle warm emissive
-          emissiveIntensity={0.2}
-          wireframe={discoveryState < 2} 
-          metalness={0.9}
-          roughness={0.3}
+          color="#ffffff"
+          emissive={discoveryState >= 2 ? "#FF0000" : "#000000"} // Crimson Red emissive
+          emissiveIntensity={0.5}
+          metalness={0.1}
+          roughness={0.9}
         />
+        <Edges color="black" />
       </mesh>
       <mesh position={[0, 0, 0.1]}>
         <capsuleGeometry args={[0.02, 1.1, 4, 4]} />
         <meshStandardMaterial 
-          color={discoveryState >= 2 ? "#B87333" : "#F5F5DC"} // Copper or Cream line
-          metalness={0.5} 
-          roughness={0.5} 
+          color="#111111" // Black line
+          metalness={0.1} 
+          roughness={0.9} 
         />
+        <Edges color={discoveryState >= 2 ? "#00FF00" : "black"} />
       </mesh>
     </group>
   );
@@ -201,17 +203,16 @@ function Gear({ radius, teeth, speed, discoveryState, globalExplosion, zOffset =
 
   return (
     <mesh ref={meshRef} position={[0, 0, zOffset]}>
-      {/* We use a cylinder with radial segments equal to teeth * 2 to simulate gear teeth when wireframed */}
       <cylinderGeometry args={[radius, radius, 0.1, teeth * 2, 1, false]} />
       <meshStandardMaterial 
-        color={discoveryState >= 2 ? "#555555" : "#D4AF37"}
-        emissive={discoveryState >= 2 ? "#111111" : "#111100"}
-        wireframe={discoveryState < 2}
+        color="#ffffff"
+        emissive={discoveryState >= 2 ? "#00FF00" : "#000000"} // Emerald Green emissive
         transparent
         opacity={0.8}
-        metalness={1.0}
-        roughness={0.4}
+        metalness={0.1}
+        roughness={0.9}
       />
+      <Edges color="black" />
     </mesh>
   );
 }

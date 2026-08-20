@@ -40,23 +40,40 @@ const fragmentShader = `
     vec2 uv = vUv;
     vec2 centeredUv = uv - 0.5;
     
-    // Calculate distance from center for radial gradient
+    // Calculate distance from center for vignette
     float dist = length(centeredUv);
     
-    // Vintage Prussian Blue Theme
-    // Deep center: #0A1B2A, Outer edges: #020C17
-    vec3 colorLight = vec3(0.04, 0.11, 0.16); // Center (lighter Prussian)
-    vec3 colorDark = vec3(0.01, 0.05, 0.09);  // Edges (very dark Prussian)
+    // Stark White Background Theme
+    vec3 colorLight = vec3(0.98, 0.98, 0.98); // Off-white/paper
+    vec3 colorDark = vec3(0.85, 0.85, 0.85);  // Slight vignette edge
     
     // Radial mix
     vec3 baseColor = mix(colorLight, colorDark, smoothstep(0.0, 1.2, dist));
     
-    // Add procedural paper noise (vintage grain)
+    // Add procedural paper noise (very subtle grain)
     float n = noise(uv * 800.0 + uTime * 0.05);
-    baseColor += n * 0.04;
+    baseColor -= n * 0.02; // Subtract to make grain dark
+    
+    // Draw rigid esoteric grid lines (circuit traces)
+    float grid1 = abs(fract(uv.x * 20.0) - 0.5);
+    float grid2 = abs(fract(uv.y * 20.0) - 0.5);
+    
+    // Sharp grid lines
+    float lineThickness = 0.02;
+    if (grid1 < lineThickness || grid2 < lineThickness) {
+      // Sometimes make the lines red or green based on noise/time to mimic circuits
+      float accentNoise = noise(uv * 5.0 + uTime * 0.1);
+      if (accentNoise > 0.8) {
+        baseColor = mix(baseColor, vec3(0.8, 0.0, 0.0), 0.5); // Crimson Red accent
+      } else if (accentNoise < -0.8) {
+        baseColor = mix(baseColor, vec3(0.0, 0.6, 0.0), 0.5); // Emerald Green accent
+      } else {
+        baseColor = mix(baseColor, vec3(0.1, 0.1, 0.1), 0.15); // Black/Grey circuit line
+      }
+    }
     
     // Subtle vignette
-    baseColor *= smoothstep(1.0, 0.3, dist);
+    baseColor *= smoothstep(1.2, 0.1, dist) * 0.3 + 0.7;
 
     gl_FragColor = vec4(baseColor, 1.0);
   }
