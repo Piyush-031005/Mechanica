@@ -5,6 +5,7 @@ import { CameraController } from "@/components/Camera/CameraController";
 import { GridSystem } from "@/components/Environment/GridSystem";
 import { Effects } from "@/components/Effects/Effects";
 import { Flower } from "@/components/Artifacts/Flower";
+import { TheEye } from "@/components/Artifacts/TheEye";
 import { SecretManager } from "@/components/Mechanics/SecretManager";
 import { AudioSystem } from "@/components/Mechanics/AudioSystem";
 
@@ -26,6 +27,9 @@ export default function Home() {
           
           {/* The primary interactive artifact */}
           <Flower />
+          
+          {/* The final ending sequence */}
+          <TheEye />
           
         </Canvas>
       </div>
