@@ -4,12 +4,16 @@ import { useRef, useMemo, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useCursor, Html } from "@react-three/drei";
 import * as THREE from "three";
+import { useStore } from "@/store/useStore";
 
 export function Flower() {
   const groupRef = useRef<THREE.Group>(null);
   const coreRef = useRef<THREE.Mesh>(null);
   const [hovered, setHovered] = useState(false);
   const [discoveryState, setDiscoveryState] = useState(0); // 0: Base, 1: Blueprint, 2: Mechanical, 3: Exploded
+  
+  const globalExplosion = useStore((state) => state.globalExplosion);
+  const playMechanicalClick = useStore((state) => state.playMechanicalClick);
   
   useCursor(hovered, "crosshair", "auto");
 
@@ -25,6 +29,7 @@ export function Flower() {
       arr.push({ 
         basePosition: new THREE.Vector3(x, y, 0),
         explodedPosition: new THREE.Vector3(x * 2.5, y * 2.5, Math.random() * 2 - 1),
+        globalExplodedPosition: new THREE.Vector3(x * 5, y * 5, (Math.random() - 0.5) * 10),
         rotation: angle 
       });
     }
@@ -34,8 +39,8 @@ export function Flower() {
   useFrame((state, delta) => {
     if (groupRef.current) {
       groupRef.current.rotation.z += delta * 0.1;
-      // If exploded (state >= 3), rotate faster
-      if (discoveryState >= 3) {
+      // If exploded (state >= 3) or global explosion, rotate faster/wilder
+      if (discoveryState >= 3 || globalExplosion) {
         groupRef.current.rotation.x += delta * 0.2;
         groupRef.current.rotation.y += delta * 0.2;
       } else {
@@ -46,12 +51,13 @@ export function Flower() {
     }
     
     if (coreRef.current) {
-      const scale = 1 + Math.sin(state.clock.elapsedTime * (discoveryState >= 3 ? 5 : 2)) * 0.05;
+      const scale = 1 + Math.sin(state.clock.elapsedTime * (discoveryState >= 3 || globalExplosion ? 5 : 2)) * 0.05;
       coreRef.current.scale.set(scale, scale, scale);
     }
   });
 
   const handleClick = () => {
+    playMechanicalClick();
     setDiscoveryState((prev) => (prev + 1) % 4);
   };
 
@@ -124,10 +130,16 @@ export function Flower() {
 // Sub-component to manage individual petal lerping without massive re-renders
 function Petal({ petal, discoveryState }: { petal: any, discoveryState: number }) {
   const meshRef = useRef<THREE.Group>(null);
+  const globalExplosion = useStore((state) => state.globalExplosion);
   
   useFrame(() => {
     if (meshRef.current) {
-      const targetPos = discoveryState >= 3 ? petal.explodedPosition : petal.basePosition;
+      let targetPos = petal.basePosition;
+      if (globalExplosion) {
+        targetPos = petal.globalExplodedPosition;
+      } else if (discoveryState >= 3) {
+        targetPos = petal.explodedPosition;
+      }
       meshRef.current.position.lerp(targetPos, 0.05);
     }
   });
