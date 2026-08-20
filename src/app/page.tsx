@@ -4,6 +4,7 @@ import { Canvas } from "@react-three/fiber";
 import { CameraController } from "@/components/Camera/CameraController";
 import { GridSystem } from "@/components/Environment/GridSystem";
 import { Effects } from "@/components/Effects/Effects";
+import { Flower } from "@/components/Artifacts/Flower";
 
 export default function Home() {
   return (
@@ -19,13 +20,9 @@ export default function Home() {
           <GridSystem />
           <Effects />
           
-          {/* A tunnel of blueprint cubes to fly through to test the camera */}
-          {Array.from({ length: 50 }).map((_, i) => (
-            <mesh key={i} position={[(Math.random() - 0.5) * 10, (Math.random() - 0.5) * 10, -i * 2]}>
-              <boxGeometry args={[1, 1, 1]} />
-              <meshStandardMaterial color="#00ffff" wireframe />
-            </mesh>
-          ))}
+          {/* The primary interactive artifact */}
+          <Flower />
+          
         </Canvas>
       </div>
     </main>
