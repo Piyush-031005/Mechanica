@@ -2,6 +2,8 @@
 
 import { Canvas } from "@react-three/fiber";
 import { CameraController } from "@/components/Camera/CameraController";
+import { GridSystem } from "@/components/Environment/GridSystem";
+import { Effects } from "@/components/Effects/Effects";
 
 export default function Home() {
   return (
@@ -13,6 +15,9 @@ export default function Home() {
           <CameraController />
           <color attach="background" args={["#020914"]} />
           <ambientLight intensity={0.5} />
+          
+          <GridSystem />
+          <Effects />
           
           {/* A tunnel of blueprint cubes to fly through to test the camera */}
           {Array.from({ length: 50 }).map((_, i) => (
