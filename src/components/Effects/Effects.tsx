@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import { EffectComposer, Noise, Vignette, ChromaticAberration, DepthOfField, Bloom } from "@react-three/postprocessing";
+import { EffectComposer, Noise, Vignette, ChromaticAberration, Bloom } from "@react-three/postprocessing";
 import { BlendFunction } from "postprocessing";
 import * as THREE from "three";
 import { useStore } from "@/store/useStore";
@@ -12,38 +12,50 @@ export function Effects() {
 
   useFrame(() => {
     if (chromRef.current) {
-      // Get velocity from store (absolute value)
       const velocity = Math.abs(useStore.getState().scrollVelocity);
-      
-      // Calculate a distortion amount based on velocity. Max out at some value.
-      // Velocity might be e.g. 0 to 50
-      const distortion = Math.min(0.05, 0.001 + velocity * 0.002);
-      
-      // Lerp the offset for smooth transition
-      chromRef.current.offset.x = THREE.MathUtils.lerp(chromRef.current.offset.x, distortion, 0.1);
-      chromRef.current.offset.y = THREE.MathUtils.lerp(chromRef.current.offset.y, distortion, 0.1);
+      // Very subtle CA — only kicks in meaningfully when scrolling fast
+      // Max offset 0.003 (was 0.05 — that's what caused the rainbow noise problem!)
+      const distortion = Math.min(0.003, 0.0002 + velocity * 0.0001);
+      chromRef.current.offset.x = THREE.MathUtils.lerp(chromRef.current.offset.x, distortion, 0.08);
+      chromRef.current.offset.y = THREE.MathUtils.lerp(chromRef.current.offset.y, distortion * 0.5, 0.08);
     }
   });
 
   return (
-    <EffectComposer multisampling={4}>
-      {/* Subtle paper grain noise */}
-      <Noise premultiply blendFunction={BlendFunction.MULTIPLY} opacity={0.1} />
-      
-      {/* Restored crisp bloom for the red/green glowing circuits */}
-      <Bloom 
-        luminanceThreshold={0.5} 
-        luminanceSmoothing={0.9} 
-        intensity={1.0} 
+    <EffectComposer multisampling={8}>
+      {/* 
+        Very fine grain — blueprint paper texture
+        Using SOFT_LIGHT to mix gently without darkening the scene
+      */}
+      <Noise blendFunction={BlendFunction.SOFT_LIGHT} opacity={0.04} />
+
+      {/* 
+        Bloom tuned for the glowing cores: 
+        High luminanceThreshold means only the very bright emissive spots bloom.
+        The gear rings (non-emissive) do NOT bloom — keeping lines crisp.
+        Only the core spheres and eye pupils glow.
+      */}
+      <Bloom
+        luminanceThreshold={0.7}
+        luminanceSmoothing={0.4}
+        intensity={1.8}
+        mipmapBlur
       />
-      
-      {/* Clean subtle vignette */}
-      <Vignette eskil={false} offset={0.1} darkness={0.8} />
-      
-      {/* Velocity-Reactive Chromatic Aberration */}
-      <ChromaticAberration 
+
+      {/* 
+        Vignette: Pulls focus to center of screen where the hero object lives.
+        darkness 0.7 — noticeable but not crushing.
+      */}
+      <Vignette eskil={false} offset={0.15} darkness={0.7} />
+
+      {/* 
+        Chromatic Aberration: Velocity-reactive, now capped at 0.003 (was 0.05).
+        At 0.05 it was causing the rainbow colored shapes (the core bug).
+        Now it's a whisper-thin lens fringe effect when scrolling.
+      */}
+      <ChromaticAberration
         ref={chromRef}
-        offset={new THREE.Vector2(0.001, 0.001)}
+        offset={new THREE.Vector2(0.0002, 0.0002)}
       />
     </EffectComposer>
   );
