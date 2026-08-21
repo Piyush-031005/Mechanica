@@ -70,6 +70,12 @@ export function Dragonfly() {
     setActive(!active);
   };
 
+  const cameraZ = useStore((state) => state.cameraZ);
+  
+  // Fade out HTML if camera is far
+  const dist = Math.abs(cameraZ - (-15));
+  const htmlOpacity = Math.max(0, 1 - (dist / 10));
+
   return (
     <group 
       ref={groupRef} 
@@ -78,18 +84,33 @@ export function Dragonfly() {
       onPointerOut={() => setHovered(false)}
       onClick={handleClick}
     >
-      <Html position={[0, -3, 0]} center style={{ pointerEvents: 'none' }}>
+      <Html position={[0, -3, 0]} center style={{ pointerEvents: 'none', opacity: htmlOpacity, transition: 'opacity 0.2s' }}>
         <div style={{
           color: t.edge,
           fontFamily: 'monospace',
-          fontSize: '10px',
-          textAlign: 'center',
-          opacity: 0.8,
-          whiteSpace: 'nowrap'
+          fontSize: '12px',
+          border: `1px solid ${t.edge}`,
+          padding: '8px',
+          background: 'rgba(0,0,0,0.4)',
+          backdropFilter: 'blur(4px)',
+          whiteSpace: 'nowrap',
+          textTransform: 'uppercase',
+          position: 'relative'
         }}>
-          ARTIFACT_02 // AERO-DRONE<br/>
-          STATE: {isExploded ? 'EXPLODED_VIEW' : 'HIBERNATION'}<br/>
-          THEME: {activeTheme}
+          <div style={{ position: 'absolute', top: -3, left: -3, width: 6, height: 6, borderTop: `1px solid ${t.edge}`, borderLeft: `1px solid ${t.edge}` }} />
+          <div style={{ position: 'absolute', top: -3, right: -3, width: 6, height: 6, borderTop: `1px solid ${t.edge}`, borderRight: `1px solid ${t.edge}` }} />
+          <div style={{ position: 'absolute', bottom: -3, left: -3, width: 6, height: 6, borderBottom: `1px solid ${t.edge}`, borderLeft: `1px solid ${t.edge}` }} />
+          <div style={{ position: 'absolute', bottom: -3, right: -3, width: 6, height: 6, borderBottom: `1px solid ${t.edge}`, borderRight: `1px solid ${t.edge}` }} />
+
+          <div style={{ fontSize: '10px', opacity: 0.7, borderBottom: `1px dashed ${t.edge}`, paddingBottom: '4px', marginBottom: '4px' }}>
+            ID: ARTIFACT_02 // (x,y,z): 0, {artifactY}, -15
+          </div>
+          <div style={{ fontSize: '18px', letterSpacing: '2px', fontWeight: 'bold' }}>
+            AERO_DRONE
+          </div>
+          <div style={{ fontSize: '10px', opacity: 0.7, marginTop: '4px' }}>
+            STATE: {isExploded ? '[ KINETIC ]' : '[ STATIC ]'}
+          </div>
         </div>
       </Html>
 

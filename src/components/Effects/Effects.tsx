@@ -26,7 +26,7 @@ export function Effects() {
   });
 
   return (
-    <EffectComposer disableNormalPass multisampling={4}>
+    <EffectComposer multisampling={4}>
       {/* Subtle paper grain noise */}
       <Noise premultiply blendFunction={BlendFunction.MULTIPLY} opacity={0.1} />
       
@@ -43,10 +43,7 @@ export function Effects() {
       {/* Velocity-Reactive Chromatic Aberration */}
       <ChromaticAberration 
         ref={chromRef}
-        blendFunction={BlendFunction.NORMAL} 
-        offset={new THREE.Vector2(0.001, 0.001)} 
-        radialModulation={true}
-        modulationOffset={0.5}
+        offset={new THREE.Vector2(0.001, 0.001)}
       />
     </EffectComposer>
   );

@@ -67,22 +67,41 @@ export function Owl() {
     }
   });
 
+  const cameraZ = useStore((state) => state.cameraZ);
+  
+  // Fade out HTML if camera is far
+  const dist = Math.abs(cameraZ - (-55));
+  const htmlOpacity = Math.max(0, 1 - (dist / 10));
+
   return (
     <group position={[0, artifactY, -15]}>
-      <Html position={[0, 5, 0]} center style={{ pointerEvents: 'none' }}>
+      <Html position={[0, 5, 0]} center style={{ pointerEvents: 'none', opacity: htmlOpacity, transition: 'opacity 0.2s' }}>
         <div style={{
           color: t.edge,
           fontFamily: 'monospace',
-          fontSize: '10px',
-          textAlign: 'center',
+          fontSize: '12px',
+          border: `1px solid ${t.edge}`,
+          padding: '8px',
+          background: 'rgba(0,0,0,0.4)',
+          backdropFilter: 'blur(4px)',
           whiteSpace: 'nowrap',
           textTransform: 'uppercase',
-          borderLeft: `1px solid ${t.edge}`,
-          paddingLeft: '10px'
+          position: 'relative'
         }}>
-          ARTIFACT_03 // NIGHT-WATCH<br/>
-          STATE: {isExploded ? 'EXPLODED_VIEW' : 'ACTIVE_TRACKING'}<br/>
-          THEME: {activeTheme}
+          <div style={{ position: 'absolute', top: -3, left: -3, width: 6, height: 6, borderTop: `1px solid ${t.edge}`, borderLeft: `1px solid ${t.edge}` }} />
+          <div style={{ position: 'absolute', top: -3, right: -3, width: 6, height: 6, borderTop: `1px solid ${t.edge}`, borderRight: `1px solid ${t.edge}` }} />
+          <div style={{ position: 'absolute', bottom: -3, left: -3, width: 6, height: 6, borderBottom: `1px solid ${t.edge}`, borderLeft: `1px solid ${t.edge}` }} />
+          <div style={{ position: 'absolute', bottom: -3, right: -3, width: 6, height: 6, borderBottom: `1px solid ${t.edge}`, borderRight: `1px solid ${t.edge}` }} />
+
+          <div style={{ fontSize: '10px', opacity: 0.7, borderBottom: `1px dashed ${t.edge}`, paddingBottom: '4px', marginBottom: '4px' }}>
+            ID: ARTIFACT_03 // (x,y,z): 0, {artifactY}, -15
+          </div>
+          <div style={{ fontSize: '18px', letterSpacing: '2px', fontWeight: 'bold' }}>
+            NIGHT_WATCH
+          </div>
+          <div style={{ fontSize: '10px', opacity: 0.7, marginTop: '4px' }}>
+            STATE: {isExploded ? '[ EXPLODED ]' : '[ TRACKING ]'}
+          </div>
         </div>
       </Html>
 
@@ -134,8 +153,8 @@ export function Owl() {
 
         {/* Left Eye (Lens) */}
         <group position={[-0.4, 0.2, 1.1]}>
-          <mesh>
-            <cylinderGeometry args={[0.3, 0.3, 0.2, 16]} rotation={[Math.PI / 2, 0, 0]} />
+          <mesh rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.3, 0.3, 0.2, 16]} />
             <meshStandardMaterial color={t.base} transparent={t.transparent} opacity={0.5} metalness={0.9} roughness={0.1} />
             <Edges color={t.edge} />
           </mesh>
@@ -147,8 +166,8 @@ export function Owl() {
         
         {/* Right Eye (Lens) */}
         <group position={[0.4, 0.2, 1.1]}>
-          <mesh>
-            <cylinderGeometry args={[0.3, 0.3, 0.2, 16]} rotation={[Math.PI / 2, 0, 0]} />
+          <mesh rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.3, 0.3, 0.2, 16]} />
             <meshStandardMaterial color={t.base} transparent={t.transparent} opacity={0.5} metalness={0.9} roughness={0.1} />
             <Edges color={t.edge} />
           </mesh>
