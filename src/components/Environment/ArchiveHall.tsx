@@ -2,13 +2,19 @@
 
 import { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
-import { Edges, Line } from "@react-three/drei";
+import { Edges, Line, Sparkles } from "@react-three/drei";
 import * as THREE from "three";
 import { useStore } from "@/store/useStore";
 
 const EDGE_COLORS = {
   CYANOTYPE: "#6eb5ff",
-  DRAFT:     "#333333",
+  DRAFT:     "#1a1a1a",
+  CYBER:     "#00ccff",
+};
+
+const SPARKLE_COLORS = {
+  CYANOTYPE: "#6eb5ff",
+  DRAFT:     "#886644",
   CYBER:     "#00ccff",
 };
 
@@ -131,6 +137,29 @@ export function ArchiveHall() {
           </mesh>
         </group>
       ))}
+
+      {/* ── AMBIENT PARTICLE DUST: gives depth and atmosphere ─────── */}
+      {/* Cathedral dust motes — scattered throughout the whole shaft */}
+      <Sparkles
+        count={300}
+        scale={[30, 80, 30]}
+        position={[0, -30, -15]}
+        size={0.8}
+        speed={0.08}
+        opacity={0.22}
+        color={SPARKLE_COLORS[activeTheme]}
+        noise={0.6}
+      />
+      {/* Denser cluster near the Engine entrance */}
+      <Sparkles
+        count={100}
+        scale={[12, 8, 12]}
+        position={[0, -4, -10]}
+        size={1.2}
+        speed={0.05}
+        opacity={0.18}
+        color={SPARKLE_COLORS[activeTheme]}
+      />
     </group>
   );
 }
