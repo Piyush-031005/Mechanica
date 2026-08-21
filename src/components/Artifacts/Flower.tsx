@@ -8,9 +8,39 @@ import { useStore } from "@/store/useStore";
 
 const THEME = {
   CYANOTYPE: { edge: "#6eb5ff", accent: "#ffffff", bodyOpacity: 0.0 },
-  DRAFT:     { edge: "#222222", accent: "#cc0000", bodyOpacity: 0.95 },
+  DRAFT:     { edge: "#1a1a1a", accent: "#cc2200", bodyOpacity: 0.95 },
   CYBER:     { edge: "#00ccff", accent: "#ff00aa", bodyOpacity: 0.0 },
 };
+
+// Dimension annotation: a horizontal line with tick ends and a label
+// Used to annotate diameters, like a real technical drawing
+function DimensionAnnotation({ from, to, label, edgeColor, yPos = 0 }: any) {
+  const pts = useMemo(() => [
+    new THREE.Vector3(from, yPos, 0),
+    new THREE.Vector3(to, yPos, 0)
+  ], [from, to, yPos]);
+  const tickA = useMemo(() => [
+    new THREE.Vector3(from, yPos - 0.25, 0),
+    new THREE.Vector3(from, yPos + 0.25, 0)
+  ], [from, yPos]);
+  const tickB = useMemo(() => [
+    new THREE.Vector3(to, yPos - 0.25, 0),
+    new THREE.Vector3(to, yPos + 0.25, 0)
+  ], [to, yPos]);
+
+  return (
+    <group>
+      <Line points={pts} color={edgeColor} lineWidth={0.5} transparent opacity={0.4} />
+      <Line points={tickA} color={edgeColor} lineWidth={0.5} transparent opacity={0.4} />
+      <Line points={tickB} color={edgeColor} lineWidth={0.5} transparent opacity={0.4} />
+      <Html position={[(from + to) / 2, yPos + 0.5, 0]} center style={{ pointerEvents: 'none' }}>
+        <div style={{ fontFamily: 'monospace', fontSize: 8, color: edgeColor, opacity: 0.6, whiteSpace: 'nowrap', letterSpacing: 1 }}>
+          {label}
+        </div>
+      </Html>
+    </group>
+  );
+}
 
 // A single precision gear ring
 function GearRing({ radius, tubeRadius, segments, rotationSpeed, yOffset = 0, edgeColor }: any) {
@@ -151,12 +181,13 @@ export function Flower() {
         </div>
       </Html>
 
-      {/* ── RADIATING CONSTRUCTION LINES ─────────────────────────── */}
-      <RadiatingLines count={24} radius={9} edgeColor={t.edge} />
-
-      {/* ── ORBIT PATH ANNOTATIONS ───────────────────────────────── */}
-      <OrbitPath radius={5.5} edgeColor={t.edge} />
-      <OrbitPath radius={7.5} edgeColor={t.edge} />
+      {/* ── DIMENSION ANNOTATIONS (like a real technical drawing) ─── */}
+      {/* Outer diameter annotation */}
+      <DimensionAnnotation from={-8.0} to={8.0} label="Ø 16.00 m — OUTER GEAR RING" edgeColor={t.edge} yPos={-9.5} />
+      {/* Orbit radius annotation */}
+      <DimensionAnnotation from={0} to={5.5} label="R 5.50 m — ORBIT PATH" edgeColor={t.edge} yPos={9.2} />
+      {/* Inner mandala */}
+      <DimensionAnnotation from={0} to={2.0} label="R 2.00 m — INNER MANDALA" edgeColor={t.accent} yPos={2.8} />
 
       {/* ── MAIN GEAR RINGS (nested, counter-rotating) ──────────── */}
       {/* Outermost: Slow, large, prominent */}
