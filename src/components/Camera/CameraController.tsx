@@ -52,6 +52,7 @@ export function CameraController() {
 
     lenis.on("scroll", (e: any) => {
       scrollProgress.current = e.progress;
+      useStore.getState().setScrollVelocity(e.velocity);
     });
 
     return () => {
