@@ -2,27 +2,27 @@ import { create } from "zustand";
 
 export const THEME_COLORS = {
   CYANOTYPE: {
-    bg: '#e6e6e6', // Off-white poster paper
-    edge: '#00ffff', // Cyan ink
-    core: '#0000ff', // Deep blue ink
-    glow: '#00ffff', // Cyan highlight
-    dim: 'rgba(0,0,255,0.2)',
+    bg: '#00091f',       // Deep Prussian navy
+    edge: '#6eb5ff',     // Cool blueprint line blue
+    core: '#ffffff',     // Pure white for the glowing center
+    glow: '#6eb5ff',
+    dim: 'rgba(110,181,255,0.15)',
     wireframe: true,
   },
   DRAFT: {
-    bg: '#dedbd2', // Grunge parchment
-    edge: '#111111', // Heavy black ink
-    core: '#ff0000', // Pure Red overprint
-    glow: '#000000', // Black shadow
-    dim: 'rgba(255,0,0,0.2)',
+    bg: '#f4f0e6',       // Aged engineering paper
+    edge: '#1a1a1a',     // India ink black
+    core: '#cc2200',     // Technical red accent
+    glow: '#1a1a1a',
+    dim: 'rgba(26,26,26,0.1)',
     wireframe: false,
   },
   CYBER: {
-    bg: '#050505', // Pitch black
-    edge: '#ff0055', // Neon Pink
-    core: '#ccff00', // Acid Yellow
-    glow: '#9900ff', // Deep Purple
-    dim: 'rgba(255,0,85,0.2)',
+    bg: '#020408',       // Void black
+    edge: '#00ccff',     // Neon cyan
+    core: '#ff00aa',     // Hot magenta accent
+    glow: '#00ccff',
+    dim: 'rgba(0,204,255,0.1)',
     wireframe: true,
   }
 };
