@@ -13,68 +13,136 @@ const THEME_COLORS = {
 };
 
 export function ArchiveHall() {
-  const pillarsRef = useRef<THREE.InstancedMesh>(null);
+  const outerRingsRef = useRef<THREE.InstancedMesh>(null);
+  const innerSwarmRef = useRef<THREE.InstancedMesh>(null);
+  const coreNodesRef = useRef<THREE.InstancedMesh>(null);
   
   const activeTheme = useStore((state) => state.activeTheme);
   const t = THEME_COLORS[activeTheme];
 
-  const numPillars = 40;
+  const numRings = 200;
+  const numSwarm = 3000;
+  const numNodes = 1000;
   
-  // Calculate pillar positions
   const tempObj = useMemo(() => new THREE.Object3D(), []);
   
-  useFrame(() => {
-    if (pillarsRef.current) {
-      let index = 0;
-      for (let i = 0; i < numPillars; i++) {
-        // Form a circular vertical shaft
-        const angle = (i / numPillars) * Math.PI * 2;
-        const radius = 10 + Math.random() * 5; // Distance from center of shaft
+  // Pre-calculate random offsets for the swarm
+  const swarmData = useMemo(() => {
+    return Array.from({ length: numSwarm }, () => ({
+      radius: 15 + Math.random() * 40,
+      angle: Math.random() * Math.PI * 2,
+      yOffset: (Math.random() - 0.5) * 200,
+      speed: (Math.random() - 0.5) * 0.2,
+      pulseSpeed: Math.random() * 2
+    }));
+  }, []);
+
+  const nodeData = useMemo(() => {
+    return Array.from({ length: numNodes }, () => {
+      // Golden ratio spiral distribution on a sphere
+      const phi = Math.acos(-1 + (2 * Math.random()));
+      const theta = Math.sqrt(numNodes * Math.PI) * phi;
+      return {
+        x: Math.cos(theta) * Math.sin(phi),
+        y: Math.sin(theta) * Math.sin(phi),
+        z: Math.cos(phi),
+        scale: 0.1 + Math.random() * 0.5
+      };
+    });
+  }, []);
+
+  useFrame((state) => {
+    const time = state.clock.elapsedTime;
+
+    // Outer interlocking rings (Astrolabe structure)
+    if (outerRingsRef.current) {
+      for (let i = 0; i < numRings; i++) {
+        const radius = 20 + (i % 10) * 2; // Concentric layers
+        const yOffset = -i * 1.5;
+        const rotationSpeed = (i % 2 === 0 ? 1 : -1) * 0.1;
         
-        // Arrange pillars along the Y-axis going down
-        const x = Math.cos(angle) * radius;
-        const z = -45 + Math.sin(angle) * radius; // Center of shaft is at Z = -45
-        const y = -i * 2; // Drop down 2 units per pillar
+        tempObj.position.set(0, yOffset, -15);
+        tempObj.rotation.set(
+          Math.PI / 2 + Math.sin(time * 0.1 + i) * 0.2, 
+          time * rotationSpeed + (i * 0.1), 
+          Math.cos(time * 0.1 + i) * 0.2
+        );
+        const scale = 1 + Math.sin(time * 0.5 + i) * 0.05;
+        tempObj.scale.set(radius * scale, radius * scale, 1);
+        tempObj.updateMatrix();
+        outerRingsRef.current.setMatrixAt(i, tempObj.matrix);
+      }
+      outerRingsRef.current.instanceMatrix.needsUpdate = true;
+    }
+
+    // Inner chaotic particle swarm (Data flow)
+    if (innerSwarmRef.current) {
+      for (let i = 0; i < numSwarm; i++) {
+        const data = swarmData[i];
+        const currentAngle = data.angle + time * data.speed;
+        
+        // Helix motion
+        const x = Math.cos(currentAngle) * data.radius;
+        const z = -15 + Math.sin(currentAngle) * data.radius;
+        const y = data.yOffset + Math.sin(time * data.pulseSpeed) * 5;
         
         tempObj.position.set(x, y, z);
-        tempObj.rotation.set(0, angle, 0); // Face the center
-        tempObj.updateMatrix();
+        tempObj.rotation.set(time, time * 1.5, 0);
         
-        pillarsRef.current.setMatrixAt(index++, tempObj.matrix);
+        // Pulse size
+        const s = 0.5 + Math.sin(time * data.pulseSpeed + i) * 0.4;
+        tempObj.scale.set(s, s, s);
+        
+        tempObj.updateMatrix();
+        innerSwarmRef.current.setMatrixAt(i, tempObj.matrix);
       }
-      pillarsRef.current.instanceMatrix.needsUpdate = true;
+      innerSwarmRef.current.instanceMatrix.needsUpdate = true;
+    }
+
+    // Sacred Geometry Core Nodes (Dyson sphere around the shaft)
+    if (coreNodesRef.current) {
+      const radiusBase = 40;
+      for (let i = 0; i < numNodes; i++) {
+        const d = nodeData[i];
+        const r = radiusBase + Math.sin(time * 2 + i) * 2;
+        
+        tempObj.position.set(
+          d.x * r,
+          d.y * r * 2 - 50, // Stretched along Y axis
+          -15 + d.z * r
+        );
+        
+        // Look at center
+        tempObj.lookAt(0, tempObj.position.y, -15);
+        
+        tempObj.scale.setScalar(d.scale);
+        tempObj.updateMatrix();
+        coreNodesRef.current.setMatrixAt(i, tempObj.matrix);
+      }
+      coreNodesRef.current.instanceMatrix.needsUpdate = true;
     }
   });
 
   return (
     <group>
-      {/* Archway Rings going down */}
-      {Array.from({ length: 20 }).map((_, i) => (
-        <mesh key={i} position={[0, -i * 5, -45]} rotation={[Math.PI / 2, 0, 0]} castShadow receiveShadow>
-          <torusGeometry args={[12, 0.5, 16, 64]} />
-          <meshStandardMaterial 
-            color={t.base} 
-            transparent={t.transparent} 
-            opacity={t.opacity} 
-            metalness={0.1} 
-            roughness={0.9} 
-          />
-          <Edges color={t.edge} />
-        </mesh>
-      ))}
+      {/* Astrolabe Rings */}
+      <instancedMesh ref={outerRingsRef} args={[undefined, undefined, numRings]}>
+        <torusGeometry args={[1, 0.005, 4, 64]} />
+        <meshStandardMaterial color={t.base} transparent opacity={0.3} metalness={0} roughness={1} />
+        <Edges color={activeTheme === 'CYBER' ? '#9900ff' : t.edge} threshold={1} />
+      </instancedMesh>
 
-      {/* Massive Pillars using Instanced Mesh for performance */}
-      <instancedMesh ref={pillarsRef} args={[undefined, undefined, numPillars]} castShadow receiveShadow>
-        <boxGeometry args={[2, 30, 2]} />
-        <meshStandardMaterial 
-          color={t.base} 
-          transparent={t.transparent} 
-          opacity={t.opacity} 
-          metalness={0.1} 
-          roughness={0.9} 
-          wireframe={false} 
-        />
-        <Edges color={activeTheme === 'CYBER' ? '#ff00ff' : t.edge} />
+      {/* Swarm Particles */}
+      <instancedMesh ref={innerSwarmRef} args={[undefined, undefined, numSwarm]}>
+        <octahedronGeometry args={[0.5, 0]} />
+        <meshStandardMaterial color={t.edge} emissive={t.edge} emissiveIntensity={0.5} transparent opacity={0.5} wireframe={true} />
+      </instancedMesh>
+
+      {/* Sacred Geometry Core Nodes */}
+      <instancedMesh ref={coreNodesRef} args={[undefined, undefined, numNodes]}>
+        <icosahedronGeometry args={[1, 0]} />
+        <meshStandardMaterial color={t.base} transparent opacity={0.8} />
+        <Edges color={activeTheme === 'DRAFT' ? '#ff0000' : t.edge} />
       </instancedMesh>
     </group>
   );
