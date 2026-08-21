@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { ScreenQuad } from "@react-three/drei";
@@ -14,93 +14,97 @@ const vertexShader = `
   }
 `;
 
+// A premium, clean shader — deep blue paper with subtle grain and faint star-field
 const fragmentShader = `
   varying vec2 vUv;
   uniform float uTime;
-  uniform float uTheme; // 0.0 = CYANOTYPE, 1.0 = DRAFT, 2.0 = CYBER
+  uniform float uTheme; // 0.0=CYANOTYPE, 1.0=DRAFT, 2.0=CYBER
 
-  float rand(vec2 n) { 
-    return fract(sin(dot(n, vec2(12.9898, 4.1414))) * 43758.5453);
+  float hash(vec2 p) {
+    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
   }
 
-  float noise(vec2 p){
-    vec2 ip = floor(p);
-    vec2 u = fract(p);
-    u = u*u*(3.0-2.0*u);
-    
-    float res = mix(
-      mix(rand(ip), rand(ip+vec2(1.0,0.0)), u.x),
-      mix(rand(ip+vec2(0.0,1.0)), rand(ip+vec2(1.0,1.0)), u.x), u.y);
-    return res*res;
+  float smoothNoise(vec2 p) {
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+    f = f * f * (3.0 - 2.0 * f);
+    return mix(
+      mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x),
+      mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x),
+      f.y
+    );
   }
 
   void main() {
     vec2 uv = vUv;
-    vec2 centeredUv = uv - 0.5;
-    float dist = length(centeredUv);
-    
-    vec3 baseColor;
-    vec3 gridColor;
-    float gridOpacity = 1.0;
-    float n = noise(uv * 800.0 + uTime * 0.05);
+    vec2 c = uv - 0.5;
+    float dist = length(c);
+
+    // ── THEME COLORS ──────────────────────────────────────────────
+    vec3 bgColor;
+    vec3 lineColor;
+    float lineOpacity;
 
     if (uTheme < 0.5) {
-      // THEME 0: CYANOTYPE (Deep Blue background, White Grid)
-      vec3 colorLight = vec3(0.0, 0.1, 0.4); // Royal blue
-      vec3 colorDark = vec3(0.0, 0.02, 0.15); // Dark blue edge
-      baseColor = mix(colorLight, colorDark, smoothstep(0.0, 1.2, dist));
-      baseColor += n * 0.05; // Light grain
-      gridColor = vec3(1.0, 1.0, 1.0); // Pure white grid
-      gridOpacity = 0.5;
+      // CYANOTYPE — Prussian blue photographic paper
+      vec3 deep = vec3(0.0, 0.035, 0.12);
+      vec3 mid  = vec3(0.0, 0.06, 0.22);
+      bgColor = mix(deep, mid, smoothstep(0.0, 0.8, 1.0 - dist));
+      // Add subtle paper grain
+      float grain = smoothNoise(uv * 400.0) * 0.015;
+      bgColor += grain;
+      lineColor = vec3(0.4, 0.75, 1.0);
+      lineOpacity = 0.06;
     } else if (uTheme < 1.5) {
-      // THEME 1: DRAFT (Off-white paper, Dark Pencil Grid)
-      vec3 colorLight = vec3(0.98, 0.96, 0.92); // Cream paper
-      vec3 colorDark = vec3(0.85, 0.82, 0.75); // Darker parchment edge
-      baseColor = mix(colorLight, colorDark, smoothstep(0.0, 1.2, dist));
-      baseColor -= n * 0.03; // Dark grain
-      gridColor = vec3(0.1, 0.1, 0.1); // Charcoal grid
-      gridOpacity = 0.8;
+      // DRAFT — aged engineering paper, warm cream
+      vec3 paper = vec3(0.94, 0.91, 0.83);
+      vec3 edge  = vec3(0.82, 0.79, 0.71);
+      bgColor = mix(paper, edge, smoothstep(0.0, 1.0, dist));
+      float grain = smoothNoise(uv * 300.0) * 0.02 - 0.01;
+      bgColor += grain;
+      lineColor = vec3(0.2, 0.2, 0.25);
+      lineOpacity = 0.07;
     } else {
-      // THEME 2: CYBER (Pitch Black, RGB Neon Grid)
-      vec3 colorLight = vec3(0.05, 0.05, 0.05);
-      vec3 colorDark = vec3(0.0, 0.0, 0.0);
-      baseColor = mix(colorLight, colorDark, smoothstep(0.0, 1.2, dist));
-      // Halftone dot effect
-      float dotSize = 150.0;
-      float d = length(fract(uv * dotSize) - 0.5);
-      if (d > 0.4) baseColor -= vec3(0.03); 
-      gridColor = vec3(0.0, 1.0, 0.8); // Cyan grid
-      gridOpacity = 1.0;
+      // CYBER — deep void black
+      vec3 void_ = vec3(0.02, 0.02, 0.025);
+      vec3 deep  = vec3(0.0, 0.0, 0.0);
+      bgColor = mix(void_, deep, smoothstep(0.0, 1.0, dist));
+      lineColor = vec3(0.0, 0.8, 1.0);
+      lineOpacity = 0.05;
     }
-    
-    // Draw rigid esoteric grid lines
-    float grid1 = abs(fract(uv.x * 20.0) - 0.5);
-    float grid2 = abs(fract(uv.y * 20.0) - 0.5);
-    float grid3 = abs(fract((uv.x + uv.y) * 10.0) - 0.5); // Diagonal
-    
-    float lineThickness = 0.015;
-    if (grid1 < lineThickness || grid2 < lineThickness) {
-      if (uTheme > 1.5) { // Cyber mode has glitchy RGB lines
-        float accentNoise = noise(uv * 5.0 + uTime * 0.1);
-        if (accentNoise > 0.7) {
-          baseColor = vec3(1.0, 0.0, 1.0); // Magenta accent
-        } else {
-          baseColor = gridColor;
-        }
-      } else {
-        baseColor = mix(baseColor, gridColor, gridOpacity);
+
+    // ── SUBTLE GRID LINES (barely visible) ────────────────────────
+    // Fine grid
+    float gx = abs(fract(uv.x * 30.0 - 0.5) - 0.5);
+    float gy = abs(fract(uv.y * 30.0 - 0.5) - 0.5);
+    float fineLine = 1.0 - smoothstep(0.0, 0.025, min(gx, gy));
+
+    // Major grid every 6 cells
+    float mx = abs(fract(uv.x * 5.0 - 0.5) - 0.5);
+    float my = abs(fract(uv.y * 5.0 - 0.5) - 0.5);
+    float majorLine = 1.0 - smoothstep(0.0, 0.015, min(mx, my));
+
+    bgColor = mix(bgColor, lineColor, fineLine * lineOpacity);
+    bgColor = mix(bgColor, lineColor, majorLine * lineOpacity * 2.0);
+
+    // ── STAR FIELD (tiny scattered dots for CYANOTYPE / CYBER) ────
+    if (uTheme < 0.5 || uTheme > 1.5) {
+      // Scatter stars across the background
+      vec2 cell = floor(uv * 80.0);
+      vec2 cellUv = fract(uv * 80.0);
+      float star = hash(cell + vec2(17.3, 43.1));
+      if (star > 0.97) { // Only ~3% of cells have a star
+        float starDist = length(cellUv - 0.5);
+        float starBrightness = (1.0 - smoothstep(0.0, 0.2, starDist)) * (star - 0.97) * 30.0;
+        bgColor += lineColor * starBrightness * 0.6;
       }
     }
 
-    if (uTheme < 1.5 && grid3 < 0.005) {
-       // Subtle diagonal construction lines for Cyanotype/Draft
-       baseColor = mix(baseColor, gridColor, gridOpacity * 0.3);
-    }
-    
-    // Vignette
-    baseColor *= smoothstep(1.5, 0.2, dist) * 0.5 + 0.5;
+    // ── VIGNETTE ──────────────────────────────────────────────────
+    float vignette = 1.0 - smoothstep(0.3, 0.9, dist);
+    bgColor *= mix(0.65, 1.0, vignette);
 
-    gl_FragColor = vec4(baseColor, 1.0);
+    gl_FragColor = vec4(bgColor, 1.0);
   }
 `;
 
@@ -118,12 +122,11 @@ export function BlueprintBackground() {
   useFrame((state) => {
     if (materialRef.current) {
       materialRef.current.uniforms.uTime.value = state.clock.elapsedTime;
-      // Smoothly transition theme uniform
       const target = getThemeValue(activeTheme);
       materialRef.current.uniforms.uTheme.value = THREE.MathUtils.lerp(
         materialRef.current.uniforms.uTheme.value,
         target,
-        0.05
+        0.03
       );
     }
   });

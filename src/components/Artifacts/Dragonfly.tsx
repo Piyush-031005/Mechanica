@@ -2,157 +2,222 @@
 
 import { useRef, useState, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
-import { useCursor, Html, Edges } from "@react-three/drei";
+import { useCursor, Html, Edges, Line } from "@react-three/drei";
 import * as THREE from "three";
 import { useStore } from "@/store/useStore";
 
-const THEME_COLORS = {
-  CYANOTYPE: { base: "#000000", edge: "#ffffff", transparent: true, emissive: "#ffffff", opacity: 0.0 },
-  DRAFT: { base: "#f0ebdc", edge: "#111111", transparent: false, emissive: "#000000", opacity: 1.0 },
-  CYBER: { base: "#111111", edge: "#00ffff", transparent: false, emissive: "#ff00ff", opacity: 1.0 }
+const THEME = {
+  CYANOTYPE: { edge: "#6eb5ff", accent: "#ffffff", bodyOpacity: 0.0 },
+  DRAFT:     { edge: "#222222", accent: "#cc0000", bodyOpacity: 0.9 },
+  CYBER:     { edge: "#00ccff", accent: "#ff00aa", bodyOpacity: 0.0 },
 };
 
-export function Dragonfly() {
+// One wing panel — made of a grid of lines like the reference image
+function WingPanel({ side, wingsActive, edgeColor }: { side: 1 | -1; wingsActive: boolean; edgeColor: string }) {
   const groupRef = useRef<THREE.Group>(null);
-  const instancedRef = useRef<THREE.InstancedMesh>(null);
-  const [hovered, setHovered] = useState(false);
-  const [active, setActive] = useState(false);
-  
-  const playMechanicalClick = useStore((state) => state.playMechanicalClick);
-  const activeTheme = useStore((state) => state.activeTheme);
-  const cameraY = useStore((state) => state.cameraY);
-  const cameraZ = useStore((state) => state.cameraZ);
-  const t = THEME_COLORS[activeTheme];
 
-  useCursor(hovered, "crosshair", "auto");
+  const wingPts = useMemo(() => {
+    // Wing outline — asymmetric, dragonfly-shaped
+    return [
+      new THREE.Vector3(0, 0, 0),
+      new THREE.Vector3(side * 0.3, 0.4, 0),
+      new THREE.Vector3(side * 1.8, 0.8, 0),
+      new THREE.Vector3(side * 3.5, 0.5, 0),
+      new THREE.Vector3(side * 4.2, 0, 0),
+      new THREE.Vector3(side * 3.8, -0.4, 0),
+      new THREE.Vector3(side * 2.0, -0.5, 0),
+      new THREE.Vector3(side * 0.8, -0.3, 0),
+      new THREE.Vector3(0, 0, 0),
+    ];
+  }, [side]);
 
-  const artifactY = -35;
-  const isExploded = Math.abs(cameraY - artifactY) < 10 || active;
-
-  const dist = Math.abs(cameraZ - (-15));
-  const htmlOpacity = Math.max(0, 1 - (dist / 10));
-
-  const numParticles = 1000;
-
-  // Initialize particle states
-  const particles = useMemo(() => {
-    return Array.from({ length: numParticles }, () => ({
-      x: (Math.random() - 0.5) * 10,
-      y: (Math.random() - 0.5) * 10,
-      z: (Math.random() - 0.5) * 10,
-      vx: 0, vy: 0, vz: 0,
-      scale: 0.1 + Math.random() * 0.2
-    }));
-  }, []);
-
-  const tempObj = useMemo(() => new THREE.Object3D(), []);
+  // Wing vein lines — the grid of detail inside the wing
+  const veins = useMemo(() => {
+    const lines: THREE.Vector3[][] = [];
+    const divisions = 7;
+    for (let i = 1; i < divisions; i++) {
+      const t = i / divisions;
+      // Longitudinal veins (root to tip)
+      lines.push([
+        new THREE.Vector3(0, 0, 0),
+        new THREE.Vector3(side * (4.2 * t), (Math.sin(t * Math.PI) * 0.5), 0),
+      ]);
+    }
+    // Cross veins
+    for (let i = 1; i < divisions; i++) {
+      const x = side * (i * 0.6);
+      const yTop = Math.sin((i / divisions) * Math.PI) * 0.7;
+      const yBot = -Math.sin((i / divisions) * Math.PI) * 0.4;
+      lines.push([
+        new THREE.Vector3(x, yTop, 0),
+        new THREE.Vector3(x, yBot, 0),
+      ]);
+    }
+    return lines;
+  }, [side]);
 
   useFrame((state, delta) => {
     if (groupRef.current) {
-      groupRef.current.position.y = artifactY + Math.sin(state.clock.elapsedTime) * 0.5;
-      groupRef.current.rotation.y += delta * 0.1;
-    }
-
-    if (instancedRef.current) {
-      const time = state.clock.elapsedTime;
-      for (let i = 0; i < numParticles; i++) {
-        const p = particles[i];
-        
-        if (isExploded) {
-          // Lorenz Attractor style chaos
-          const dx = 10 * (p.y - p.x);
-          const dy = p.x * (28 - p.z) - p.y;
-          const dz = p.x * p.y - (8/3) * p.z;
-          
-          p.vx += dx * 0.0005;
-          p.vy += dy * 0.0005;
-          p.vz += dz * 0.0005;
-          
-          // Damping
-          p.vx *= 0.95; p.vy *= 0.95; p.vz *= 0.95;
-        } else {
-          // Figure 8 infinity loop (hibernation pattern)
-          const angle = time * 2 + i * 0.01;
-          const targetX = Math.sin(angle) * 5;
-          const targetY = Math.sin(angle * 2) * 2;
-          const targetZ = Math.cos(angle) * 5;
-          
-          p.vx += (targetX - p.x) * 0.01;
-          p.vy += (targetY - p.y) * 0.01;
-          p.vz += (targetZ - p.z) * 0.01;
-          
-          // Heavier damping to keep shape tight
-          p.vx *= 0.9; p.vy *= 0.9; p.vz *= 0.9;
-        }
-
-        p.x += p.vx;
-        p.y += p.vy;
-        p.z += p.vz;
-
-        tempObj.position.set(p.x, p.y, p.z);
-        // Point in direction of velocity
-        if (p.vx !== 0 || p.vy !== 0 || p.vz !== 0) {
-           tempObj.lookAt(p.x + p.vx, p.y + p.vy, p.z + p.vz);
-        }
-        
-        const s = p.scale * (isExploded ? 2 : 1);
-        tempObj.scale.set(s, s * 4, s); // Stretched along velocity
-        tempObj.updateMatrix();
-        instancedRef.current.setMatrixAt(i, tempObj.matrix);
-      }
-      instancedRef.current.instanceMatrix.needsUpdate = true;
+      // Wing flap
+      const speed = wingsActive ? 18 : 1.2;
+      const amplitude = wingsActive ? 0.3 : 0.08;
+      const flapAngle = Math.sin(state.clock.elapsedTime * speed) * amplitude;
+      groupRef.current.rotation.y = flapAngle * side;
     }
   });
 
-  const handleClick = () => {
-    playMechanicalClick();
-    setActive(!active);
-  };
+  return (
+    <group ref={groupRef} position={[0, 0.5, 0.2]}>
+      {/* Wing outline */}
+      <Line points={wingPts} color={edgeColor} lineWidth={1.2} transparent opacity={0.8} />
+      {/* Wing veins */}
+      {veins.map((pts, i) => (
+        <Line key={i} points={pts} color={edgeColor} lineWidth={0.5} transparent opacity={0.4} />
+      ))}
+    </group>
+  );
+}
+
+// Rear (smaller) wing pair
+function RearWingPanel({ side, wingsActive, edgeColor }: { side: 1 | -1; wingsActive: boolean; edgeColor: string }) {
+  const groupRef = useRef<THREE.Group>(null);
+
+  const wingPts = useMemo(() => [
+    new THREE.Vector3(0, 0, 0),
+    new THREE.Vector3(side * 0.4, 0.3, 0),
+    new THREE.Vector3(side * 2.5, 0.4, 0),
+    new THREE.Vector3(side * 3.2, 0, 0),
+    new THREE.Vector3(side * 2.8, -0.5, 0),
+    new THREE.Vector3(side * 1.0, -0.4, 0),
+    new THREE.Vector3(0, 0, 0),
+  ], [side]);
+
+  useFrame((state) => {
+    if (groupRef.current) {
+      const speed = wingsActive ? 18 : 1.2;
+      const flapAngle = Math.sin(state.clock.elapsedTime * speed + 0.4) * (wingsActive ? 0.25 : 0.06);
+      groupRef.current.rotation.y = flapAngle * side;
+    }
+  });
 
   return (
-    <group 
-      ref={groupRef} 
-      position={[0, artifactY, -15]} 
+    <group ref={groupRef} position={[0, 0, -0.8]}>
+      <Line points={wingPts} color={edgeColor} lineWidth={0.9} transparent opacity={0.65} />
+    </group>
+  );
+}
+
+export function Dragonfly() {
+  const groupRef = useRef<THREE.Group>(null);
+  const [hovered, setHovered] = useState(false);
+  const [wingsActive, setWingsActive] = useState(false);
+
+  const playMechanicalClick = useStore((s) => s.playMechanicalClick);
+  const activeTheme = useStore((s) => s.activeTheme);
+  const cameraZ = useStore((s) => s.cameraZ);
+  const cameraY = useStore((s) => s.cameraY);
+  const t = THEME[activeTheme];
+
+  useCursor(hovered, "crosshair", "auto");
+
+  const artifactY = 0;
+  const htmlOpacity = Math.max(0, Math.min(1, 1 - (Math.abs(cameraY - artifactY + 35) / 8)));
+
+  // Tail segments geometry
+  const tailSegments = useMemo(() => {
+    return Array.from({ length: 7 }, (_, i) => ({
+      y: -(i * 0.65 + 0.7),
+      r: 0.22 - i * 0.025,
+      h: 0.6,
+    }));
+  }, []);
+
+  useFrame((state, delta) => {
+    if (groupRef.current) {
+      // Gentle hover float
+      groupRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.8) * 0.4 - 35;
+    }
+  });
+
+  return (
+    <group
+      ref={groupRef}
+      position={[0, -35, -15]}
       onPointerOver={() => setHovered(true)}
       onPointerOut={() => setHovered(false)}
-      onClick={handleClick}
+      onClick={() => { playMechanicalClick(); setWingsActive(e => !e); }}
     >
-      <Html position={[0, -3, 0]} center style={{ pointerEvents: 'none', opacity: htmlOpacity, transition: 'opacity 0.2s' }}>
+      {/* ── HTML LABEL ──────────────────────────────────────────── */}
+      <Html position={[5, 2, 0]} center style={{ pointerEvents: 'none', opacity: htmlOpacity, transition: 'opacity 0.5s' }}>
         <div style={{
-          color: t.edge,
-          fontFamily: 'monospace',
-          fontSize: '12px',
-          border: `1px solid ${t.edge}`,
-          padding: '8px',
-          background: 'rgba(0,0,0,0.4)',
-          backdropFilter: 'blur(4px)',
-          whiteSpace: 'nowrap',
-          textTransform: 'uppercase',
+          fontFamily: 'monospace', fontSize: 11, color: t.edge,
+          border: `1px solid ${t.edge}`, padding: '6px 10px',
+          background: 'rgba(0,0,15,0.6)', backdropFilter: 'blur(6px)',
+          whiteSpace: 'nowrap', letterSpacing: 1, lineHeight: 1.6,
           position: 'relative'
         }}>
-          <div style={{ position: 'absolute', top: -3, left: -3, width: 6, height: 6, borderTop: `1px solid ${t.edge}`, borderLeft: `1px solid ${t.edge}` }} />
-          <div style={{ position: 'absolute', top: -3, right: -3, width: 6, height: 6, borderTop: `1px solid ${t.edge}`, borderRight: `1px solid ${t.edge}` }} />
-          <div style={{ position: 'absolute', bottom: -3, left: -3, width: 6, height: 6, borderBottom: `1px solid ${t.edge}`, borderLeft: `1px solid ${t.edge}` }} />
-          <div style={{ position: 'absolute', bottom: -3, right: -3, width: 6, height: 6, borderBottom: `1px solid ${t.edge}`, borderRight: `1px solid ${t.edge}` }} />
-
-          <div style={{ fontSize: '10px', opacity: 0.7, borderBottom: `1px dashed ${t.edge}`, paddingBottom: '4px', marginBottom: '4px' }}>
-            ID: ARTIFACT_02 // (x,y,z): 0, {artifactY}, -15<br/>
-            PARTICLES: {numParticles} // CHAOS_MATH
-          </div>
-          <div style={{ fontSize: '18px', letterSpacing: '2px', fontWeight: 'bold' }}>
-            AERO_DRONE_SWARM
-          </div>
-          <div style={{ fontSize: '10px', opacity: 0.7, marginTop: '4px' }}>
-            STATE: {isExploded ? '[ LORENZ_ATTRACTOR ]' : '[ INFINITY_LOOP ]'}
-          </div>
+          <div style={{ position: 'absolute', top: -3, left: -3, width: 5, height: 5, borderTop: `1px solid ${t.edge}`, borderLeft: `1px solid ${t.edge}` }} />
+          <div style={{ position: 'absolute', top: -3, right: -3, width: 5, height: 5, borderTop: `1px solid ${t.edge}`, borderRight: `1px solid ${t.edge}` }} />
+          <div style={{ position: 'absolute', bottom: -3, left: -3, width: 5, height: 5, borderBottom: `1px solid ${t.edge}`, borderLeft: `1px solid ${t.edge}` }} />
+          <div style={{ position: 'absolute', bottom: -3, right: -3, width: 5, height: 5, borderBottom: `1px solid ${t.edge}`, borderRight: `1px solid ${t.edge}` }} />
+          <div style={{ opacity: 0.6, fontSize: 9 }}>ARTIFACT 02 · SECTOR B</div>
+          <div style={{ fontSize: 14, fontWeight: 'bold', letterSpacing: 3 }}>AERO-DRONE</div>
+          <div style={{ opacity: 0.6, fontSize: 9 }}>WINGSPAN 6.4m · {wingsActive ? 'FLIGHT MODE' : 'PATROL MODE'}</div>
         </div>
       </Html>
 
-      <instancedMesh ref={instancedRef} args={[undefined, undefined, numParticles]}>
-        <coneGeometry args={[1, 3, 3]} />
-        <meshStandardMaterial color={t.base} transparent opacity={0.5} />
-        <Edges color={activeTheme === 'CYBER' ? '#00ffff' : t.edge} threshold={15} />
-      </instancedMesh>
+      {/* ── THORAX (main body center) ────────────────────────────── */}
+      <mesh>
+        <capsuleGeometry args={[0.25, 0.8, 8, 16]} />
+        <meshStandardMaterial color={activeTheme === 'DRAFT' ? '#f0ebdc' : '#000'} transparent opacity={t.bodyOpacity} />
+        <Edges color={t.edge} />
+      </mesh>
+
+      {/* ── HEAD ─────────────────────────────────────────────────── */}
+      <group position={[0, 0.85, 0]}>
+        <mesh>
+          <sphereGeometry args={[0.28, 16, 16]} />
+          <meshStandardMaterial color={activeTheme === 'DRAFT' ? '#f0ebdc' : '#000'} transparent opacity={t.bodyOpacity} />
+          <Edges color={t.edge} />
+        </mesh>
+        {/* Eyes */}
+        <mesh position={[-0.14, 0.06, 0.22]}>
+          <sphereGeometry args={[0.1, 8, 8]} />
+          <meshStandardMaterial color={t.edge} emissive={t.edge} emissiveIntensity={1.5} />
+        </mesh>
+        <mesh position={[0.14, 0.06, 0.22]}>
+          <sphereGeometry args={[0.1, 8, 8]} />
+          <meshStandardMaterial color={t.edge} emissive={t.edge} emissiveIntensity={1.5} />
+        </mesh>
+      </group>
+
+      {/* ── SEGMENTED TAIL ───────────────────────────────────────── */}
+      {tailSegments.map((seg, i) => (
+        <mesh key={i} position={[0, seg.y, 0]}>
+          <cylinderGeometry args={[seg.r, seg.r * 0.88, seg.h, 8]} />
+          <meshStandardMaterial color={activeTheme === 'DRAFT' ? '#f0ebdc' : '#000'} transparent opacity={t.bodyOpacity} />
+          <Edges color={i % 2 === 0 ? t.edge : t.accent} threshold={1} />
+        </mesh>
+      ))}
+      {/* Tail tip */}
+      <mesh position={[0, -5.5, 0]}>
+        <coneGeometry args={[0.06, 0.4, 6]} />
+        <meshStandardMaterial color={t.edge} emissive={t.edge} emissiveIntensity={0.8} />
+      </mesh>
+
+      {/* ── WINGS (4 panels) ─────────────────────────────────────── */}
+      <WingPanel side={1} wingsActive={wingsActive} edgeColor={t.edge} />
+      <WingPanel side={-1} wingsActive={wingsActive} edgeColor={t.edge} />
+      <RearWingPanel side={1} wingsActive={wingsActive} edgeColor={t.edge} />
+      <RearWingPanel side={-1} wingsActive={wingsActive} edgeColor={t.edge} />
+
+      {/* ── CENTER ANNOTATION LINE ───────────────────────────────── */}
+      <Line
+        points={[new THREE.Vector3(0, 1.2, 0), new THREE.Vector3(0, -6.0, 0)]}
+        color={t.accent}
+        lineWidth={0.3}
+        transparent opacity={0.4}
+      />
     </group>
   );
 }

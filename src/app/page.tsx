@@ -31,15 +31,15 @@ export default function Home() {
           <SecretManager />
           <CameraController />
           
-          <ambientLight intensity={0.2} />
-          {/* Cinematic Spotlight for harsh vintage shadows */}
-          <directionalLight 
-            position={[10, 20, 10]} 
-            intensity={2} 
-            castShadow 
-            shadow-mapSize={[2048, 2048]}
+          <ambientLight intensity={0.05} />
+          {/* Cinematic cool directional light from above */}
+          <directionalLight
+            position={[0, 30, 10]}
+            intensity={1.2}
+            color="#c8e0ff"
           />
-          <pointLight position={[-10, 10, -30]} intensity={1.5} color="#D4AF37" />
+          {/* Subtle rim light from the side */}
+          <pointLight position={[-20, 10, -10]} intensity={0.4} color="#6eb5ff" />
           
           <ArchiveHall />
           <GridSystem />
