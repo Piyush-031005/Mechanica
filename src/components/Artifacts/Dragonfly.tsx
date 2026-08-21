@@ -121,7 +121,7 @@ export function Dragonfly() {
   useCursor(hovered, "crosshair", "auto");
 
   const artifactY = 0;
-  const htmlOpacity = Math.max(0, Math.min(1, 1 - (Math.abs(cameraY - artifactY + 35) / 8)));
+  const htmlOpacity = 1; // Always visible when camera reaches this artifact
 
   // Tail segments geometry
   const tailSegments = useMemo(() => {
@@ -134,15 +134,15 @@ export function Dragonfly() {
 
   useFrame((state, delta) => {
     if (groupRef.current) {
-      // Gentle hover float
-      groupRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.8) * 0.4 - 35;
+      // Hover float + Z position: -50 so it's FAR behind the engine
+      groupRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.8) * 0.5 - 28;
     }
   });
 
   return (
     <group
       ref={groupRef}
-      position={[0, -35, -15]}
+      position={[0, -28, -50]}
       onPointerOver={() => setHovered(true)}
       onPointerOut={() => setHovered(false)}
       onClick={() => { playMechanicalClick(); setWingsActive(e => !e); }}

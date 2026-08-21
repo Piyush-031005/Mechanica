@@ -57,7 +57,7 @@ export function Owl() {
   }, []);
 
   const artifactY = -55;
-  const htmlOpacity = Math.max(0, Math.min(1, 1 - (Math.abs(cameraY - artifactY) / 8)));
+  const htmlOpacity = 1; // Always visible when camera is here
 
   // Mouse-tracking for the container (the whole eye tracks mouse)
   useFrame((state, delta) => {
@@ -84,25 +84,24 @@ export function Owl() {
     }
   });
 
-  // Precise gyroscope ring configurations
-  // Real gyroscopes have rings on exact cardinal axes + diagonal axes
+  // Precise gyroscope ring configurations — scaled up for visibility
   const rings = useMemo(() => [
-    // Cardinal rings (the 3 principal axes of a gyroscope)
-    { ax: 1, ay: 0, az: 0, r: 5.5, speed: 0.22, tube: 0.04 },
-    { ax: 0, ay: 1, az: 0, r: 5.5, speed: -0.18, tube: 0.04 },
-    { ax: 0, ay: 0, az: 1, r: 5.5, speed: 0.15, tube: 0.04 },
+    // Cardinal rings
+    { ax: 1, ay: 0, az: 0, r: 10,  speed: 0.22, tube: 0.10 },
+    { ax: 0, ay: 1, az: 0, r: 10,  speed: -0.18, tube: 0.10 },
+    { ax: 0, ay: 0, az: 1, r: 10,  speed: 0.15, tube: 0.10 },
     // Intermediate rings
-    { ax: 1, ay: 1, az: 0, r: 4.2, speed: -0.3, tube: 0.03 },
-    { ax: 0, ay: 1, az: 1, r: 4.2, speed: 0.28, tube: 0.03 },
-    { ax: 1, ay: 0, az: 1, r: 4.2, speed: -0.25, tube: 0.03 },
+    { ax: 1, ay: 1, az: 0, r: 7.5, speed: -0.3, tube: 0.07 },
+    { ax: 0, ay: 1, az: 1, r: 7.5, speed: 0.28, tube: 0.07 },
+    { ax: 1, ay: 0, az: 1, r: 7.5, speed: -0.25, tube: 0.07 },
     // Inner precision rings
-    { ax: 1, ay: 1, az: 1, r: 3.0, speed: 0.5, tube: 0.03 },
-    { ax: -1, ay: 1, az: 1, r: 3.0, speed: -0.45, tube: 0.03 },
-    { ax: 1, ay: -1, az: 1, r: 3.0, speed: 0.4, tube: 0.03 },
+    { ax: 1, ay: 1, az: 1, r: 5.5, speed: 0.5, tube: 0.06 },
+    { ax: -1, ay: 1, az: 1, r: 5.5, speed: -0.45, tube: 0.06 },
+    { ax: 1, ay: -1, az: 1, r: 5.5, speed: 0.4, tube: 0.06 },
     // Accent inner rings
-    { ax: 1, ay: 2, az: 0, r: 2.0, speed: 0.9, tube: 0.025 },
-    { ax: 0, ay: 1, az: 2, r: 2.0, speed: -0.85, tube: 0.025 },
-    { ax: 2, ay: 0, az: 1, r: 2.0, speed: 0.75, tube: 0.025 },
+    { ax: 1, ay: 2, az: 0, r: 3.5, speed: 0.9, tube: 0.05 },
+    { ax: 0, ay: 1, az: 2, r: 3.5, speed: -0.85, tube: 0.05 },
+    { ax: 2, ay: 0, az: 1, r: 3.5, speed: 0.75, tube: 0.05 },
   ], []);
 
   // Outer stabilizer frame — static, does NOT rotate
@@ -110,7 +109,7 @@ export function Owl() {
     const pts = [];
     for (let i = 0; i <= 64; i++) {
       const a = (i / 64) * Math.PI * 2;
-      pts.push(new THREE.Vector3(Math.cos(a) * 6.2, Math.sin(a) * 6.2, 0));
+      pts.push(new THREE.Vector3(Math.cos(a) * 11, Math.sin(a) * 11, 0));
     }
     return pts;
   }, []);
@@ -120,13 +119,13 @@ export function Owl() {
     Array.from({ length: 8 }, (_, i) => {
       const a = (i / 8) * Math.PI * 2;
       return [
-        new THREE.Vector3(Math.cos(a) * 6.2, Math.sin(a) * 6.2, 0),
+        new THREE.Vector3(Math.cos(a) * 11, Math.sin(a) * 11, 0),
         new THREE.Vector3(0, 0, 0),
       ];
     }), []);
 
   return (
-    <group position={[0, artifactY, -15]}>
+    <group position={[0, -55, -90]}>
       {/* ── HTML LABEL ──────────────────────────────────────────── */}
       <Html position={[7, 3, 0]} center style={{ pointerEvents: 'none', opacity: htmlOpacity, transition: 'opacity 0.5s' }}>
         <div style={{
