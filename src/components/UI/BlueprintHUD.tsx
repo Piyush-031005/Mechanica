@@ -27,7 +27,14 @@ export function BlueprintHUD() {
   if (!mounted) return null;
 
   const t = THEME_COLORS[activeTheme];
-  const c = t.edge; // primary color
+  const c = t.edge;
+
+  // Depth progress: cameraY goes from 0 to about -60
+  const depthProgress = Math.min(1, Math.max(0, Math.abs(cameraY) / 60));
+  const depthPct = Math.round(depthProgress * 100);
+
+  // Sector label based on depth
+  const sector = depthProgress < 0.3 ? 'A — ENGINE' : depthProgress < 0.65 ? 'B — AERO-DRONE' : 'C — NIGHT-WATCH'; // primary color
 
   return (
     <div style={{
@@ -94,6 +101,30 @@ export function BlueprintHUD() {
       <div style={{ position: 'absolute', bottom: 24, right: 32, color: c, opacity: 0.4, textAlign: 'right' }}>
         <div style={{ fontSize: 9, letterSpacing: 2 }}>BUILD 2026.08</div>
         <div style={{ fontSize: 9, letterSpacing: 1, marginTop: 2 }}>SCROLL TO DESCEND</div>
+      </div>
+
+      {/* ── RIGHT EDGE: Vertical Depth Progress Bar ───────────────── */}
+      <div style={{
+        position: 'absolute', top: '50%', right: 28,
+        transform: 'translateY(-50%)',
+        display: 'flex', flexDirection: 'column', alignItems: 'center',
+        gap: 8, color: c, opacity: 0.6
+      }}>
+        <div style={{ fontSize: 8, letterSpacing: 2, writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>SECTOR {sector}</div>
+        {/* Track */}
+        <div style={{ width: 1, height: 160, background: c, opacity: 0.2, position: 'relative' }}>
+          {/* Glowing pip */}
+          <div style={{
+            position: 'absolute', top: `${depthPct}%`,
+            left: '50%', transform: 'translate(-50%, -50%)',
+            width: 5, height: 5,
+            background: c,
+            borderRadius: '50%',
+            boxShadow: `0 0 6px ${c}`,
+            transition: 'top 0.3s ease',
+          }} />
+        </div>
+        <div style={{ fontSize: 9, letterSpacing: 1 }}>{depthPct}%</div>
       </div>
     </div>
   );
