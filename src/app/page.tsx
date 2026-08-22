@@ -8,6 +8,7 @@ import { AwwwardsUI } from "@/components/UI/AwwwardsUI";
 import { LiquidCore } from "@/components/Artifacts/LiquidCore";
 import { TheEngine } from "@/components/Artifacts/TheEngine";
 import { TheDrone } from "@/components/Artifacts/TheDrone";
+import { TheEye } from "@/components/Artifacts/TheEye";
 
 export default function Home() {
   return (
@@ -60,6 +61,9 @@ export default function Home() {
           
           {/* Section 3: The Atmosphere */}
           <TheDrone />
+          
+          {/* Section 4: The Observer */}
+          <TheEye />
           
           <Effects />
         </Canvas>
