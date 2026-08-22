@@ -2,7 +2,7 @@
 
 import { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
-import { MeshTransmissionMaterial, Float } from "@react-three/drei";
+import { MeshTransmissionMaterial, Float, Sparkles } from "@react-three/drei";
 import * as THREE from "three";
 import { useStore } from "@/store/useStore";
 
@@ -14,7 +14,7 @@ export function LiquidCore() {
 
   useFrame((state, delta) => {
     if (meshRef.current) {
-      // Rotate constantly
+      // Base rotation
       meshRef.current.rotation.x += delta * 0.2;
       meshRef.current.rotation.y += delta * 0.15;
       
@@ -22,6 +22,14 @@ export function LiquidCore() {
       const velocity = useStore.getState().scrollVelocity;
       meshRef.current.rotation.z += velocity * 0.005;
       
+      // Mouse magnetic reactivity
+      const targetX = (state.pointer.x * Math.PI) / 4;
+      const targetY = (state.pointer.y * Math.PI) / 4;
+      
+      // Smoothly interpolate current rotation towards mouse target (parallax)
+      meshRef.current.rotation.y = THREE.MathUtils.lerp(meshRef.current.rotation.y, meshRef.current.rotation.y + targetX, 0.05);
+      meshRef.current.rotation.x = THREE.MathUtils.lerp(meshRef.current.rotation.x, meshRef.current.rotation.x - targetY, 0.05);
+
       // Pulse scale slightly based on time
       const scale = 1 + Math.sin(state.clock.elapsedTime * 2) * 0.05;
       meshRef.current.scale.set(scale, scale, scale);
@@ -29,28 +37,49 @@ export function LiquidCore() {
   });
 
   return (
-    <Float speed={2} rotationIntensity={1} floatIntensity={2} floatingRange={[-0.5, 0.5]}>
-      <mesh ref={meshRef} geometry={geometry}>
-        {/* Awwwards-winning Glass/Liquid material */}
-        <MeshTransmissionMaterial
-          backside
-          samples={16}
-          thickness={2.5}
-          chromaticAberration={0.8}
-          anisotropy={0.3}
-          distortion={0.5}
-          distortionScale={0.5}
-          temporalDistortion={0.2}
-          color="#ffffff"
-          attenuationDistance={10}
-          attenuationColor="#ffffff"
-          clearcoat={1}
-          clearcoatRoughness={0.1}
-          roughness={0.05}
-          transmission={1}
-          ior={1.5}
-        />
-      </mesh>
-    </Float>
+    <group>
+      {/* Cinematic Dust passing behind the object to be refracted by the glass */}
+      <Sparkles 
+        count={200} 
+        scale={12} 
+        size={3} 
+        speed={0.2} 
+        opacity={0.8} 
+        color="#ffaa55" 
+        position={[0, 0, -4]} // Positioned deliberately behind the glass
+      />
+      <Sparkles 
+        count={200} 
+        scale={12} 
+        size={2} 
+        speed={0.4} 
+        opacity={0.5} 
+        color="#6eb5ff" 
+        position={[0, 0, -2]} 
+      />
+
+      <Float speed={2} rotationIntensity={1} floatIntensity={2} floatingRange={[-0.5, 0.5]}>
+        <mesh ref={meshRef} geometry={geometry}>
+          <MeshTransmissionMaterial
+            backside
+            samples={16}
+            thickness={2.5}
+            chromaticAberration={0.8}
+            anisotropy={0.3}
+            distortion={0.5}
+            distortionScale={0.5}
+            temporalDistortion={0.2}
+            color="#ffffff"
+            attenuationDistance={10}
+            attenuationColor="#ffffff"
+            clearcoat={1}
+            clearcoatRoughness={0.1}
+            roughness={0.05}
+            transmission={1}
+            ior={1.5}
+          />
+        </mesh>
+      </Float>
+    </group>
   );
 }
