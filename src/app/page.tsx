@@ -6,6 +6,7 @@ import { CameraController } from "@/components/Camera/CameraController";
 import { Effects } from "@/components/Effects/Effects";
 import { AwwwardsUI } from "@/components/UI/AwwwardsUI";
 import { LiquidCore } from "@/components/Artifacts/LiquidCore";
+import { TheEngine } from "@/components/Artifacts/TheEngine";
 
 export default function Home() {
   return (
@@ -50,8 +51,11 @@ export default function Home() {
           {/* Environment map is required for MeshTransmissionMaterial to reflect something */}
           <Environment preset="city" />
 
-          {/* The Hero Object */}
+          {/* Section 1: The Hero Object */}
           <LiquidCore />
+          
+          {/* Section 2: The Vault */}
+          <TheEngine />
           
           <Effects />
         </Canvas>
