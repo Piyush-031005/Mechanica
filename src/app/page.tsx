@@ -7,6 +7,7 @@ import { Effects } from "@/components/Effects/Effects";
 import { AwwwardsUI } from "@/components/UI/AwwwardsUI";
 import { LiquidCore } from "@/components/Artifacts/LiquidCore";
 import { TheEngine } from "@/components/Artifacts/TheEngine";
+import { TheDrone } from "@/components/Artifacts/TheDrone";
 
 export default function Home() {
   return (
@@ -56,6 +57,9 @@ export default function Home() {
           
           {/* Section 2: The Vault */}
           <TheEngine />
+          
+          {/* Section 3: The Atmosphere */}
+          <TheDrone />
           
           <Effects />
         </Canvas>
