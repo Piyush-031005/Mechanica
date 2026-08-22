@@ -1,16 +1,18 @@
 "use client";
 
-import { Canvas } from "@react-three/fiber";
-import { Environment } from "@react-three/drei";
-import { CameraController } from "@/components/Camera/CameraController";
-import { Effects } from "@/components/Effects/Effects";
 import { AwwwardsUI } from "@/components/UI/AwwwardsUI";
 import { LiquidCore } from "@/components/Artifacts/LiquidCore";
+import { PosterBackground } from "@/components/Environment/PosterBackground";
+import { Canvas } from "@react-three/fiber";
+import { CameraController } from "@/components/Camera/CameraController";
+import { Effects } from "@/components/Effects/Effects";
+import { Environment } from "@react-three/drei";
 
 export default function Home() {
   return (
     // Single 100vh screen for the Graphic Poster
-    <main style={{ height: "100vh", width: "100vw", background: "#f0f2f5" }}>
+    <main style={{ height: "100vh", width: "100vw", position: "relative" }}>
+      <PosterBackground />
       <AwwwardsUI />
       
       <div style={{ position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", background: "transparent" }}>
