@@ -68,7 +68,7 @@ export const useStore = create<GameState>((set) => ({
   scrollVelocity: 0,
   setScrollVelocity: (v) => set({ scrollVelocity: v }),
 
-  activeTheme: "CYANOTYPE",
+  activeTheme: "DRAFT",
   cycleTheme: () => set((state) => {
     if (state.activeTheme === "CYANOTYPE") return { activeTheme: "DRAFT" };
     if (state.activeTheme === "DRAFT") return { activeTheme: "CYBER" };

@@ -17,10 +17,10 @@ import { BlueprintHUD } from "@/components/UI/BlueprintHUD";
 
 export default function Home() {
   return (
-    <main style={{ height: "1500vh", width: "100vw" }}>
+    <main style={{ height: "500vh", width: "100vw" }}>
       <AudioSystem />
       <BlueprintHUD />
-      <div style={{ position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", background: "#00091f" }}>
+      <div style={{ position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", background: "#f0e8d3" }}>
         <Canvas
           shadows
           gl={{ antialias: true, alpha: false }}
