@@ -1,60 +1,59 @@
 "use client";
 
 import { Canvas } from "@react-three/fiber";
+import { Environment } from "@react-three/drei";
 import { CameraController } from "@/components/Camera/CameraController";
-import { GridSystem } from "@/components/Environment/GridSystem";
-import { BlueprintBackground } from "@/components/Environment/BlueprintBackground";
-import { ArchiveHall } from "@/components/Environment/ArchiveHall";
 import { Effects } from "@/components/Effects/Effects";
-import { Flower } from "@/components/Artifacts/Flower";
-import { Dragonfly } from "@/components/Artifacts/Dragonfly";
-import { Owl } from "@/components/Artifacts/Owl";
-import { TheEye } from "@/components/Artifacts/TheEye";
-import { ArchiveLogs } from "@/components/Artifacts/ArchiveLogs";
-import { SecretManager } from "@/components/Mechanics/SecretManager";
-import { AudioSystem } from "@/components/Mechanics/AudioSystem";
-import { BlueprintHUD } from "@/components/UI/BlueprintHUD";
+import { AwwwardsUI } from "@/components/UI/AwwwardsUI";
+import { LiquidCore } from "@/components/Artifacts/LiquidCore";
 
 export default function Home() {
   return (
-    <main style={{ height: "500vh", width: "100vw" }}>
-      <AudioSystem />
-      <BlueprintHUD />
-      <div style={{ position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", background: "#f0e8d3" }}>
+    // 500vh - fast, dense scroll experience
+    <main style={{ height: "500vh", width: "100vw", background: "#050505" }}>
+      <AwwwardsUI />
+      
+      <div style={{ position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", background: "#050505" }}>
         <Canvas
-          shadows
-          gl={{ antialias: true, alpha: false }}
+          gl={{ antialias: true, alpha: false, powerPreference: "high-performance" }}
         >
-          {/* Custom procedural background behind everything */}
-          <BlueprintBackground />
+          {/* Very dark grey background */}
+          <color attach="background" args={["#050505"]} />
           
-          <SecretManager />
           <CameraController />
           
-          <ambientLight intensity={0.05} />
-          {/* Cinematic cool directional light from above */}
+          {/* Studio Lighting Setup */}
+          <ambientLight intensity={0.2} />
+          
+          {/* Key light - cool white */}
           <directionalLight
-            position={[0, 30, 10]}
-            intensity={1.2}
-            color="#c8e0ff"
+            position={[5, 10, 5]}
+            intensity={2}
+            color="#ffffff"
           />
-          {/* Subtle rim light from the side */}
-          <pointLight position={[-20, 10, -10]} intensity={0.4} color="#6eb5ff" />
           
-          <ArchiveHall />
-          <GridSystem />
+          {/* Fill light - subtle blue */}
+          <directionalLight
+            position={[-5, 0, 5]}
+            intensity={0.5}
+            color="#6eb5ff"
+          />
+          
+          {/* Rim light - dramatic red/orange from behind */}
+          <pointLight
+            position={[0, -5, -5]}
+            intensity={4}
+            color="#ff5500"
+            distance={20}
+          />
+
+          {/* Environment map is required for MeshTransmissionMaterial to reflect something */}
+          <Environment preset="city" />
+
+          {/* The Hero Object */}
+          <LiquidCore />
+          
           <Effects />
-          
-          <ArchiveLogs />
-          
-          {/* The primary interactive artifacts */}
-          <Flower />
-          <Dragonfly />
-          <Owl />
-          
-          {/* The final ending sequence */}
-          <TheEye />
-          
         </Canvas>
       </div>
     </main>

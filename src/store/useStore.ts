@@ -43,6 +43,9 @@ interface GameState {
   setCameraPos: (z: number, y: number) => void;
   scrollVelocity: number;
   setScrollVelocity: (v: number) => void;
+
+  scrollDepth: number;
+  setScrollDepth: (d: number) => void;
   
   // Theme Engine
   activeTheme: ThemeMode;
@@ -67,6 +70,9 @@ export const useStore = create<GameState>((set) => ({
   
   scrollVelocity: 0,
   setScrollVelocity: (v) => set({ scrollVelocity: v }),
+
+  scrollDepth: 0,
+  setScrollDepth: (d) => set({ scrollDepth: d }),
 
   activeTheme: "DRAFT",
   cycleTheme: () => set((state) => {
