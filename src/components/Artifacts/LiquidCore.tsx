@@ -38,25 +38,19 @@ export function LiquidCore() {
 
   return (
     <group>
-      {/* Cinematic Dust passing behind the object to be refracted by the glass */}
-      <Sparkles 
-        count={200} 
-        scale={12} 
-        size={3} 
-        speed={0.2} 
-        opacity={0.8} 
-        color="#ffaa55" 
-        position={[0, 0, -4]} // Positioned deliberately behind the glass
-      />
-      <Sparkles 
-        count={200} 
-        scale={12} 
-        size={2} 
-        speed={0.4} 
-        opacity={0.5} 
-        color="#6eb5ff" 
-        position={[0, 0, -2]} 
-      />
+      {/* Sleek, premium metallic rings orbiting the core */}
+      <mesh rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[6, 0.02, 16, 100]} />
+        <meshStandardMaterial color="#ffaa55" metalness={1} roughness={0.2} />
+      </mesh>
+      <mesh rotation={[0, Math.PI / 3, 0]}>
+        <torusGeometry args={[7, 0.015, 16, 100]} />
+        <meshStandardMaterial color="#ffffff" metalness={1} roughness={0.1} />
+      </mesh>
+      <mesh rotation={[0, -Math.PI / 4, Math.PI / 6]}>
+        <torusGeometry args={[8, 0.03, 16, 100]} />
+        <meshStandardMaterial color="#6eb5ff" metalness={1} roughness={0.3} />
+      </mesh>
 
       <Float speed={2} rotationIntensity={1} floatIntensity={2} floatingRange={[-0.5, 0.5]}>
         <mesh ref={meshRef} geometry={geometry}>
