@@ -32,7 +32,7 @@ export function LiquidCore() {
     <group>
       {/* Massive Graphic Poster Typography */}
       <Text
-        font="/fonts/Michroma.woff"
+        font="/fonts/Orbitron-Black.ttf"
         fontSize={3.2}
         letterSpacing={0.05}
         color="#00f0ff"
@@ -44,7 +44,7 @@ export function LiquidCore() {
         NEVERA
       </Text>
       <Text
-        font="/fonts/Michroma.woff"
+        font="/fonts/Orbitron-Black.ttf"
         fontSize={4.2}
         letterSpacing={0.02}
         color="#ffffff"

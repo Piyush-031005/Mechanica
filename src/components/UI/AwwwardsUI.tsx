@@ -1,16 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, useMotionValue, useSpring } from "framer-motion";
 
 export function AwwwardsUI() {
   const [mounted, setMounted] = useState(false);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const cursorX = useMotionValue(-100);
+  const cursorY = useMotionValue(-100);
+  
+  const springX = useSpring(cursorX, { stiffness: 150, damping: 25, mass: 0.5 });
+  const springY = useSpring(cursorY, { stiffness: 150, damping: 25, mass: 0.5 });
   
   useEffect(() => { 
     setMounted(true); 
     const handleMouseMove = (e: MouseEvent) => {
-      setMousePos({ x: e.clientX, y: e.clientY });
+      cursorX.set(e.clientX - 20); // offset by half the cursor size
+      cursorY.set(e.clientY - 20);
     };
     window.addEventListener("mousemove", handleMouseMove);
     return () => window.removeEventListener("mousemove", handleMouseMove);
@@ -48,10 +53,9 @@ export function AwwwardsUI() {
 
       {/* Dynamic Cursor Tracker */}
       <motion.div 
-        animate={{ x: mousePos.x, y: mousePos.y }}
-        transition={{ type: "spring", stiffness: 150, damping: 25, mass: 0.5 }}
         style={{ 
-          position: 'absolute', top: -20, left: -20,
+          x: springX, y: springY,
+          position: 'absolute', top: 0, left: 0,
           width: '40px', height: '40px', 
           border: '1px solid rgba(0, 240, 255, 0.4)', 
           borderRadius: '50%',
