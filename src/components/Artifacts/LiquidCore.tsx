@@ -32,48 +32,49 @@ export function LiquidCore() {
     <group>
       {/* Massive Graphic Poster Typography */}
       <Text
-        font="https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuGKYMZhrib2Bg-4.ttf"
-        fontSize={3.5}
-        letterSpacing={-0.05}
-        color="#111111"
+        font="/fonts/Michroma.woff"
+        fontSize={3.2}
+        letterSpacing={0.05}
+        color="#00f0ff"
         position={[0, 0, -1]} // Positioned slightly behind so the knot weaves through it
         anchorX="center"
         anchorY="middle"
-        characters="END THE LOOP"
+        characters="NEVERA"
       >
-        END THE
+        NEVERA
       </Text>
       <Text
-        font="https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuGKYMZhrib2Bg-4.ttf"
-        fontSize={4.5}
-        letterSpacing={-0.08}
-        color="#ffaa55"
-        position={[0, -3.5, 0]}
+        font="/fonts/Michroma.woff"
+        fontSize={4.2}
+        letterSpacing={0.02}
+        color="#ffffff"
+        position={[0, -3.2, 0]}
         anchorX="center"
         anchorY="middle"
-        characters="END THE LOOP"
+        characters="NEVERA"
       >
-        LOOP
+        Navera
       </Text>
 
       {/* The Liquid/Chrome Object intertwining with the text */}
       <mesh ref={meshRef} geometry={geometry} position={[0, 0, 0]}>
         <MeshTransmissionMaterial
           backside
-          samples={8}
+          samples={4} // Reduced to 4 to fix precision warnings and improve performance
+          resolution={128} // Explicit resolution
           thickness={3}
-          chromaticAberration={1.5}
-          anisotropy={0.5}
-          distortion={0.8}
+          chromaticAberration={1.0}
+          anisotropy={0.8}
+          distortion={0.5}
           distortionScale={0.5}
           temporalDistortion={0.1}
-          color="#aaddff" // Cool liquid tint for the light background
-          attenuationDistance={5}
+          color="#00f0ff" // Bright cyan liquid tint
+          attenuationDistance={3}
           attenuationColor="#ffffff"
           clearcoat={1}
-          roughness={0.05}
+          roughness={0.02}
           transmission={1}
-          ior={1.4}
+          ior={1.3}
         />
       </mesh>
     </group>
