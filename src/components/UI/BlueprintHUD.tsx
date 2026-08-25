@@ -1,105 +1,92 @@
-"use client";
-
-import { useEffect, useState, useRef } from "react";
-import { motion, useMotionValue, useSpring, useMotionValueEvent } from "framer-motion";
-
 export function BlueprintHUD() {
-  const [mounted, setMounted] = useState(false);
-  const cursorX = useMotionValue(0);
-  const cursorY = useMotionValue(0);
-  
-  const springX = useSpring(cursorX, { stiffness: 300, damping: 30, mass: 0.2 });
-  const springY = useSpring(cursorY, { stiffness: 300, damping: 30, mass: 0.2 });
-  
-  // Slower springs for trailing effect
-  const trailX = useSpring(cursorX, { stiffness: 50, damping: 20 });
-  const trailY = useSpring(cursorY, { stiffness: 50, damping: 20 });
-
-  const xRef = useRef<HTMLSpanElement>(null);
-  const yRef = useRef<HTMLSpanElement>(null);
-
-  useMotionValueEvent(springX, "change", (latest) => {
-    if (xRef.current) xRef.current.textContent = `X: ${Math.round(latest)}`;
-  });
-  useMotionValueEvent(springY, "change", (latest) => {
-    if (yRef.current) yRef.current.textContent = `Y: ${Math.round(latest)}`;
-  });
-
-  useEffect(() => { 
-    setMounted(true); 
-    // Initialize position after mount to avoid SSR window error
-    cursorX.set(window.innerWidth / 2);
-    cursorY.set(window.innerHeight / 2);
-
-    const handleMouseMove = (e: MouseEvent) => {
-      cursorX.set(e.clientX); 
-      cursorY.set(e.clientY);
-    };
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, [cursorX, cursorY]);
-  
-  if (!mounted) return null;
-
   return (
     <div style={{
-      position: 'fixed', inset: 0,
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100vw',
+      height: '100vh',
       pointerEvents: 'none',
-      zIndex: 100,
+      zIndex: 10,
+      fontFamily: '"Geist Mono", monospace',
       color: 'var(--foreground)',
-      overflow: 'hidden',
-      mixBlendMode: 'multiply'
     }}>
-      
-      {/* 1. GLOBAL CAD CROSSHAIRS (Follows Mouse) */}
-      <motion.div style={{
-        position: 'absolute', top: 0, bottom: 0, left: springX, width: '1px',
-        background: 'var(--crimson)', opacity: 0.4
-      }} />
-      <motion.div style={{
-        position: 'absolute', left: 0, right: 0, top: springY, height: '1px',
-        background: 'var(--crimson)', opacity: 0.4
-      }} />
-      
-      {/* Ghost Trailing Crosshairs */}
-      <motion.div style={{
-        position: 'absolute', top: 0, bottom: 0, left: trailX, width: '1px',
-        background: 'rgba(0, 150, 255, 0.3)'
-      }} />
-      <motion.div style={{
-        position: 'absolute', left: 0, right: 0, top: trailY, height: '1px',
-        background: 'rgba(0, 150, 255, 0.3)'
-      }} />
-
-      {/* Target Reticle at intersection */}
-      <motion.div style={{
-        position: 'absolute', left: springX, top: springY,
-        width: '40px', height: '40px', x: '-50%', y: '-50%',
-        border: '1px solid var(--crimson)', borderRadius: '50%',
-        display: 'flex', justifyContent: 'center', alignItems: 'center'
-      }}>
-        <div style={{ width: '4px', height: '4px', background: 'var(--crimson)' }} />
-        <div style={{ position: 'absolute', top: '-10px', left: '50%', width: '1px', height: '10px', background: 'var(--crimson)' }} />
-        <div style={{ position: 'absolute', bottom: '-10px', left: '50%', width: '1px', height: '10px', background: 'var(--crimson)' }} />
-        <div style={{ position: 'absolute', left: '-10px', top: '50%', width: '10px', height: '1px', background: 'var(--crimson)' }} />
-        <div style={{ position: 'absolute', right: '-10px', top: '50%', width: '10px', height: '1px', background: 'var(--crimson)' }} />
-      </motion.div>
-
-      {/* Live Coordinate Tracker */}
-      <motion.div style={{
-        position: 'absolute', left: springX, top: springY,
-        x: 25, y: 25, fontSize: '10px', fontWeight: 600, color: 'var(--crimson)',
-        display: 'flex', flexDirection: 'column', gap: '2px'
-      }}>
-        <span ref={xRef}>X: 0</span>
-        <span ref={yRef}>Y: 0</span>
-      </motion.div>
-
-      {/* 3. DIAGNOSTIC CENTER OVERLAY */}
-      <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '600px', height: '600px', border: '1px solid rgba(17,17,17,0.05)', borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        <div style={{ width: '500px', height: '500px', border: '1px dashed rgba(255,0,60,0.1)', borderRadius: '50%' }} />
+      {/* Top Left: Warning Frame */}
+      <div style={{ position: 'absolute', top: 40, left: 40, display: 'flex', flexDirection: 'column', gap: '5px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{ width: 15, height: 15, backgroundColor: '#ff007f' }} />
+          <div style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.2em', color: '#ff007f' }}>SYSTEM ACTIVE</div>
+        </div>
+        <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '0.1em', marginTop: '5px' }}>PROJECT LEVIATHAN</div>
+        <div style={{ fontSize: '10px', opacity: 0.6, letterSpacing: '0.1em' }}>[SEC: 099-ALPHA-OMEGA]</div>
       </div>
 
+      {/* Top Right: Cyberpunk Barcode & Data */}
+      <div style={{ position: 'absolute', top: 40, right: 40, textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px' }}>
+        <div style={{ display: 'flex', gap: '5px' }}>
+          {Array.from({ length: 15 }).map((_, i) => (
+            <div key={i} style={{ width: Math.random() > 0.5 ? 2 : 5, height: 30, backgroundColor: 'var(--foreground)' }} />
+          ))}
+        </div>
+        <div style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.2em', color: '#34d399', backgroundColor: '#1a1a1a', padding: '4px 8px' }}>
+          CREATION // 234
+        </div>
+        <div style={{ fontSize: '10px', opacity: 0.6, fontFamily: 'sans-serif' }}>&lt;&lt;&lt;&lt;&lt;&lt; ++++ &gt;&gt;&gt;&gt;&gt;&gt;</div>
+      </div>
+
+      {/* Bottom Left: Coordinates and Status */}
+      <div style={{ position: 'absolute', bottom: 40, left: 40 }}>
+        <div style={{ fontSize: '10px', opacity: 0.5, letterSpacing: '0.2em', marginBottom: '10px' }}>SPATIAL COORDINATES</div>
+        <div style={{ fontSize: '14px', fontFamily: '"Geist Mono", monospace', letterSpacing: '0.1em' }}>
+          X: <span style={{ color: '#fbbf24' }}>45.992</span><br/>
+          Y: <span style={{ color: '#fbbf24' }}>-12.004</span><br/>
+          Z: <span style={{ color: '#fbbf24' }}>88.110</span>
+        </div>
+        
+        {/* Warning Tape pattern */}
+        <div style={{ 
+          marginTop: '20px', 
+          width: '150px', 
+          height: '10px', 
+          background: 'repeating-linear-gradient(45deg, #fbbf24, #fbbf24 10px, #1a1a1a 10px, #1a1a1a 20px)' 
+        }} />
+      </div>
+
+      {/* Bottom Right: Scale indicator */}
+      <div style={{ position: 'absolute', bottom: 40, right: 40, textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+          <div style={{ fontSize: '10px', fontWeight: 900, color: '#ff007f' }}>R_99</div>
+          <div style={{ fontSize: '24px', fontWeight: 900, color: '#34d399', letterSpacing: '0.1em' }}>0054</div>
+        </div>
+        <div style={{ width: '200px', height: '1px', backgroundColor: 'var(--foreground)', opacity: 0.3, marginBottom: '5px' }} />
+        <div style={{ display: 'flex', justifyContent: 'space-between', width: '200px', fontSize: '10px', opacity: 0.5 }}>
+          <span>0.0mm</span>
+          <span>100.0mm</span>
+        </div>
+      </div>
+
+      {/* Crosshairs & Alignment Marks */}
+      <div style={{ position: 'absolute', top: '50%', left: 40, width: 20, height: 1, backgroundColor: '#ff007f' }} />
+      <div style={{ position: 'absolute', top: '50%', right: 40, width: 20, height: 1, backgroundColor: '#ff007f' }} />
+      <div style={{ position: 'absolute', top: 40, left: '50%', width: 1, height: 20, backgroundColor: '#34d399' }} />
+      <div style={{ position: 'absolute', bottom: 40, left: '50%', width: 1, height: 20, backgroundColor: '#34d399' }} />
+      
+      {/* Center Target (Subtle) */}
+      <div style={{ 
+        position: 'absolute', 
+        top: '50%', 
+        left: '50%', 
+        transform: 'translate(-50%, -50%)',
+        width: '40px',
+        height: '40px',
+        border: '1px solid rgba(251, 191, 36, 0.3)',
+        borderRadius: '50%',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center'
+      }}>
+        <div style={{ width: 2, height: 2, backgroundColor: '#fbbf24' }} />
+      </div>
     </div>
   );
 }
