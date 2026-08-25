@@ -6,7 +6,7 @@ import { PosterBackground } from "@/components/Environment/PosterBackground";
 import { Canvas } from "@react-three/fiber";
 import { CameraController } from "@/components/Camera/CameraController";
 import { Effects } from "@/components/Effects/Effects";
-import { ScrollControls, Scroll } from "@react-three/drei";
+import { ScrollControls, Scroll, Environment } from "@react-three/drei";
 
 export default function Home() {
   return (
@@ -26,6 +26,8 @@ export default function Home() {
           <ambientLight intensity={1.5} color="#ffffff" />
           <directionalLight position={[10, 10, 5]} intensity={3} color="#ffffff" />
           
+          <Environment preset="city" blur={0.5} />
+
           <ScrollControls pages={4} damping={0.1}>
             <MechanicalAssembly />
             

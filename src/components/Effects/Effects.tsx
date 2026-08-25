@@ -8,20 +8,20 @@ export function Effects() {
   return (
     <EffectComposer multisampling={8}>
       {/* Heavy Film Grain for CAD feel */}
-      <Noise blendFunction={BlendFunction.OVERLAY} opacity={0.06} />
+      <Noise blendFunction={BlendFunction.OVERLAY} opacity={0.04} />
 
-      {/* Intense Bloom for the glowing point cloud */}
+      {/* Smooth Bloom for the glowing elements without blowing them out */}
       <Bloom 
-        luminanceThreshold={0.5} 
+        luminanceThreshold={1.2} 
         luminanceSmoothing={0.9} 
-        intensity={2.5} 
+        intensity={1.5} 
         mipmapBlur 
       />
 
-      {/* Chromatic Aberration for digital glitch/lens effect */}
+      {/* Subtle Chromatic Aberration for premium digital lens effect */}
       <ChromaticAberration 
         blendFunction={BlendFunction.NORMAL} 
-        offset={new THREE.Vector2(0.002, 0.002)} 
+        offset={new THREE.Vector2(0.001, 0.001)} 
         radialModulation={false}
         modulationOffset={0}
       />
