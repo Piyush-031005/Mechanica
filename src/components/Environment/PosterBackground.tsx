@@ -1,47 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
-
 export function PosterBackground() {
   return (
-    <>
-      <div className="noise-overlay" />
-      <div style={{
-        position: 'absolute',
-        inset: 0,
-        zIndex: -1,
-        background: 'var(--background)',
-        overflow: 'hidden'
-      }}>
-        {/* Dynamic Luminous Gradient - Enhanced opacity and colors */}
-        <motion.div 
-          animate={{
-            background: [
-              "radial-gradient(circle at 20% 30%, rgba(0,240,255,0.2) 0%, transparent 60%)",
-              "radial-gradient(circle at 80% 70%, rgba(255,0,60,0.15) 0%, transparent 60%)",
-              "radial-gradient(circle at 50% 50%, rgba(0,240,255,0.2) 0%, transparent 60%)",
-            ]
-          }}
-          transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-          style={{ position: 'absolute', inset: 0 }}
-        />
-
-        {/* Main Grid SVG - Increased Opacity for Visibility */}
-        <svg width="100%" height="100%" style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
-          <defs>
-            <pattern id="smallGrid" width="40" height="40" patternUnits="userSpaceOnUse">
-              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(0, 150, 255, 0.4)" strokeWidth="0.5"/>
-            </pattern>
-            <pattern id="largeGrid" width="200" height="200" patternUnits="userSpaceOnUse">
-              <rect width="200" height="200" fill="url(#smallGrid)"/>
-              <path d="M 200 0 L 0 0 0 200" fill="none" stroke="rgba(0, 200, 255, 0.6)" strokeWidth="1"/>
-              <circle cx="0" cy="0" r="3" fill="var(--crimson)" opacity="0.8" />
-            </pattern>
-          </defs>
-
-          <rect width="100%" height="100%" fill="url(#largeGrid)" />
-          
-          {/* Ethereal Sun */}
     <div style={{
       position: 'fixed', inset: 0, zIndex: -1,
       background: 'var(--background)',
