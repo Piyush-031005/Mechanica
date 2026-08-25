@@ -2,7 +2,7 @@
 
 import { useRef, useMemo } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
-import { useScroll, Edges, MeshTransmissionMaterial } from "@react-three/drei";
+import { useScroll, Edges } from "@react-three/drei";
 import * as THREE from "three";
 
 // The core assembly component, instantiated twice (once for sketch, once for reality)
@@ -117,7 +117,17 @@ function AssemblyPart({ isSketch, clippingPlanes }: { isSketch: boolean, clippin
         {isSketch ? (
           <meshBasicMaterial color="#f0eadd" transparent opacity={0.8} clippingPlanes={clippingPlanes} />
         ) : (
-          <MeshTransmissionMaterial backside samples={6} resolution={512} thickness={2.5} chromaticAberration={0.8} anisotropy={1} color="#ffffff" attenuationDistance={5} attenuationColor="#ff003c" roughness={0.05} ior={1.45} clearcoat={1} clippingPlanes={clippingPlanes} />
+          <meshPhysicalMaterial 
+            transmission={1} 
+            thickness={2.5} 
+            roughness={0.05} 
+            ior={1.45} 
+            clearcoat={1} 
+            color="#ffffff" 
+            attenuationDistance={5} 
+            attenuationColor="#ff003c" 
+            clippingPlanes={clippingPlanes} 
+          />
         )}
         <Edges scale={1.02} threshold={15}>
           <lineBasicMaterial attach="material" color={inkEdges} clippingPlanes={clippingPlanes} />
