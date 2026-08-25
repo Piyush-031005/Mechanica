@@ -51,33 +51,53 @@ function AssemblyPart({ isSketch, clippingPlanes }: { isSketch: boolean, clippin
     const time = state.clock.elapsedTime;
 
     if (groupRef.current) {
-      groupRef.current.rotation.y = time * 0.1 + offset * Math.PI * 4;
-      groupRef.current.rotation.x = THREE.MathUtils.lerp(0, Math.PI / 4, offset);
+      // 0 to 0.5 maps to local 0 to 1 for explosion
+      const localOffset = Math.min(1, offset * 2);
+      
+      groupRef.current.rotation.y = time * 0.1 + localOffset * Math.PI * 4;
+      groupRef.current.rotation.x = THREE.MathUtils.lerp(0, Math.PI / 4, localOffset);
+
+      // If we scroll past 0.5, the object zooms massively past the camera
+      if (offset > 0.5) {
+        const flyby = (offset - 0.5) * 2; // 0 to 1
+        const scale = THREE.MathUtils.lerp(1, 15, flyby);
+        groupRef.current.scale.set(scale, scale, scale);
+        groupRef.current.position.z = THREE.MathUtils.lerp(0, 10, flyby);
+        // Fade out
+        groupRef.current.visible = flyby < 0.8;
+      } else {
+        groupRef.current.scale.set(1, 1, 1);
+        groupRef.current.position.z = 0;
+        groupRef.current.visible = true;
+      }
     }
     
+    // Use localOffset for kinematics so it finishes exploding by 0.5
+    const kOffset = Math.min(1, offset * 2);
+
     if (outerRingRef.current) {
-      outerRingRef.current.position.y = THREE.MathUtils.lerp(0, 5, offset);
+      outerRingRef.current.position.y = THREE.MathUtils.lerp(0, 5, kOffset);
       outerRingRef.current.rotation.x = time * 0.5;
     }
     
     if (innerRingRef.current) {
-      innerRingRef.current.position.y = THREE.MathUtils.lerp(0, -5, offset);
+      innerRingRef.current.position.y = THREE.MathUtils.lerp(0, -5, kOffset);
       innerRingRef.current.rotation.z = time * -0.5;
     }
     
-    if (topCapRef.current) topCapRef.current.position.y = THREE.MathUtils.lerp(1.2, 7, offset);
-    if (bottomCapRef.current) bottomCapRef.current.position.y = THREE.MathUtils.lerp(-1.2, -7, offset);
+    if (topCapRef.current) topCapRef.current.position.y = THREE.MathUtils.lerp(1.2, 7, kOffset);
+    if (bottomCapRef.current) bottomCapRef.current.position.y = THREE.MathUtils.lerp(-1.2, -7, kOffset);
     
     if (coreRef.current) {
-      const pulseSpeed = THREE.MathUtils.lerp(1, 10, offset);
+      const pulseSpeed = THREE.MathUtils.lerp(1, 10, kOffset);
       const scale = 1 + Math.sin(time * pulseSpeed) * 0.05;
       coreRef.current.scale.set(scale, scale, scale);
     }
 
     if (swarmRef.current) {
-      swarmRef.current.rotation.y = time * 0.2 + offset * Math.PI * 2;
+      swarmRef.current.rotation.y = time * 0.2 + kOffset * Math.PI * 2;
       swarmRef.current.rotation.x = time * -0.1;
-      const swarmExpand = THREE.MathUtils.lerp(1, 2.5, offset);
+      const swarmExpand = THREE.MathUtils.lerp(1, 2.5, kOffset);
       swarmRef.current.scale.set(swarmExpand, swarmExpand, swarmExpand);
     }
 
