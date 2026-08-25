@@ -1,9 +1,9 @@
 :root {
-  --background: #f4f7f6; /* Pearl/Cyan white */
-  --foreground: #111111; /* Charcoal */
-  --blueprint-line: rgba(0, 240, 255, 0.3);
-  --blueprint-grid: rgba(0, 150, 255, 0.15);
-  --crimson: #ff003c;
+  --background: #f0eadd; /* Aged parchment */
+  --foreground: #2c2825; /* Ink black/brown */
+  --blueprint-line: rgba(44, 40, 37, 0.15); /* Ink lines */
+  --blueprint-grid: rgba(44, 40, 37, 0.05); /* Faint grid */
+  --crimson: #a31a1a; /* Red ink / dried blood */
   --font-primary: var(--font-oswald), sans-serif;
   --font-jp: var(--font-noto-sans-jp), sans-serif;
 }
@@ -14,6 +14,7 @@ body {
   padding: 0;
   width: 100vw;
   min-height: 100vh;
+  height: 100vh;
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-primary);

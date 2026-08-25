@@ -32,57 +32,63 @@ export default function Home() {
             <MechanicalAssembly />
             
             {/* HTML Overlay Sections */}
-            <Scroll html style={{ width: '100vw' }}>
+            <Scroll html style={{ width: '100vw', mixBlendMode: 'multiply' }}>
               
               {/* PAGE 1: Intro */}
               <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '10vw' }}>
+                <div style={{ fontSize: '10px', letterSpacing: '0.2em', opacity: 0.5, marginBottom: '20px' }}>ARCHIVE ENTRY // 001</div>
                 <h1 style={{ fontSize: '8vw', fontWeight: 900, lineHeight: 0.9, letterSpacing: '-0.02em', color: 'var(--foreground)' }}>
-                  QUANTUM<br/><span className="text-crimson">DRIVE</span>
+                  ORGAN 01<br/><span className="text-crimson">OPTICAL NERVE</span>
                 </h1>
-                <p style={{ marginTop: '20px', maxWidth: '400px', fontSize: '14px', opacity: 0.6, letterSpacing: '0.05em' }}>
-                  A next-generation biomechanical core. Scroll down to initiate the exploded view sequence and analyze internal components.
+                <p style={{ marginTop: '20px', maxWidth: '400px', fontSize: '14px', opacity: 0.7, letterSpacing: '0.05em' }}>
+                  A microscopic component of the Colossus. Deciphering the glass core geometry.
+                  <br/><br/>
+                  *Drag your cursor across the manuscript to materialize the artifact.*
                 </p>
               </div>
 
               {/* PAGE 2: Exploded View */}
               <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', padding: '10vw' }}>
                 <div style={{ textAlign: 'right', maxWidth: '400px' }}>
-                  <h2 className="text-jp" style={{ fontSize: '4vw', fontWeight: 900, color: 'var(--crimson)' }}>分解図</h2>
-                  <h3 style={{ fontSize: '2vw', fontWeight: 700, letterSpacing: '0.1em', marginTop: '10px' }}>EXPLODED SCHEMATIC</h3>
-                  <p style={{ marginTop: '20px', fontSize: '14px', opacity: 0.6, textAlign: 'justify' }}>
-                    Outer containment rings disengaged. Exposing the central glass Icosahedron. Notice the connecting laser tethering system maintaining structural integrity under zero gravity.
+                  <h2 className="text-jp" style={{ fontSize: '4vw', fontWeight: 900, color: 'var(--crimson)' }}>解剖図</h2>
+                  <h3 style={{ fontSize: '2vw', fontWeight: 700, letterSpacing: '0.1em', marginTop: '10px' }}>ANATOMICAL BREAKDOWN</h3>
+                  <p style={{ marginTop: '20px', fontSize: '14px', opacity: 0.7, textAlign: 'justify' }}>
+                    Outer titanium arteries disengaged. The central refraction sphere acts as a memory lens. We believe the entire machine is dreaming.
                   </p>
                 </div>
               </div>
 
               {/* PAGE 3: Technical Data */}
               <div style={{ height: '100vh', display: 'flex', alignItems: 'center', padding: '10vw' }}>
-                <div style={{ backgroundColor: 'rgba(244, 247, 246, 0.8)', padding: '40px', border: '1px solid var(--crimson)', backdropFilter: 'blur(10px)', mixBlendMode: 'normal' }}>
-                  <h3 style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.2em', color: 'var(--crimson)', marginBottom: '20px' }}>SYSTEM DIAGNOSTICS</h3>
+                <div style={{ padding: '40px', border: '1px solid var(--foreground)', backgroundColor: 'rgba(240, 234, 221, 0.5)' }}>
+                  <h3 style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.2em', color: 'var(--crimson)', marginBottom: '20px' }}>FIELD NOTES</h3>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '12px', width: '300px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(17,17,17,0.1)', paddingBottom: '5px' }}>
-                      <span>CORE TEMPERATURE</span>
-                      <span className="text-crimson">4,000 K</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(44, 40, 37, 0.2)', paddingBottom: '5px' }}>
+                      <span>MATERIAL</span>
+                      <span className="text-crimson">UNKNOWN GLASS</span>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(17,17,17,0.1)', paddingBottom: '5px' }}>
-                      <span>CONTAINMENT FIELD</span>
-                      <span>STABLE</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(44, 40, 37, 0.2)', paddingBottom: '5px' }}>
+                      <span>LIFECYCLE</span>
+                      <span>DORMANT</span>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(17,17,17,0.1)', paddingBottom: '5px' }}>
-                      <span>ENERGY OUTPUT</span>
-                      <span>8.4 TW</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(44, 40, 37, 0.2)', paddingBottom: '5px' }}>
+                      <span>SCALE</span>
+                      <span>1:1000000000</span>
                     </div>
                   </div>
+                  <p style={{ marginTop: '20px', fontSize: '10px', fontStyle: 'italic', opacity: 0.6 }}>
+                    Note to self: The universe might be inside this sphere.
+                  </p>
                 </div>
               </div>
 
               {/* PAGE 4: Conclusion */}
               <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-                <h1 className="text-jp" style={{ fontSize: '15vw', fontWeight: 900, WebkitTextStroke: '2px var(--foreground)', color: 'transparent', opacity: 0.2 }}>
-                  未来
+                <h1 className="text-jp" style={{ fontSize: '15vw', fontWeight: 900, WebkitTextStroke: '2px var(--foreground)', color: 'transparent', opacity: 0.1 }}>
+                  巨像
                 </h1>
                 <p style={{ position: 'absolute', fontSize: '24px', fontWeight: 700, letterSpacing: '0.5em', color: 'var(--crimson)' }}>
-                  END OF TRANSMISSION
+                  THE COLOSSUS SLEEPS
                 </p>
               </div>
 
