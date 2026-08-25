@@ -8,8 +8,7 @@ import { CameraController } from "@/components/Camera/CameraController";
 import { Effects } from "@/components/Effects/Effects";
 import { ScrollControls, Scroll, Environment } from "@react-three/drei";
 
-import { ArcaneGeometry } from "@/components/Environment/ArcaneGeometry";
-import { TheWeaver } from "@/components/Artifacts/TheWeaver";
+import { CyberBird } from "@/components/Artifacts/CyberBird";
 
 export default function Home() {
   return (
@@ -26,11 +25,10 @@ export default function Home() {
           <ambientLight intensity={0.5} />
           <directionalLight position={[10, 10, 5]} intensity={2} />
           <Environment preset="city" />
-          <ArcaneGeometry />
           
           <ScrollControls pages={8} damping={0.1}>
             <MechanicalAssembly />
-            <TheWeaver />
+            <CyberBird />
             
             <Scroll html style={{ width: '100vw', mixBlendMode: 'multiply' }}>
               
@@ -73,25 +71,25 @@ export default function Home() {
                 </p>
               </div>
 
-              {/* PAGE 5-8: ORGAN 02 (THE WEAVER) */}
+              {/* PAGE 5-8: ORGAN 02 (THE PHOENIX) */}
               <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-end', padding: '10vw' }}>
                 <div style={{ textAlign: 'right' }}>
                   <div style={{ fontSize: '10px', letterSpacing: '0.2em', opacity: 0.5, marginBottom: '20px' }}>ARCHIVE ENTRY // 002</div>
                   <h1 style={{ fontSize: '8vw', fontWeight: 900, lineHeight: 0.9, letterSpacing: '-0.02em', color: 'var(--foreground)' }}>
-                    ORGAN 02<br/><span style={{ color: '#ff007f' }}>THE WEAVER</span>
+                    ORGAN 02<br/><span style={{ color: '#ff007f' }}>CYBER PHOENIX</span>
                   </h1>
                   <p style={{ marginTop: '20px', maxWidth: '400px', fontSize: '14px', opacity: 0.7, letterSpacing: '0.05em', marginLeft: 'auto' }}>
-                    The entity responsible for spinning the structural grid of the Colossus. A highly articulated mechanical arachnid.
+                    A majestic deep-sea mechanical bird. It powers the Colossus with massive mathematical wings.
                   </p>
                 </div>
               </div>
 
               <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', padding: '10vw' }}>
                 <div style={{ maxWidth: '400px' }}>
-                  <h2 className="text-jp" style={{ fontSize: '4vw', fontWeight: 900, color: '#fbbf24' }}>蜘蛛</h2>
-                  <h3 style={{ fontSize: '2vw', fontWeight: 700, letterSpacing: '0.1em', marginTop: '10px' }}>PROCEDURAL KINEMATICS</h3>
+                  <h2 className="text-jp" style={{ fontSize: '4vw', fontWeight: 900, color: '#fbbf24' }}>不死鳥</h2>
+                  <h3 style={{ fontSize: '2vw', fontWeight: 700, letterSpacing: '0.1em', marginTop: '10px' }}>FLUID KINEMATICS</h3>
                   <p style={{ marginTop: '20px', fontSize: '14px', opacity: 0.7, textAlign: 'justify' }}>
-                    Its 8 legs idle independently using trigonometric phase offsets. The "Spirit of Design" renders its blueprint in continuous neon cyan and purple wires.
+                    Composed of hundreds of independent glass feathers that ripple and flap through complex sine wave orchestration.
                   </p>
                 </div>
               </div>
@@ -106,7 +104,7 @@ export default function Home() {
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(44, 40, 37, 0.2)', paddingBottom: '5px' }}>
                       <span>RIGHT SECTOR</span>
-                      <span style={{ color: '#ff0000' }}>DARK METAL / RED OPTICS</span>
+                      <span style={{ color: '#00ffff' }}>SOLID GLASS / CYAN OPTICS</span>
                     </div>
                   </div>
                 </div>
