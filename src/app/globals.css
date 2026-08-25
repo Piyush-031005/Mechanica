@@ -1,7 +1,11 @@
 :root {
-  --background: #020914;
-  --foreground: #e0e0e0;
-  --blueprint-line: #00ffff;
+  --background: #f4f7f6; /* Pearl/Cyan white */
+  --foreground: #111111; /* Charcoal */
+  --blueprint-line: rgba(0, 240, 255, 0.3);
+  --blueprint-grid: rgba(0, 150, 255, 0.15);
+  --crimson: #ff003c;
+  --font-primary: var(--font-oswald), sans-serif;
+  --font-jp: var(--font-noto-sans-jp), sans-serif;
 }
 
 html,
@@ -12,10 +16,11 @@ body {
   min-height: 100vh;
   background: var(--background);
   color: var(--foreground);
-  font-family: 'Space Mono', 'IBM Plex Mono', monospace;
+  font-family: var(--font-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   user-select: none;
+  overflow: hidden; /* Lock scroll for full screen experience */
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */
@@ -36,4 +41,12 @@ body {
 canvas {
   display: block;
   outline: none;
+}
+
+/* Utility classes for typography */
+.text-jp {
+  font-family: var(--font-jp);
+}
+.text-crimson {
+  color: var(--crimson);
 }

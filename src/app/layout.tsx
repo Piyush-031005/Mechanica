@@ -1,16 +1,20 @@
 import type { Metadata } from "next";
-import { Space_Mono } from "next/font/google";
+import { Oswald, Noto_Sans_JP } from "next/font/google";
 import "./globals.css";
 
-const spaceMono = Space_Mono({
-  weight: ['400', '700'],
+const oswald = Oswald({
   subsets: ["latin"],
-  variable: "--font-space-mono",
+  variable: "--font-oswald",
+});
+
+const notoSansJP = Noto_Sans_JP({
+  subsets: ["latin"],
+  variable: "--font-noto-sans-jp",
 });
 
 export const metadata: Metadata = {
-  title: "MECHANICA | The Codex of Forms",
-  description: "An interactive sci-fi documentary archive.",
+  title: "MECHANICA | The Luminous Cyber-Ecology",
+  description: "An unprecedented WebGL experience.",
 };
 
 export default function RootLayout({
@@ -19,7 +23,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${spaceMono.variable}`}>
+    <html lang="en" className={`${oswald.variable} ${notoSansJP.variable}`}>
       <body>{children}</body>
     </html>
   );

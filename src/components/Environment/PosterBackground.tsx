@@ -1,37 +1,62 @@
+"use client";
+
+import { motion } from "framer-motion";
+
 export function PosterBackground() {
   return (
     <div style={{
       position: 'absolute',
       inset: 0,
       zIndex: -1,
-      background: '#050505', // The beloved dark void background
+      background: 'var(--background)',
       overflow: 'hidden'
     }}>
-      <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style={{ opacity: 0.6 }}>
+      {/* Dynamic Luminous Gradient */}
+      <motion.div 
+        animate={{
+          background: [
+            "radial-gradient(circle at 20% 30%, rgba(0,240,255,0.08) 0%, transparent 50%)",
+            "radial-gradient(circle at 80% 70%, rgba(255,0,60,0.04) 0%, transparent 50%)",
+            "radial-gradient(circle at 50% 50%, rgba(0,240,255,0.08) 0%, transparent 50%)",
+          ]
+        }}
+        transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+        style={{ position: 'absolute', inset: 0 }}
+      />
+
+      {/* Main Grid SVG */}
+      <svg width="100%" height="100%" style={{ position: 'absolute', inset: 0 }}>
         <defs>
           <pattern id="smallGrid" width="40" height="40" patternUnits="userSpaceOnUse">
-            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(0, 240, 255, 0.05)" strokeWidth="1"/>
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="var(--blueprint-grid)" strokeWidth="0.5"/>
           </pattern>
-          <pattern id="largeGrid" width="400" height="400" patternUnits="userSpaceOnUse">
-            <rect width="400" height="400" fill="url(#smallGrid)"/>
-            <path d="M 400 0 L 0 0 0 400" fill="none" stroke="rgba(0, 240, 255, 0.15)" strokeWidth="1"/>
+          <pattern id="largeGrid" width="200" height="200" patternUnits="userSpaceOnUse">
+            <rect width="200" height="200" fill="url(#smallGrid)"/>
+            <path d="M 200 0 L 0 0 0 200" fill="none" stroke="var(--blueprint-line)" strokeWidth="1"/>
+            <circle cx="0" cy="0" r="3" fill="var(--crimson)" opacity="0.5" />
           </pattern>
         </defs>
 
-        {/* The Blueprint Grid Over The Dark Void */}
         <rect width="100%" height="100%" fill="url(#largeGrid)" />
-
-        {/* Technical Arcs */}
-        <circle cx="20%" cy="80%" r="600" fill="none" stroke="rgba(0, 240, 255, 0.1)" strokeWidth="1" strokeDasharray="10 20" />
-        <circle cx="80%" cy="20%" r="800" fill="none" stroke="rgba(255, 255, 255, 0.03)" strokeWidth="2" />
-        <circle cx="50%" cy="50%" r="400" fill="none" stroke="rgba(0, 240, 255, 0.08)" strokeWidth="1" strokeDasharray="4 8" />
         
-        {/* Registration marks */}
-        <path d="M 50 20 L 50 80 M 20 50 L 80 50" stroke="rgba(0, 240, 255, 0.3)" strokeWidth="1" />
-        <path d="M 50 20 L 50 80 M 20 50 L 80 50" stroke="rgba(0, 240, 255, 0.3)" strokeWidth="1" transform="translate(1820, 0)" />
-        <path d="M 50 20 L 50 80 M 20 50 L 80 50" stroke="rgba(0, 240, 255, 0.3)" strokeWidth="1" transform="translate(0, 900)" />
-        <path d="M 50 20 L 50 80 M 20 50 L 80 50" stroke="rgba(0, 240, 255, 0.3)" strokeWidth="1" transform="translate(1820, 900)" />
+        {/* Ethereal Sun */}
+        <circle cx="50%" cy="50%" r="35%" fill="rgba(255, 0, 60, 0.02)" />
+        
+        {/* Technical Rings */}
+        <circle cx="50%" cy="50%" r="35%" fill="none" stroke="var(--blueprint-line)" strokeWidth="1" strokeDasharray="4 16" />
+        <circle cx="50%" cy="50%" r="40%" fill="none" stroke="var(--blueprint-grid)" strokeWidth="0.5" />
+        
+        {/* Japanese Watermark typography fading into grid */}
+        <text x="50%" y="50%" fontSize="20vw" fill="rgba(0, 150, 255, 0.02)" textAnchor="middle" dominantBaseline="central" fontWeight="900" className="text-jp" style={{ writingMode: 'vertical-rl' }}>
+          生態系
+        </text>
       </svg>
+
+      {/* Corner Registration Marks */}
+      <div style={{ position: 'absolute', top: 40, left: 40, width: 40, height: 40, borderTop: '2px solid var(--crimson)', borderLeft: '2px solid var(--crimson)' }} />
+      <div style={{ position: 'absolute', top: 40, right: 40, width: 40, height: 40, borderTop: '2px solid var(--crimson)', borderRight: '2px solid var(--crimson)' }} />
+      <div style={{ position: 'absolute', bottom: 40, left: 40, width: 40, height: 40, borderBottom: '2px solid var(--crimson)', borderLeft: '2px solid var(--crimson)' }} />
+      <div style={{ position: 'absolute', bottom: 40, right: 40, width: 40, height: 40, borderBottom: '2px solid var(--crimson)', borderRight: '2px solid var(--crimson)' }} />
     </div>
   );
 }
