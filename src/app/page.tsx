@@ -9,7 +9,7 @@ import { Effects } from "@/components/Effects/Effects";
 import { ScrollControls, Scroll, Environment } from "@react-three/drei";
 
 import { ArcaneGeometry } from "@/components/Environment/ArcaneGeometry";
-import { NeuralJellyfish } from "@/components/Artifacts/NeuralJellyfish";
+import { TheWeaver } from "@/components/Artifacts/TheWeaver";
 
 export default function Home() {
   return (
@@ -30,7 +30,7 @@ export default function Home() {
           
           <ScrollControls pages={8} damping={0.1}>
             <MechanicalAssembly />
-            <NeuralJellyfish />
+            <TheWeaver />
             
             <Scroll html style={{ width: '100vw', mixBlendMode: 'multiply' }}>
               
@@ -38,7 +38,7 @@ export default function Home() {
               <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '10vw' }}>
                 <div style={{ fontSize: '10px', letterSpacing: '0.2em', opacity: 0.5, marginBottom: '20px' }}>ARCHIVE ENTRY // 001</div>
                 <h1 style={{ fontSize: '8vw', fontWeight: 900, lineHeight: 0.9, letterSpacing: '-0.02em', color: 'var(--foreground)' }}>
-                  ORGAN 01<br/><span className="text-crimson">OPTICAL NERVE</span>
+                  ORGAN 01<br/><span style={{ color: '#ff007f' }}>OPTICAL NERVE</span>
                 </h1>
                 <p style={{ marginTop: '20px', maxWidth: '400px', fontSize: '14px', opacity: 0.7, letterSpacing: '0.05em' }}>
                   A microscopic component of the Colossus. Deciphering the glass core geometry.
@@ -47,7 +47,7 @@ export default function Home() {
 
               <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', padding: '10vw' }}>
                 <div style={{ textAlign: 'right', maxWidth: '400px' }}>
-                  <h2 className="text-jp" style={{ fontSize: '4vw', fontWeight: 900, color: 'var(--crimson)' }}>解剖図</h2>
+                  <h2 className="text-jp" style={{ fontSize: '4vw', fontWeight: 900, color: '#fbbf24' }}>解剖図</h2>
                   <h3 style={{ fontSize: '2vw', fontWeight: 700, letterSpacing: '0.1em', marginTop: '10px' }}>ANATOMICAL BREAKDOWN</h3>
                   <p style={{ marginTop: '20px', fontSize: '14px', opacity: 0.7, textAlign: 'justify' }}>
                     Outer titanium arteries disengaged. The central refraction sphere acts as a memory lens.
@@ -56,9 +56,9 @@ export default function Home() {
               </div>
 
               <div style={{ height: '100vh', display: 'flex', alignItems: 'center', padding: '10vw' }}>
-                <div style={{ padding: '40px', border: '1px solid var(--foreground)', backgroundColor: 'rgba(240, 234, 221, 0.5)' }}>
-                  <h3 style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.2em', color: 'var(--crimson)', marginBottom: '20px' }}>FIELD NOTES</h3>
-                  <p style={{ fontSize: '10px', fontStyle: 'italic', opacity: 0.6 }}>
+                <div style={{ padding: '40px', border: '1px solid #34d399', backgroundColor: 'rgba(240, 234, 221, 0.1)', backdropFilter: 'blur(5px)' }}>
+                  <h3 style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.2em', color: '#ff007f', marginBottom: '20px' }}>FIELD NOTES</h3>
+                  <p style={{ fontSize: '10px', fontStyle: 'italic', opacity: 0.8 }}>
                     Note to self: The universe might be inside this sphere.
                   </p>
                 </div>
@@ -68,45 +68,45 @@ export default function Home() {
                 <h1 className="text-jp" style={{ fontSize: '15vw', fontWeight: 900, WebkitTextStroke: '2px var(--foreground)', color: 'transparent', opacity: 0.1 }}>
                   巨像
                 </h1>
-                <p style={{ position: 'absolute', fontSize: '24px', fontWeight: 700, letterSpacing: '0.5em', color: 'var(--crimson)' }}>
+                <p style={{ position: 'absolute', fontSize: '24px', fontWeight: 700, letterSpacing: '0.5em', color: '#ff007f' }}>
                   ZOOMING IN...
                 </p>
               </div>
 
-              {/* PAGE 5-8: ORGAN 02 (NEURAL PARASITE) */}
+              {/* PAGE 5-8: ORGAN 02 (THE WEAVER) */}
               <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-end', padding: '10vw' }}>
                 <div style={{ textAlign: 'right' }}>
                   <div style={{ fontSize: '10px', letterSpacing: '0.2em', opacity: 0.5, marginBottom: '20px' }}>ARCHIVE ENTRY // 002</div>
                   <h1 style={{ fontSize: '8vw', fontWeight: 900, lineHeight: 0.9, letterSpacing: '-0.02em', color: 'var(--foreground)' }}>
-                    ORGAN 02<br/><span className="text-crimson">NEURAL PARASITE</span>
+                    ORGAN 02<br/><span style={{ color: '#ff007f' }}>THE WEAVER</span>
                   </h1>
                   <p style={{ marginTop: '20px', maxWidth: '400px', fontSize: '14px', opacity: 0.7, letterSpacing: '0.05em', marginLeft: 'auto' }}>
-                    A primitive deep-sea mechanism. It powers the colossal network through bioluminescent thought.
+                    The entity responsible for spinning the structural grid of the Colossus. A highly articulated mechanical arachnid.
                   </p>
                 </div>
               </div>
 
               <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', padding: '10vw' }}>
                 <div style={{ maxWidth: '400px' }}>
-                  <h2 className="text-jp" style={{ fontSize: '4vw', fontWeight: 900, color: 'var(--crimson)' }}>深海</h2>
-                  <h3 style={{ fontSize: '2vw', fontWeight: 700, letterSpacing: '0.1em', marginTop: '10px' }}>BIOLOGICAL KINEMATICS</h3>
+                  <h2 className="text-jp" style={{ fontSize: '4vw', fontWeight: 900, color: '#fbbf24' }}>蜘蛛</h2>
+                  <h3 style={{ fontSize: '2vw', fontWeight: 700, letterSpacing: '0.1em', marginTop: '10px' }}>PROCEDURAL KINEMATICS</h3>
                   <p style={{ marginTop: '20px', fontSize: '14px', opacity: 0.7, textAlign: 'justify' }}>
-                    The eight tentacles wriggle mathematically using complex sine waves. It appears fossilized, but dragging your light across it awakens the bioluminescence.
+                    Its 8 legs idle independently using trigonometric phase offsets. The "Spirit of Design" renders its blueprint in continuous neon cyan and purple wires.
                   </p>
                 </div>
               </div>
               
               <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', padding: '10vw' }}>
-                <div style={{ padding: '40px', border: '1px solid var(--foreground)', backgroundColor: 'rgba(240, 234, 221, 0.5)' }}>
-                  <h3 style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.2em', color: 'var(--crimson)', marginBottom: '20px' }}>MATERIAL ANALYSIS</h3>
+                <div style={{ padding: '40px', border: '1px solid #34d399', backgroundColor: 'rgba(240, 234, 221, 0.1)', backdropFilter: 'blur(5px)' }}>
+                  <h3 style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.2em', color: '#ff007f', marginBottom: '20px' }}>MATERIAL ANALYSIS</h3>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '12px', width: '300px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(44, 40, 37, 0.2)', paddingBottom: '5px' }}>
-                      <span>DOME SHELL</span>
-                      <span className="text-crimson">FOSSILIZED IRON / NEON GLASS</span>
+                      <span>LEFT SECTOR</span>
+                      <span style={{ color: '#34d399' }}>NEON WIREFRAME</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(44, 40, 37, 0.2)', paddingBottom: '5px' }}>
-                      <span>CORE</span>
-                      <span>LIQUID ENERGY</span>
+                      <span>RIGHT SECTOR</span>
+                      <span style={{ color: '#ff0000' }}>DARK METAL / RED OPTICS</span>
                     </div>
                   </div>
                 </div>
@@ -114,10 +114,10 @@ export default function Home() {
 
               <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
                 <h1 className="text-jp" style={{ fontSize: '15vw', fontWeight: 900, WebkitTextStroke: '2px var(--foreground)', color: 'transparent', opacity: 0.1 }}>
-                  復活
+                  覚醒
                 </h1>
-                <p style={{ position: 'absolute', fontSize: '24px', fontWeight: 700, letterSpacing: '0.5em', color: 'var(--crimson)' }}>
-                  RESURRECTION
+                <p style={{ position: 'absolute', fontSize: '24px', fontWeight: 700, letterSpacing: '0.5em', color: '#ff007f' }}>
+                  AWAKENING
                 </p>
               </div>
 
