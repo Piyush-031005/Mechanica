@@ -195,11 +195,11 @@ export function MechanicalAssembly() {
 
       {/* Connecting Laser Lines (Visible when exploded) */}
       <mesh ref={topLaserRef}>
-        <cylinderGeometry args={[0.02, 1, 8]} />
+        <cylinderGeometry args={[0.02, 0.02, 1, 8]} />
         <meshBasicMaterial color="#ff003c" transparent opacity={0.5} />
       </mesh>
       <mesh ref={bottomLaserRef}>
-        <cylinderGeometry args={[0.02, 1, 8]} />
+        <cylinderGeometry args={[0.02, 0.02, 1, 8]} />
         <meshBasicMaterial color="#00f0ff" transparent opacity={0.5} />
       </mesh>
     </group>
