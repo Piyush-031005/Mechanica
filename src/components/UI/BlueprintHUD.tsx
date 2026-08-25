@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { motion, useMotionValue, useSpring } from "framer-motion";
+import { useEffect, useState, useRef } from "react";
+import { motion, useMotionValue, useSpring, useMotionValueEvent } from "framer-motion";
 
 export function BlueprintHUD() {
   const [mounted, setMounted] = useState(false);
-  const cursorX = useMotionValue(window.innerWidth / 2);
-  const cursorY = useMotionValue(window.innerHeight / 2);
+  const cursorX = useMotionValue(0);
+  const cursorY = useMotionValue(0);
   
   const springX = useSpring(cursorX, { stiffness: 300, damping: 30, mass: 0.2 });
   const springY = useSpring(cursorY, { stiffness: 300, damping: 30, mass: 0.2 });
@@ -15,8 +15,22 @@ export function BlueprintHUD() {
   const trailX = useSpring(cursorX, { stiffness: 50, damping: 20 });
   const trailY = useSpring(cursorY, { stiffness: 50, damping: 20 });
 
+  const xRef = useRef<HTMLSpanElement>(null);
+  const yRef = useRef<HTMLSpanElement>(null);
+
+  useMotionValueEvent(springX, "change", (latest) => {
+    if (xRef.current) xRef.current.textContent = `X: ${Math.round(latest)}`;
+  });
+  useMotionValueEvent(springY, "change", (latest) => {
+    if (yRef.current) yRef.current.textContent = `Y: ${Math.round(latest)}`;
+  });
+
   useEffect(() => { 
     setMounted(true); 
+    // Initialize position after mount to avoid SSR window error
+    cursorX.set(window.innerWidth / 2);
+    cursorY.set(window.innerHeight / 2);
+
     const handleMouseMove = (e: MouseEvent) => {
       cursorX.set(e.clientX); 
       cursorY.set(e.clientY);
@@ -77,8 +91,8 @@ export function BlueprintHUD() {
         x: 25, y: 25, fontSize: '10px', fontWeight: 600, color: 'var(--crimson)',
         display: 'flex', flexDirection: 'column', gap: '2px'
       }}>
-        <motion.span>X: {springX}</motion.span>
-        <motion.span>Y: {springY}</motion.span>
+        <span ref={xRef}>X: 0</span>
+        <span ref={yRef}>Y: 0</span>
       </motion.div>
 
       {/* 2. STATIC CORNER DATA BLOCKS */}
