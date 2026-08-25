@@ -1,7 +1,7 @@
 "use client";
 
 import { AwwwardsUI } from "@/components/UI/AwwwardsUI";
-import { LiquidCore } from "@/components/Artifacts/LiquidCore";
+import { CyberOrigami } from "@/components/Artifacts/CyberOrigami";
 import { PosterBackground } from "@/components/Environment/PosterBackground";
 import { Canvas } from "@react-three/fiber";
 import { CameraController } from "@/components/Camera/CameraController";
@@ -21,25 +21,32 @@ export default function Home() {
         >
           <CameraController />
 
-          {/* Studio Lighting Setup for light background */}
-          <ambientLight intensity={0.8} />
+          {/* Luminous Lighting Setup */}
+          <ambientLight intensity={1.5} color="#ffffff" />
           
           <directionalLight
-            position={[5, 10, 5]}
-            intensity={2}
+            position={[10, 10, 5]}
+            intensity={3}
             color="#ffffff"
           />
           
+          {/* Subtle Crimson rim light */}
           <directionalLight
-            position={[-5, 0, 5]}
-            intensity={1}
-            color="#6eb5ff"
+            position={[-5, -5, -5]}
+            intensity={2}
+            color="#ff003c"
+          />
+          
+          <directionalLight
+            position={[0, 0, 10]}
+            intensity={1.5}
+            color="#00f0ff"
           />
 
-          <Environment preset="city" />
+          <Environment preset="studio" />
 
-          {/* The Intertwined 3D Poster */}
-          <LiquidCore />
+          {/* The new central piece */}
+          <CyberOrigami />
           
           <Effects />
         </Canvas>
