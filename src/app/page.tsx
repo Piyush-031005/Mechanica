@@ -43,7 +43,7 @@ export default function Home() {
             color="#00f0ff"
           />
 
-          <Environment preset="studio" />
+          <Environment preset="city" blur={0.5} />
 
           {/* The new central piece */}
           <CyberOrigami />
