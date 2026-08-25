@@ -105,8 +105,8 @@ function AssemblyPart({ isSketch, clippingPlanes }: { isSketch: boolean, clippin
       {/* Particle Swarm */}
       <points ref={swarmRef}>
         <bufferGeometry>
-          <bufferAttribute attach="attributes-position" count={swarmPositions.length / 3} array={swarmPositions} itemSize={3} />
-          <bufferAttribute attach="attributes-color" count={swarmColors.length / 3} array={swarmColors} itemSize={3} />
+          <bufferAttribute attach="attributes-position" args={[swarmPositions, 3]} />
+          <bufferAttribute attach="attributes-color" args={[swarmColors, 3]} />
         </bufferGeometry>
         <pointsMaterial size={isSketch ? 0.01 : 0.02} vertexColors transparent opacity={0.6} sizeAttenuation blending={isSketch ? THREE.NormalBlending : THREE.AdditiveBlending} depthWrite={false} clippingPlanes={clippingPlanes} />
       </points>
@@ -119,31 +119,41 @@ function AssemblyPart({ isSketch, clippingPlanes }: { isSketch: boolean, clippin
         ) : (
           <MeshTransmissionMaterial backside samples={6} resolution={512} thickness={2.5} chromaticAberration={0.8} anisotropy={1} color="#ffffff" attenuationDistance={5} attenuationColor="#ff003c" roughness={0.05} ior={1.45} clearcoat={1} clippingPlanes={clippingPlanes} />
         )}
-        <Edges scale={1.02} color={inkEdges} threshold={15} material={new THREE.LineBasicMaterial({ clippingPlanes })} />
+        <Edges scale={1.02} threshold={15}>
+          <lineBasicMaterial attach="material" color={inkEdges} clippingPlanes={clippingPlanes} />
+        </Edges>
       </mesh>
 
       {/* Rings */}
       <mesh ref={outerRingRef} rotation={[Math.PI / 2, 0, 0]}>
         <torusGeometry args={[3.5, 0.05, 16, 100]} />
         {isSketch ? <primitive object={sketchMat} attach="material" /> : <meshPhysicalMaterial color="#111111" metalness={1} roughness={0.2} clippingPlanes={clippingPlanes} />}
-        <Edges color={redEdges} material={new THREE.LineBasicMaterial({ clippingPlanes })} />
+        <Edges>
+          <lineBasicMaterial attach="material" color={redEdges} clippingPlanes={clippingPlanes} />
+        </Edges>
       </mesh>
       <mesh ref={innerRingRef} rotation={[Math.PI / 2, 0, 0]}>
         <torusGeometry args={[2.5, 0.02, 16, 100]} />
         {isSketch ? <primitive object={sketchMat} attach="material" /> : <meshPhysicalMaterial color="#111111" metalness={1} roughness={0.2} clippingPlanes={clippingPlanes} />}
-        <Edges color={inkEdges} material={new THREE.LineBasicMaterial({ clippingPlanes })} />
+        <Edges>
+          <lineBasicMaterial attach="material" color={inkEdges} clippingPlanes={clippingPlanes} />
+        </Edges>
       </mesh>
       
       {/* Caps */}
       <mesh ref={topCapRef} position={[0, 1.2, 0]}>
         <cylinderGeometry args={[0.5, 0.8, 0.4, 32]} />
         {isSketch ? <primitive object={sketchMat} attach="material" /> : <meshPhysicalMaterial color="#111111" metalness={1} roughness={0.5} wireframe clippingPlanes={clippingPlanes} />}
-        <Edges color={redEdges} material={new THREE.LineBasicMaterial({ clippingPlanes })} />
+        <Edges>
+          <lineBasicMaterial attach="material" color={redEdges} clippingPlanes={clippingPlanes} />
+        </Edges>
       </mesh>
       <mesh ref={bottomCapRef} position={[0, -1.2, 0]}>
         <cylinderGeometry args={[0.8, 0.5, 0.4, 32]} />
         {isSketch ? <primitive object={sketchMat} attach="material" /> : <meshPhysicalMaterial color="#111111" metalness={1} roughness={0.5} wireframe clippingPlanes={clippingPlanes} />}
-        <Edges color={inkEdges} material={new THREE.LineBasicMaterial({ clippingPlanes })} />
+        <Edges>
+          <lineBasicMaterial attach="material" color={inkEdges} clippingPlanes={clippingPlanes} />
+        </Edges>
       </mesh>
 
       {/* Lasers */}
