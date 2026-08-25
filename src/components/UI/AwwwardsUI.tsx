@@ -32,7 +32,8 @@ export function AwwwardsUI() {
       padding: '40px',
       display: 'flex',
       flexDirection: 'column',
-      justifyContent: 'space-between'
+      justifyContent: 'space-between',
+      mixBlendMode: 'multiply' // Makes the UI interact physically with the luminous background
     }}>
       {/* Top Navigation / Data Bar */}
       <motion.div 
@@ -63,7 +64,7 @@ export function AwwwardsUI() {
         </div>
       </motion.div>
 
-      {/* Massive Vertical Japanese Typography on the Left */}
+      {/* Massive Vertical Japanese Typography on the Left - Outlined/Filled combination */}
       <motion.div 
         initial={{ opacity: 0, x: -50 }}
         animate={{ opacity: 1, x: 0 }}
@@ -74,17 +75,18 @@ export function AwwwardsUI() {
           left: '40px',
           writingMode: 'vertical-rl',
           textOrientation: 'upright',
-          fontSize: '12vh',
+          fontSize: '14vh',
           fontWeight: 900,
-          lineHeight: 0.8,
-          color: 'var(--foreground)'
+          lineHeight: 0.85,
+          color: 'transparent',
+          WebkitTextStroke: '2px var(--foreground)',
         }}
         className="text-jp"
       >
-        未来の<span className="text-crimson">設計図</span>
+        未来の<span className="text-crimson" style={{ color: 'var(--crimson)', WebkitTextStroke: '0px' }}>設計図</span>
       </motion.div>
 
-      {/* Dynamic Crimson Cursor Tracker */}
+      {/* Dynamic Crimson Cursor Tracker - Blend mode reset since it's nested */}
       <motion.div 
         style={{ 
           x: springX, y: springY,
@@ -93,7 +95,7 @@ export function AwwwardsUI() {
           border: '1px solid var(--crimson)', 
           borderRadius: '50%',
           display: 'flex', justifyContent: 'center', alignItems: 'center',
-          mixBlendMode: 'difference' // Interacts beautifully with the luminous background
+          mixBlendMode: 'normal'
         }}
       >
         <div style={{ width: '4px', height: '4px', background: 'var(--crimson)', borderRadius: '50%' }} />
