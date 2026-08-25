@@ -8,7 +8,7 @@ import { CameraController } from "@/components/Camera/CameraController";
 import { Effects } from "@/components/Effects/Effects";
 import { ScrollControls, Scroll, Environment } from "@react-three/drei";
 
-import { ChronoCompass } from "@/components/Artifacts/ChronoCompass";
+import { NeuralJellyfish } from "@/components/Artifacts/NeuralJellyfish";
 
 export default function Home() {
   return (
@@ -28,7 +28,7 @@ export default function Home() {
           
           <ScrollControls pages={8} damping={0.1}>
             <MechanicalAssembly />
-            <ChronoCompass />
+            <NeuralJellyfish />
             
             <Scroll html style={{ width: '100vw', mixBlendMode: 'multiply' }}>
               
@@ -71,25 +71,25 @@ export default function Home() {
                 </p>
               </div>
 
-              {/* PAGE 5-8: ORGAN 02 (CHRONO-COMPASS) */}
+              {/* PAGE 5-8: ORGAN 02 (NEURAL PARASITE) */}
               <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-end', padding: '10vw' }}>
                 <div style={{ textAlign: 'right' }}>
                   <div style={{ fontSize: '10px', letterSpacing: '0.2em', opacity: 0.5, marginBottom: '20px' }}>ARCHIVE ENTRY // 002</div>
                   <h1 style={{ fontSize: '8vw', fontWeight: 900, lineHeight: 0.9, letterSpacing: '-0.02em', color: 'var(--foreground)' }}>
-                    ORGAN 02<br/><span className="text-crimson">CHRONO-COMPASS</span>
+                    ORGAN 02<br/><span className="text-crimson">NEURAL PARASITE</span>
                   </h1>
                   <p style={{ marginTop: '20px', maxWidth: '400px', fontSize: '14px', opacity: 0.7, letterSpacing: '0.05em', marginLeft: 'auto' }}>
-                    The mechanism responsible for measuring dreams.
+                    A primitive deep-sea mechanism. It powers the colossal network through bioluminescent thought.
                   </p>
                 </div>
               </div>
 
               <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', padding: '10vw' }}>
                 <div style={{ maxWidth: '400px' }}>
-                  <h2 className="text-jp" style={{ fontSize: '4vw', fontWeight: 900, color: 'var(--crimson)' }}>時間</h2>
-                  <h3 style={{ fontSize: '2vw', fontWeight: 700, letterSpacing: '0.1em', marginTop: '10px' }}>TEMPORAL KINEMATICS</h3>
+                  <h2 className="text-jp" style={{ fontSize: '4vw', fontWeight: 900, color: 'var(--crimson)' }}>深海</h2>
+                  <h3 style={{ fontSize: '2vw', fontWeight: 700, letterSpacing: '0.1em', marginTop: '10px' }}>BIOLOGICAL KINEMATICS</h3>
                   <p style={{ marginTop: '20px', fontSize: '14px', opacity: 0.7, textAlign: 'justify' }}>
-                    The brass concentric rings operate independently of linear time. The needle does not point North; it points to exactly 3.14 seconds ago.
+                    The eight tentacles wriggle mathematically using complex sine waves. It appears fossilized, but dragging your light across it awakens the bioluminescence.
                   </p>
                 </div>
               </div>
@@ -99,12 +99,12 @@ export default function Home() {
                   <h3 style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.2em', color: 'var(--crimson)', marginBottom: '20px' }}>MATERIAL ANALYSIS</h3>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '12px', width: '300px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(44, 40, 37, 0.2)', paddingBottom: '5px' }}>
-                      <span>OUTER RING</span>
-                      <span className="text-crimson">GOLD / TITANIUM</span>
+                      <span>DOME SHELL</span>
+                      <span className="text-crimson">FOSSILIZED IRON / NEON GLASS</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(44, 40, 37, 0.2)', paddingBottom: '5px' }}>
-                      <span>CORE NEEDLE</span>
-                      <span>UNKNOWN ISOTOPE</span>
+                      <span>CORE</span>
+                      <span>LIQUID ENERGY</span>
                     </div>
                   </div>
                 </div>
@@ -112,10 +112,10 @@ export default function Home() {
 
               <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
                 <h1 className="text-jp" style={{ fontSize: '15vw', fontWeight: 900, WebkitTextStroke: '2px var(--foreground)', color: 'transparent', opacity: 0.1 }}>
-                  夢
+                  復活
                 </h1>
                 <p style={{ position: 'absolute', fontSize: '24px', fontWeight: 700, letterSpacing: '0.5em', color: 'var(--crimson)' }}>
-                  THE MACHINE DREAMS
+                  RESURRECTION
                 </p>
               </div>
 
