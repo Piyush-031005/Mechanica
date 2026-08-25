@@ -8,6 +8,7 @@ import { CameraController } from "@/components/Camera/CameraController";
 import { Effects } from "@/components/Effects/Effects";
 import { ScrollControls, Scroll, Environment } from "@react-three/drei";
 
+import { ArcaneGeometry } from "@/components/Environment/ArcaneGeometry";
 import { NeuralJellyfish } from "@/components/Artifacts/NeuralJellyfish";
 
 export default function Home() {
@@ -25,6 +26,7 @@ export default function Home() {
           <ambientLight intensity={0.5} />
           <directionalLight position={[10, 10, 5]} intensity={2} />
           <Environment preset="city" />
+          <ArcaneGeometry />
           
           <ScrollControls pages={8} damping={0.1}>
             <MechanicalAssembly />
