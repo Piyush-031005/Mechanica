@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef, useMemo } from "react";
-import { useRef, useMemo } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useScroll, Edges } from "@react-three/drei";
 import { useStore } from "@/store/useStore";

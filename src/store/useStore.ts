@@ -53,6 +53,7 @@ interface GameState {
 
   devMode: boolean;
   toggleDevMode: () => void;
+  explosion: number;
   triggerGlobalExplosion: () => void;
   resetExplosion: () => void;
 }
@@ -83,6 +84,8 @@ export const useStore = create<GameState>((set) => ({
 
   devMode: false,
   toggleDevMode: () => set((state) => ({ devMode: !state.devMode })),
-  triggerGlobalExplosion: () => set({ triggerClick: Math.random() }),
-  resetExplosion: () => set({ triggerClick: 0 }),
+  
+  explosion: 0,
+  triggerGlobalExplosion: () => set({ explosion: 1 }),
+  resetExplosion: () => set({ explosion: 0 }),
 }));

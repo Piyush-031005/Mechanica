@@ -52,7 +52,6 @@ export function Effects() {
 
       {/* Subtle Chromatic Aberration for premium digital lens effect */}
       <ChromaticAberration 
-        blendFunction={BlendFunction.NORMAL} 
         offset={new THREE.Vector2(0.001, 0.001)} 
         radialModulation={false}
         modulationOffset={0}
