@@ -1,14 +1,18 @@
 "use client";
 
 import { useRef, useMemo } from "react";
+import { useRef, useMemo } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useScroll, Edges } from "@react-three/drei";
+import { useStore } from "@/store/useStore";
 import * as THREE from "three";
 
 const FEATHER_COUNT = 400;
 
 function BirdPart({ isBlueprint, clippingPlanes }: { isBlueprint: boolean, clippingPlanes: THREE.Plane[] }) {
   const scroll = useScroll();
+  const explosion = useStore((state) => state.explosion);
+  
   const groupRef = useRef<THREE.Group>(null);
   const instancedMeshRef = useRef<THREE.InstancedMesh>(null);
   const coreRef = useRef<THREE.Mesh>(null);
@@ -31,7 +35,14 @@ function BirdPart({ isBlueprint, clippingPlanes }: { isBlueprint: boolean, clipp
       const z = -Math.pow(t, 2) * 4; // Sweeping back
       const y = Math.sin(t * Math.PI) * 2; // Arching up
       
-      data.push({ x, y, z, t, isRightWing });
+      // Calculate a randomized scatter vector for the explosion
+      const scatter = new THREE.Vector3(
+        (Math.random() - 0.5) * 50,
+        (Math.random() - 0.5) * 50,
+        (Math.random() - 0.5) * 50
+      );
+      
+      data.push({ x, y, z, t, isRightWing, scatter });
     }
     return data;
   }, []);
@@ -40,11 +51,17 @@ function BirdPart({ isBlueprint, clippingPlanes }: { isBlueprint: boolean, clipp
     const data = [];
     for(let i=0; i<30; i++) {
       const t = i / 30;
+      const scatter = new THREE.Vector3(
+        (Math.random() - 0.5) * 20,
+        (Math.random() - 0.5) * 20,
+        (Math.random() - 0.5) * 20
+      );
       data.push({
         x: (Math.random() - 0.5) * 0.5,
         y: -t * 2,
         z: 1 + t * 4,
-        t
+        t,
+        scatter
       });
     }
     return data;
@@ -59,37 +76,41 @@ function BirdPart({ isBlueprint, clippingPlanes }: { isBlueprint: boolean, clipp
       const localOffset = Math.max(0, (offset - 0.5) * 2);
       const scale = THREE.MathUtils.lerp(0.001, 1, Math.min(1, localOffset * 2)); 
       groupRef.current.scale.set(scale, scale, scale);
-      groupRef.current.visible = offset > 0.45;
+      groupRef.current.visible = offset > 0.45 && offset < 0.8;
       
       // Gentle hovering of the entire creature
       groupRef.current.position.y = Math.sin(time * 0.5) * 0.5 - 1;
     }
 
     if (coreRef.current) {
-      coreRef.current.rotation.x = time * 0.2;
-      coreRef.current.rotation.y = time * 0.3;
+      coreRef.current.rotation.x = time * 0.2 + (explosion * 5);
+      coreRef.current.rotation.y = time * 0.3 + (explosion * 5);
+      const coreScale = 1 + explosion * 3;
+      coreRef.current.scale.set(coreScale, coreScale, coreScale);
     }
 
     // Majestic Instanced Flapping for Wings
     if (instancedMeshRef.current) {
       feathers.forEach((feather, i) => {
-        // Flap math
-        // Inner feathers flap less, outer feathers flap more
         const flapAmplitude = 0.5 + feather.t * 2.5;
         const flap = Math.sin(time * 2 - feather.t * 2) * flapAmplitude;
         
-        dummy.position.set(feather.x, feather.y + flap, feather.z);
+        // Explosion scatter
+        const scatterX = feather.x + feather.scatter.x * explosion;
+        const scatterY = feather.y + flap + feather.scatter.y * explosion;
+        const scatterZ = feather.z + feather.scatter.z * explosion;
+        
+        dummy.position.set(scatterX, scatterY, scatterZ);
         
         // Orient feather to point outwards and angle with the flap
         dummy.rotation.set(
-          flap * 0.2, 
-          feather.isRightWing ? -0.2 : 0.2, 
+          flap * 0.2 + (explosion * Math.random() * Math.PI * 2), 
+          feather.isRightWing ? -0.2 : 0.2 + (explosion * Math.random() * Math.PI * 2), 
           (feather.isRightWing ? -Math.PI/2 : Math.PI/2) + flap * 0.3
         );
         
-        // Scale feathers: large near body, small at tips
         const scaleBase = (1.0 - feather.t * 0.7);
-        dummy.scale.set(scaleBase * 0.2, scaleBase * 3, scaleBase * 0.05); // Thin long blade
+        dummy.scale.set(scaleBase * 0.2, scaleBase * 3, scaleBase * 0.05);
         
         dummy.updateMatrix();
         instancedMeshRef.current!.setMatrixAt(i, dummy.matrix);
@@ -101,8 +122,13 @@ function BirdPart({ isBlueprint, clippingPlanes }: { isBlueprint: boolean, clipp
     if (tailRef.current) {
       tails.forEach((tail, i) => {
         const swish = Math.sin(time * 3 - tail.t * 5) * (0.1 + tail.t);
-        dummy.position.set(tail.x + swish, tail.y, tail.z);
-        dummy.rotation.set(-0.2, swish * 0.5, 0);
+        
+        const scatterX = tail.x + swish + tail.scatter.x * explosion;
+        const scatterY = tail.y + tail.scatter.y * explosion;
+        const scatterZ = tail.z + tail.scatter.z * explosion;
+        
+        dummy.position.set(scatterX, scatterY, scatterZ);
+        dummy.rotation.set(-0.2 + (explosion * 2), swish * 0.5, explosion * 2);
         dummy.scale.set(0.1, 2, 0.1);
         dummy.updateMatrix();
         tailRef.current!.setMatrixAt(i, dummy.matrix);
