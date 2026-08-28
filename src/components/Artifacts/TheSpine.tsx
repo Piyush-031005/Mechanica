@@ -1,44 +1,26 @@
 "use client";
 
 import { useRef, useMemo } from "react";
-import { useFrame, useThree } from "@react-three/fiber";
+import { useFrame } from "@react-three/fiber";
 import { useScroll, Edges } from "@react-three/drei";
 import { useStore } from "@/store/useStore";
 import * as THREE from "three";
 
-const VERTEBRAE_COUNT = 150;
+const HELIX_HEIGHT = 40;
+const STRAND_COUNT = 300;
+const RUNG_COUNT = 150;
 
-function SpinePart({ isBlueprint, clippingPlanes }: { isBlueprint: boolean, clippingPlanes: THREE.Plane[] }) {
+function HelixPart({ isBlueprint, clippingPlanes }: { isBlueprint: boolean, clippingPlanes: THREE.Plane[] }) {
   const scroll = useScroll();
   const explosion = useStore((state) => state.explosion);
   
   const groupRef = useRef<THREE.Group>(null);
-  const instancedMeshRef = useRef<THREE.InstancedMesh>(null);
-  const discsRef = useRef<THREE.InstancedMesh>(null);
-
-  const curve = useMemo(() => {
-    return new THREE.CatmullRomCurve3([
-      new THREE.Vector3(0, 5, -15),
-      new THREE.Vector3(-2, 2, -10),
-      new THREE.Vector3(3, -2, -5),
-      new THREE.Vector3(-1, -6, 0),
-      new THREE.Vector3(2, -10, 5),
-    ], false, "centripetal", 0.5);
-  }, []);
+  const strand1Ref = useRef<THREE.InstancedMesh>(null);
+  const strand2Ref = useRef<THREE.InstancedMesh>(null);
+  const rungsRef = useRef<THREE.InstancedMesh>(null);
+  const plasmaRef = useRef<THREE.Mesh>(null);
 
   const dummy = useMemo(() => new THREE.Object3D(), []);
-  
-  const scatterVectors = useMemo(() => {
-    const data = [];
-    for(let i=0; i<VERTEBRAE_COUNT; i++) {
-      data.push(new THREE.Vector3(
-        (Math.random() - 0.5) * 60,
-        (Math.random() - 0.5) * 60,
-        (Math.random() - 0.5) * 60
-      ));
-    }
-    return data;
-  }, []);
 
   useFrame((state) => {
     const offset = scroll.offset; 
@@ -50,94 +32,155 @@ function SpinePart({ isBlueprint, clippingPlanes }: { isBlueprint: boolean, clip
       const scale = THREE.MathUtils.lerp(0.001, 1, Math.min(1, localOffset)); 
       groupRef.current.scale.set(scale, scale, scale);
       groupRef.current.visible = offset > 0.4 && offset < 0.8;
+      
+      // Infinite vertical scrolling effect
+      groupRef.current.position.y = (time * 2) % (HELIX_HEIGHT / 4) - 5;
+      groupRef.current.rotation.y = time * 0.2;
     }
 
-    if (instancedMeshRef.current && discsRef.current) {
-      curve.points[1].x = -2 + Math.sin(time * 0.5) * 3;
-      curve.points[2].x = 3 + Math.cos(time * 0.4) * 4;
-      curve.points[3].x = -1 + Math.sin(time * 0.6) * 3;
-      curve.updateArcLengths();
+    const radius = 3;
+    const frequency = 0.5;
 
-      for (let i = 0; i < VERTEBRAE_COUNT; i++) {
-        const t = i / (VERTEBRAE_COUNT - 1);
+    // Strand 1
+    if (strand1Ref.current) {
+      for (let i = 0; i < STRAND_COUNT; i++) {
+        const y = (i / STRAND_COUNT) * HELIX_HEIGHT - (HELIX_HEIGHT / 2);
+        const angle = y * frequency + time;
         
-        const slitherWave = Math.sin(t * 10 - time * 2) * 0.1;
-        const adjustedT = Math.max(0, Math.min(1, t + slitherWave));
+        const scatterX = explosion > 0 ? (Math.random() - 0.5) * explosion * 20 : 0;
+        const scatterY = explosion > 0 ? (Math.random() - 0.5) * explosion * 20 : 0;
+        const scatterZ = explosion > 0 ? (Math.random() - 0.5) * explosion * 20 : 0;
         
-        const position = curve.getPointAt(adjustedT);
-        const tangent = curve.getTangentAt(adjustedT).normalize();
+        dummy.position.set(
+          Math.cos(angle) * radius + scatterX,
+          y + scatterY,
+          Math.sin(angle) * radius + scatterZ
+        );
         
-        const up = new THREE.Vector3(0, 1, 0);
-        const twistAngle = time * 0.5 + t * Math.PI * 4;
-        up.applyAxisAngle(tangent, twistAngle);
+        dummy.rotation.set(
+          explosion * Math.random() * 10,
+          -angle + (explosion * Math.random() * 10),
+          explosion * Math.random() * 10
+        );
         
-        // Shatter Effect
-        const scatter = scatterVectors[i];
-        const finalX = position.x + scatter.x * explosion;
-        const finalY = position.y + scatter.y * explosion;
-        const finalZ = position.z + scatter.z * explosion;
-        
-        dummy.position.set(finalX, finalY, finalZ);
-        dummy.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), tangent);
-        
-        // Wild rotation during explosion
-        dummy.rotateOnWorldAxis(tangent, twistAngle + (explosion * i * 0.1));
-        
-        const scaleFactor = Math.sin(t * Math.PI);
-        const thickness = 0.5 + scaleFactor * 0.5;
-        
-        dummy.scale.set(thickness, 0.4, thickness);
+        const s = 1 + explosion * 2;
+        dummy.scale.set(s, s, s);
         dummy.updateMatrix();
-        instancedMeshRef.current.setMatrixAt(i, dummy.matrix);
-        
-        dummy.scale.set(thickness * 1.2, 0.1, thickness * 1.2);
-        dummy.translateY(0.2);
-        dummy.updateMatrix();
-        discsRef.current.setMatrixAt(i, dummy.matrix);
+        strand1Ref.current.setMatrixAt(i, dummy.matrix);
       }
-      
-      instancedMeshRef.current.instanceMatrix.needsUpdate = true;
-      discsRef.current.instanceMatrix.needsUpdate = true;
+      strand1Ref.current.instanceMatrix.needsUpdate = true;
+    }
+
+    // Strand 2
+    if (strand2Ref.current) {
+      for (let i = 0; i < STRAND_COUNT; i++) {
+        const y = (i / STRAND_COUNT) * HELIX_HEIGHT - (HELIX_HEIGHT / 2);
+        const angle = y * frequency + Math.PI + time;
+        
+        const scatterX = explosion > 0 ? (Math.random() - 0.5) * explosion * 20 : 0;
+        const scatterY = explosion > 0 ? (Math.random() - 0.5) * explosion * 20 : 0;
+        const scatterZ = explosion > 0 ? (Math.random() - 0.5) * explosion * 20 : 0;
+
+        dummy.position.set(
+          Math.cos(angle) * radius + scatterX,
+          y + scatterY,
+          Math.sin(angle) * radius + scatterZ
+        );
+        
+        dummy.rotation.set(
+          explosion * Math.random() * 10,
+          -angle + (explosion * Math.random() * 10),
+          explosion * Math.random() * 10
+        );
+
+        const s = 1 + explosion * 2;
+        dummy.scale.set(s, s, s);
+        dummy.updateMatrix();
+        strand2Ref.current.setMatrixAt(i, dummy.matrix);
+      }
+      strand2Ref.current.instanceMatrix.needsUpdate = true;
+    }
+
+    // Rungs (Connecting bridges)
+    if (rungsRef.current) {
+      for (let i = 0; i < RUNG_COUNT; i++) {
+        const y = (i / RUNG_COUNT) * HELIX_HEIGHT - (HELIX_HEIGHT / 2);
+        const angle = y * frequency + time;
+        
+        const scatterX = explosion > 0 ? (Math.random() - 0.5) * explosion * 30 : 0;
+        const scatterY = explosion > 0 ? (Math.random() - 0.5) * explosion * 30 : 0;
+        const scatterZ = explosion > 0 ? (Math.random() - 0.5) * explosion * 30 : 0;
+
+        dummy.position.set(scatterX, y + scatterY, scatterZ);
+        dummy.rotation.set(0, -angle + (explosion * Math.random() * 5), explosion * Math.random() * 5);
+        
+        const scaleX = radius * 2 + explosion * 5;
+        dummy.scale.set(scaleX, 1, 1);
+        dummy.updateMatrix();
+        rungsRef.current.setMatrixAt(i, dummy.matrix);
+      }
+      rungsRef.current.instanceMatrix.needsUpdate = true;
+    }
+
+    if (plasmaRef.current) {
+      plasmaRef.current.rotation.y = -time * 0.5;
+      const pulse = 1 + Math.sin(time * 5) * 0.1 + (explosion * 5);
+      plasmaRef.current.scale.set(pulse, 1, pulse);
     }
   });
 
-  // Materials
-  const vertebraeMat = useMemo(() => {
-    if (isBlueprint) return new THREE.MeshBasicMaterial({ color: '#ff007f', wireframe: true, clippingPlanes });
-    return new THREE.MeshStandardMaterial({ color: '#111111', roughness: 0.8, metalness: 0.9, flatShading: true, clippingPlanes });
-  }, [isBlueprint, clippingPlanes]);
+  const solidMat = useMemo(() => new THREE.MeshStandardMaterial({ 
+    color: '#1a1a1a', 
+    metalness: 0.9, 
+    roughness: 0.4,
+    clippingPlanes 
+  }), [clippingPlanes]);
+  
+  const wireMat = useMemo(() => new THREE.MeshBasicMaterial({ 
+    color: '#00ccff', 
+    wireframe: true, 
+    transparent: true, 
+    opacity: 0.5,
+    clippingPlanes 
+  }), [clippingPlanes]);
 
-  const discMat = useMemo(() => {
-    if (isBlueprint) return new THREE.MeshBasicMaterial({ color: '#34d399', wireframe: true, transparent: true, opacity: 0.5, clippingPlanes });
-    return new THREE.MeshPhysicalMaterial({ 
-      color: '#ff3300', // Red hot glowing discs
-      transmission: 0.9,
-      thickness: 0.5,
-      roughness: 0.2,
-      emissive: '#ff0000',
-      emissiveIntensity: 2,
-      clippingPlanes 
-    });
-  }, [isBlueprint, clippingPlanes]);
+  const plasmaMat = useMemo(() => new THREE.MeshStandardMaterial({
+    color: '#ffffff',
+    emissive: '#ff00aa',
+    emissiveIntensity: 4,
+    transparent: true,
+    opacity: 0.8,
+    clippingPlanes
+  }), [clippingPlanes]);
 
   return (
-    <group ref={groupRef} position={[0, 4, -8]}>
-      {/* Interlocking Metal Vertebrae */}
-      <instancedMesh ref={instancedMeshRef} args={[null as any, null as any, VERTEBRAE_COUNT]}>
-        <cylinderGeometry args={[1, 0.8, 1, 6]} />
-        <primitive object={vertebraeMat} attach="material" />
+    <group ref={groupRef}>
+      {/* Outer Strands */}
+      <instancedMesh ref={strand1Ref} args={[undefined as any, undefined as any, STRAND_COUNT]}>
+        <boxGeometry args={[1, 0.2, 1]} />
+        <primitive object={isBlueprint ? wireMat : solidMat} attach="material" />
+      </instancedMesh>
+      <instancedMesh ref={strand2Ref} args={[undefined as any, undefined as any, STRAND_COUNT]}>
+        <boxGeometry args={[1, 0.2, 1]} />
+        <primitive object={isBlueprint ? wireMat : solidMat} attach="material" />
+      </instancedMesh>
+      
+      {/* Inner Rungs */}
+      <instancedMesh ref={rungsRef} args={[undefined as any, undefined as any, RUNG_COUNT]}>
+        <cylinderGeometry args={[0.1, 0.1, 1]} />
+        <primitive object={isBlueprint ? wireMat : solidMat} attach="material" />
       </instancedMesh>
 
-      {/* Glowing Energy Discs between vertebrae */}
-      <instancedMesh ref={discsRef} args={[null as any, null as any, VERTEBRAE_COUNT]}>
-        <torusGeometry args={[0.9, 0.2, 16, 32]} />
-        <primitive object={discMat} attach="material" />
-      </instancedMesh>
+      {/* Inner Plasma Core */}
+      <mesh ref={plasmaRef}>
+        <cylinderGeometry args={[0.5, 0.5, HELIX_HEIGHT, 16]} />
+        <primitive object={plasmaMat} attach="material" />
+        {isBlueprint && <Edges scale={1.05} color="#ffffff" />}
+      </mesh>
     </group>
   );
 }
 
-// Master component managing the medium shift
 export function TheSpine() {
   const { viewport } = useThree();
   const planeBlueprint = useMemo(() => new THREE.Plane(new THREE.Vector3(-1, 0, 0), 0), []);
@@ -150,12 +193,9 @@ export function TheSpine() {
   });
 
   return (
-    <group position={[0, -2, 0]}>
-      {/* Left side: Neon Technical Drawing */}
-      <SpinePart isBlueprint={true} clippingPlanes={[planeBlueprint]} />
-      
-      {/* Right side: Dark Metal & Exhaust */}
-      <SpinePart isBlueprint={false} clippingPlanes={[planeMachine]} />
+    <group position={[0, 0, -10]}>
+      <HelixPart isBlueprint={true} clippingPlanes={[planeBlueprint]} />
+      <HelixPart isBlueprint={false} clippingPlanes={[planeMachine]} />
     </group>
   );
 }
