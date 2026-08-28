@@ -9,12 +9,16 @@ import { Effects } from "@/components/Effects/Effects";
 import { ScrollControls, Scroll, Environment } from "@react-three/drei";
 
 import { CyberBird } from "@/components/Artifacts/CyberBird";
+import { TheSpine } from "@/components/Artifacts/TheSpine";
+import { AudioSystem } from "@/components/Mechanics/AudioSystem";
+import { SecretManager } from "@/components/Mechanics/SecretManager";
 
 export default function Home() {
   return (
     <main style={{ height: "100vh", width: "100vw", position: "relative", cursor: "none" }}>
       <PosterBackground />
       <BlueprintHUD />
+      <AudioSystem />
       
       <div style={{ position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", background: "transparent", pointerEvents: "auto" }}>
         <Canvas
@@ -26,9 +30,14 @@ export default function Home() {
           <directionalLight position={[10, 10, 5]} intensity={2} />
           <Environment preset="city" />
           
-          <ScrollControls pages={8} damping={0.1}>
+          {/* Hidden Developer / Easter Egg Mechanics */}
+          <SecretManager />
+          
+          {/* Extended to 12 pages for the colossal scale */}
+          <ScrollControls pages={12} damping={0.1}>
             <MechanicalAssembly />
             <CyberBird />
+            <TheSpine />
             
             <Scroll html style={{ width: '100vw', mixBlendMode: 'multiply' }}>
               
@@ -116,6 +125,52 @@ export default function Home() {
                 </h1>
                 <p style={{ position: 'absolute', fontSize: '24px', fontWeight: 700, letterSpacing: '0.5em', color: '#ff007f' }}>
                   AWAKENING
+                </p>
+              </div>
+
+              {/* PAGE 9-12: ORGAN 03 (THE SPINE) */}
+              <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '10vw' }}>
+                <div style={{ fontSize: '10px', letterSpacing: '0.2em', opacity: 0.5, marginBottom: '20px' }}>ARCHIVE ENTRY // 003</div>
+                <h1 style={{ fontSize: '8vw', fontWeight: 900, lineHeight: 0.9, letterSpacing: '-0.02em', color: 'var(--foreground)' }}>
+                  ORGAN 03<br/><span style={{ color: '#ff007f' }}>THE SPINE</span>
+                </h1>
+                <p style={{ marginTop: '20px', maxWidth: '400px', fontSize: '14px', opacity: 0.7, letterSpacing: '0.05em' }}>
+                  The central serpentine engine. It distributes raw kinetic energy throughout the Colossus structure.
+                </p>
+              </div>
+
+              <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', padding: '10vw' }}>
+                <div style={{ textAlign: 'right', maxWidth: '400px' }}>
+                  <h2 className="text-jp" style={{ fontSize: '4vw', fontWeight: 900, color: '#fbbf24' }}>脊柱</h2>
+                  <h3 style={{ fontSize: '2vw', fontWeight: 700, letterSpacing: '0.1em', marginTop: '10px' }}>SERPENTINE MATHEMATICS</h3>
+                  <p style={{ marginTop: '20px', fontSize: '14px', opacity: 0.7, textAlign: 'justify' }}>
+                    150 interlocking titanium vertebrae travel endlessly along a twisted Catmull-Rom spline. Energy discs pulsate between the joints.
+                  </p>
+                </div>
+              </div>
+
+              <div style={{ height: '100vh', display: 'flex', alignItems: 'center', padding: '10vw' }}>
+                <div style={{ padding: '40px', border: '1px solid #34d399', backgroundColor: 'rgba(240, 234, 221, 0.1)', backdropFilter: 'blur(5px)' }}>
+                  <h3 style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.2em', color: '#ff007f', marginBottom: '20px' }}>MATERIAL ANALYSIS</h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '12px', width: '300px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(44, 40, 37, 0.2)', paddingBottom: '5px' }}>
+                      <span>VERTEBRAE</span>
+                      <span style={{ color: '#111111' }}>HEAVY DARK METAL</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(44, 40, 37, 0.2)', paddingBottom: '5px' }}>
+                      <span>ENERGY DISCS</span>
+                      <span style={{ color: '#ff0000' }}>BLAZING RED PLASMA</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                <h1 className="text-jp" style={{ fontSize: '15vw', fontWeight: 900, WebkitTextStroke: '2px var(--foreground)', color: 'transparent', opacity: 0.1 }}>
+                  深淵
+                </h1>
+                <p style={{ position: 'absolute', fontSize: '24px', fontWeight: 700, letterSpacing: '0.5em', color: '#ff007f' }}>
+                  THE ABYSS
                 </p>
               </div>
 
