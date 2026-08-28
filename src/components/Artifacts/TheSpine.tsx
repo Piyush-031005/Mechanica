@@ -1,21 +1,23 @@
 "use client";
 
 import { useRef, useMemo } from "react";
+import { useRef, useMemo } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useScroll, Edges } from "@react-three/drei";
+import { useStore } from "@/store/useStore";
 import * as THREE from "three";
 
 const VERTEBRAE_COUNT = 150;
 
 function SpinePart({ isBlueprint, clippingPlanes }: { isBlueprint: boolean, clippingPlanes: THREE.Plane[] }) {
   const scroll = useScroll();
+  const explosion = useStore((state) => state.explosion);
+  
   const groupRef = useRef<THREE.Group>(null);
   const instancedMeshRef = useRef<THREE.InstancedMesh>(null);
   const discsRef = useRef<THREE.InstancedMesh>(null);
 
-  // Use a CatmullRomCurve3 to define the slithering path of the spine
   const curve = useMemo(() => {
-    // Initial random points for a serpentine shape
     return new THREE.CatmullRomCurve3([
       new THREE.Vector3(0, 5, -15),
       new THREE.Vector3(-2, 2, -10),
@@ -27,61 +29,69 @@ function SpinePart({ isBlueprint, clippingPlanes }: { isBlueprint: boolean, clip
 
   const dummy = useMemo(() => new THREE.Object3D(), []);
   
+  const scatterVectors = useMemo(() => {
+    const data = [];
+    for(let i=0; i<VERTEBRAE_COUNT; i++) {
+      data.push(new THREE.Vector3(
+        (Math.random() - 0.5) * 60,
+        (Math.random() - 0.5) * 60,
+        (Math.random() - 0.5) * 60
+      ));
+    }
+    return data;
+  }, []);
+
   useFrame((state) => {
     const offset = scroll.offset; 
     const time = state.clock.elapsedTime;
 
     if (groupRef.current) {
-      // Enter animation around offset 0.8
-      const localOffset = Math.max(0, (offset - 0.75) * 4); // 0.75 to 1.0 is the active range
+      const localOffset = Math.max(0, (offset - 0.75) * 4);
       const scale = THREE.MathUtils.lerp(0.001, 1, Math.min(1, localOffset)); 
       groupRef.current.scale.set(scale, scale, scale);
-      groupRef.current.visible = offset > 0.7;
+      groupRef.current.visible = offset > 0.7 && offset < 0.95;
     }
 
     if (instancedMeshRef.current && discsRef.current) {
-      // Make the curve dynamic
       curve.points[1].x = -2 + Math.sin(time * 0.5) * 3;
       curve.points[2].x = 3 + Math.cos(time * 0.4) * 4;
       curve.points[3].x = -1 + Math.sin(time * 0.6) * 3;
-      
-      // Update the curve to recalculate segments
       curve.updateArcLengths();
 
       for (let i = 0; i < VERTEBRAE_COUNT; i++) {
-        // Distribute vertebrae evenly along the curve
         const t = i / (VERTEBRAE_COUNT - 1);
         
-        // Add a "slithering" motion wave that travels down the spine
         const slitherWave = Math.sin(t * 10 - time * 2) * 0.1;
         const adjustedT = Math.max(0, Math.min(1, t + slitherWave));
         
         const position = curve.getPointAt(adjustedT);
         const tangent = curve.getTangentAt(adjustedT).normalize();
         
-        // Calculate up vector for rotation
         const up = new THREE.Vector3(0, 1, 0);
-        // Add twist to the spine
         const twistAngle = time * 0.5 + t * Math.PI * 4;
         up.applyAxisAngle(tangent, twistAngle);
         
-        dummy.position.copy(position);
-        dummy.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), tangent);
-        // Apply twist
-        dummy.rotateOnWorldAxis(tangent, twistAngle);
+        // Shatter Effect
+        const scatter = scatterVectors[i];
+        const finalX = position.x + scatter.x * explosion;
+        const finalY = position.y + scatter.y * explosion;
+        const finalZ = position.z + scatter.z * explosion;
         
-        // Scale tapers at the ends
-        const scaleFactor = Math.sin(t * Math.PI); // 0 at ends, 1 in middle
+        dummy.position.set(finalX, finalY, finalZ);
+        dummy.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), tangent);
+        
+        // Wild rotation during explosion
+        dummy.rotateOnWorldAxis(tangent, twistAngle + (explosion * i * 0.1));
+        
+        const scaleFactor = Math.sin(t * Math.PI);
         const thickness = 0.5 + scaleFactor * 0.5;
         
-        // Set Matrix for Main Vertebrae
         dummy.scale.set(thickness, 0.4, thickness);
         dummy.updateMatrix();
         instancedMeshRef.current.setMatrixAt(i, dummy.matrix);
         
-        // Set Matrix for Glass Discs (slightly offset and larger)
         dummy.scale.set(thickness * 1.2, 0.1, thickness * 1.2);
-        dummy.translateY(0.2); // Move up slightly to sit between vertebrae
+        dummy.translateY(0.2);
         dummy.updateMatrix();
         discsRef.current.setMatrixAt(i, dummy.matrix);
       }
