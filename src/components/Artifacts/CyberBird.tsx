@@ -71,11 +71,11 @@ function BirdPart({ isBlueprint, clippingPlanes }: { isBlueprint: boolean, clipp
     const time = state.clock.elapsedTime;
 
     if (groupRef.current) {
-      // Enter animation around offset 0.5
-      const localOffset = Math.max(0, (offset - 0.5) * 2);
-      const scale = THREE.MathUtils.lerp(0.001, 1, Math.min(1, localOffset * 2)); 
+      // Enter animation around offset 0.2 (Start of page 4-5)
+      const localOffset = Math.max(0, (offset - 0.2) * 4);
+      const scale = THREE.MathUtils.lerp(0.001, 1, Math.min(1, localOffset)); 
       groupRef.current.scale.set(scale, scale, scale);
-      groupRef.current.visible = offset > 0.45 && offset < 0.8;
+      groupRef.current.visible = offset > 0.15 && offset < 0.55;
       
       // Gentle hovering of the entire creature
       groupRef.current.position.y = Math.sin(time * 0.5) * 0.5 - 1;

@@ -45,10 +45,11 @@ function SpinePart({ isBlueprint, clippingPlanes }: { isBlueprint: boolean, clip
     const time = state.clock.elapsedTime;
 
     if (groupRef.current) {
-      const localOffset = Math.max(0, (offset - 0.75) * 4);
+      // Enter animation around offset 0.45 (Pages 8-9)
+      const localOffset = Math.max(0, (offset - 0.45) * 4);
       const scale = THREE.MathUtils.lerp(0.001, 1, Math.min(1, localOffset)); 
       groupRef.current.scale.set(scale, scale, scale);
-      groupRef.current.visible = offset > 0.7 && offset < 0.95;
+      groupRef.current.visible = offset > 0.4 && offset < 0.8;
     }
 
     if (instancedMeshRef.current && discsRef.current) {

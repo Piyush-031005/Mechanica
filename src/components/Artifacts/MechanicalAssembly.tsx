@@ -54,15 +54,15 @@ function AssemblyPart({ isSketch, clippingPlanes }: { isSketch: boolean, clippin
     const time = state.clock.elapsedTime;
 
     if (groupRef.current) {
-      // 0 to 0.5 maps to local 0 to 1 for explosion
-      const localOffset = Math.min(1, offset * 2);
+      // 0 to 0.25 maps to local 0 to 1 for explosion
+      const localOffset = Math.min(1, offset * 4);
       
       groupRef.current.rotation.y = time * 0.1 + localOffset * Math.PI * 4;
       groupRef.current.rotation.x = THREE.MathUtils.lerp(0, Math.PI / 4, localOffset);
 
-      // If we scroll past 0.5, the object zooms massively past the camera
-      if (offset > 0.5) {
-        const flyby = (offset - 0.5) * 2; // 0 to 1
+      // If we scroll past 0.25 (end of page 4), the object zooms massively past the camera
+      if (offset > 0.25) {
+        const flyby = (offset - 0.25) * 4; // 0 to 1 for the next quarter
         const scale = THREE.MathUtils.lerp(1, 15, flyby);
         groupRef.current.scale.set(scale, scale, scale);
         groupRef.current.position.z = THREE.MathUtils.lerp(0, 10, flyby);
@@ -75,8 +75,8 @@ function AssemblyPart({ isSketch, clippingPlanes }: { isSketch: boolean, clippin
       }
     }
     
-    // Use localOffset for kinematics so it finishes exploding by 0.5
-    const kOffset = Math.min(1, offset * 2);
+    // Use localOffset for kinematics so it finishes exploding by 0.25
+    const kOffset = Math.min(1, offset * 4);
 
     if (outerRingRef.current) {
       outerRingRef.current.position.y = THREE.MathUtils.lerp(0, 5, kOffset) + (Math.sin(time * 5) * explosion * 10);

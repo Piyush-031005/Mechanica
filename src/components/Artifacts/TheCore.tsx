@@ -21,15 +21,15 @@ function CorePart({ isBlueprint, clippingPlanes }: { isBlueprint: boolean, clipp
     const time = state.clock.elapsedTime;
 
     if (groupRef.current) {
-      // Enter animation around offset 0.95 (pages 13-16)
-      const localOffset = Math.max(0, (offset - 0.9) * 10);
+      // Enter animation around offset 0.7 (pages 12-13)
+      const localOffset = Math.max(0, (offset - 0.7) * 4);
       const scale = THREE.MathUtils.lerp(0.001, 1, Math.min(1, localOffset)); 
       
       // Explosion scale math: shatter outward based on store state
       const explodeScale = 1 + explosion * 2; // Expands wildly if explosion > 0
       
       groupRef.current.scale.set(scale * explodeScale, scale * explodeScale, scale * explodeScale);
-      groupRef.current.visible = offset > 0.85;
+      groupRef.current.visible = offset > 0.65;
       
       // Gently bob up and down
       groupRef.current.position.y = Math.sin(time) * 0.2;
