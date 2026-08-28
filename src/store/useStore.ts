@@ -75,7 +75,7 @@ export const useStore = create<GameState>((set) => ({
   scrollDepth: 0,
   setScrollDepth: (d) => set({ scrollDepth: d }),
 
-  activeTheme: "DRAFT",
+  activeTheme: "CYBER",
   cycleTheme: () => set((state) => {
     if (state.activeTheme === "CYANOTYPE") return { activeTheme: "DRAFT" };
     if (state.activeTheme === "DRAFT") return { activeTheme: "CYBER" };
