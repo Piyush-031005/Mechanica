@@ -1,10 +1,32 @@
 "use client";
 
-import { EffectComposer, Noise, Bloom, ChromaticAberration } from "@react-three/postprocessing";
+import { useRef } from "react";
+import { EffectComposer, Noise, Bloom, ChromaticAberration, Glitch } from "@react-three/postprocessing";
 import { BlendFunction } from "postprocessing";
+import { useScroll } from "@react-three/drei";
+import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { useStore } from "@/store/useStore";
 
 export function Effects() {
+  const scroll = useScroll();
+  const explosion = useStore((state) => state.explosion);
+  const glitchRef = useRef<any>(null);
+
+  useFrame(() => {
+    if (glitchRef.current) {
+      // Trigger glitch if scrolling fast, OR if explosion is active
+      const scrollSpeed = Math.abs(scroll.delta);
+      const isGlitching = scrollSpeed > 0.005 || explosion > 0.5;
+      
+      // Control glitch strength dynamically
+      glitchRef.current.active = isGlitching;
+      if (isGlitching) {
+        glitchRef.current.ratio = explosion > 0 ? 0.9 : 0.2;
+      }
+    }
+  });
+
   return (
     <EffectComposer multisampling={8}>
       {/* Heavy Film Grain for CAD feel */}
@@ -16,6 +38,16 @@ export function Effects() {
         luminanceSmoothing={0.9} 
         intensity={1.5} 
         mipmapBlur 
+      />
+
+      {/* Dynamic Glitch Effect */}
+      <Glitch 
+        ref={glitchRef}
+        delay={new THREE.Vector2(1.5, 3.5)} // min, max delay
+        duration={new THREE.Vector2(0.1, 0.3)} // min, max duration
+        strength={new THREE.Vector2(0.1, 0.5)} // min, max strength
+        active={false} // Toggled dynamically in useFrame
+        ratio={0.2}
       />
 
       {/* Subtle Chromatic Aberration for premium digital lens effect */}
