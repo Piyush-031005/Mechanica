@@ -3,11 +3,14 @@
 import { useRef, useMemo } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useScroll, Edges } from "@react-three/drei";
+import { useStore } from "@/store/useStore";
 import * as THREE from "three";
 
 // The core assembly component, instantiated twice (once for sketch, once for reality)
 function AssemblyPart({ isSketch, clippingPlanes }: { isSketch: boolean, clippingPlanes: THREE.Plane[] }) {
   const scroll = useScroll();
+  const explosion = useStore((state) => state.explosion);
+  
   const groupRef = useRef<THREE.Group>(null);
   const outerRingRef = useRef<THREE.Mesh>(null);
   const innerRingRef = useRef<THREE.Mesh>(null);
@@ -76,28 +79,37 @@ function AssemblyPart({ isSketch, clippingPlanes }: { isSketch: boolean, clippin
     const kOffset = Math.min(1, offset * 2);
 
     if (outerRingRef.current) {
-      outerRingRef.current.position.y = THREE.MathUtils.lerp(0, 5, kOffset);
-      outerRingRef.current.rotation.x = time * 0.5;
+      outerRingRef.current.position.y = THREE.MathUtils.lerp(0, 5, kOffset) + (Math.sin(time * 5) * explosion * 10);
+      outerRingRef.current.position.x = Math.cos(time * 5) * explosion * 5;
+      outerRingRef.current.rotation.x = time * 0.5 + (explosion * 5);
     }
     
     if (innerRingRef.current) {
-      innerRingRef.current.position.y = THREE.MathUtils.lerp(0, -5, kOffset);
-      innerRingRef.current.rotation.z = time * -0.5;
+      innerRingRef.current.position.y = THREE.MathUtils.lerp(0, -5, kOffset) + (Math.cos(time * 7) * explosion * 10);
+      innerRingRef.current.position.z = Math.sin(time * 7) * explosion * 5;
+      innerRingRef.current.rotation.z = time * -0.5 - (explosion * 5);
     }
     
-    if (topCapRef.current) topCapRef.current.position.y = THREE.MathUtils.lerp(1.2, 7, kOffset);
-    if (bottomCapRef.current) bottomCapRef.current.position.y = THREE.MathUtils.lerp(-1.2, -7, kOffset);
+    if (topCapRef.current) {
+      topCapRef.current.position.y = THREE.MathUtils.lerp(1.2, 7, kOffset) + (explosion * 20);
+      topCapRef.current.rotation.x = explosion * time * 10;
+    }
+    
+    if (bottomCapRef.current) {
+      bottomCapRef.current.position.y = THREE.MathUtils.lerp(-1.2, -7, kOffset) - (explosion * 20);
+      bottomCapRef.current.rotation.z = explosion * time * 10;
+    }
     
     if (coreRef.current) {
-      const pulseSpeed = THREE.MathUtils.lerp(1, 10, kOffset);
-      const scale = 1 + Math.sin(time * pulseSpeed) * 0.05;
+      const pulseSpeed = THREE.MathUtils.lerp(1, 10, kOffset) + (explosion * 20);
+      const scale = 1 + Math.sin(time * pulseSpeed) * 0.05 + (explosion * 3);
       coreRef.current.scale.set(scale, scale, scale);
     }
 
     if (swarmRef.current) {
-      swarmRef.current.rotation.y = time * 0.2 + kOffset * Math.PI * 2;
-      swarmRef.current.rotation.x = time * -0.1;
-      const swarmExpand = THREE.MathUtils.lerp(1, 2.5, kOffset);
+      swarmRef.current.rotation.y = time * 0.2 + kOffset * Math.PI * 2 + (explosion * 5);
+      swarmRef.current.rotation.x = time * -0.1 + (explosion * 5);
+      const swarmExpand = THREE.MathUtils.lerp(1, 2.5, kOffset) + (explosion * 10);
       swarmRef.current.scale.set(swarmExpand, swarmExpand, swarmExpand);
     }
 
