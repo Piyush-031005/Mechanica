@@ -24,8 +24,8 @@ export function BlueprintHUD() {
       {/* Top Right: Cyberpunk Barcode & Data */}
       <div style={{ position: 'absolute', top: 40, right: 40, textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px' }}>
         <div style={{ display: 'flex', gap: '5px' }}>
-          {Array.from({ length: 15 }).map((_, i) => (
-            <div key={i} style={{ width: Math.random() > 0.5 ? 2 : 5, height: 30, backgroundColor: 'var(--foreground)' }} />
+          {[2, 5, 2, 2, 5, 5, 2, 5, 2, 5, 5, 2, 2, 5, 2].map((w, i) => (
+            <div key={i} style={{ width: w, height: 30, backgroundColor: 'var(--foreground)' }} />
           ))}
         </div>
         <div style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.2em', color: '#34d399', backgroundColor: '#1a1a1a', padding: '4px 8px' }}>
