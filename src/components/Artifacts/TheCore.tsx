@@ -6,15 +6,33 @@ import { useScroll, Edges } from "@react-three/drei";
 import { useStore } from "@/store/useStore";
 import * as THREE from "three";
 
+const PARTICLE_COUNT = 3000;
+
 function CorePart({ isBlueprint, clippingPlanes }: { isBlueprint: boolean, clippingPlanes: THREE.Plane[] }) {
   const scroll = useScroll();
   const explosion = useStore((state) => state.explosion);
   
   const groupRef = useRef<THREE.Group>(null);
   const sunRef = useRef<THREE.Mesh>(null);
-  const ring1Ref = useRef<THREE.Mesh>(null);
-  const ring2Ref = useRef<THREE.Mesh>(null);
-  const ring3Ref = useRef<THREE.Mesh>(null);
+  const diskRef = useRef<THREE.InstancedMesh>(null);
+  const ringRef = useRef<THREE.Mesh>(null);
+  const haloRef = useRef<THREE.Mesh>(null);
+
+  const dummy = useMemo(() => new THREE.Object3D(), []);
+
+  // Precompute random particle parameters for accretion disk
+  const particles = useMemo(() => {
+    const data = [];
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      const radius = 2 + Math.random() * 4;
+      const angle = Math.random() * Math.PI * 2;
+      const speed = (Math.random() * 0.5 + 0.5) * (10 / radius); // Faster near the center
+      const yOffset = (Math.random() - 0.5) * (radius - 1);
+      
+      data.push({ radius, angle, speed, yOffset });
+    }
+    return data;
+  }, []);
 
   useFrame((state) => {
     const offset = scroll.offset; 
@@ -25,96 +43,115 @@ function CorePart({ isBlueprint, clippingPlanes }: { isBlueprint: boolean, clipp
       const localOffset = Math.max(0, (offset - 0.7) * 4);
       const scale = THREE.MathUtils.lerp(0.001, 1, Math.min(1, localOffset)); 
       
-      // Explosion scale math: shatter outward based on store state
-      const explodeScale = 1 + explosion * 2; // Expands wildly if explosion > 0
+      const explodeScale = 1 + explosion * 2; 
       
       groupRef.current.scale.set(scale * explodeScale, scale * explodeScale, scale * explodeScale);
       groupRef.current.visible = offset > 0.65;
       
-      // Gently bob up and down
-      groupRef.current.position.y = Math.sin(time) * 0.2;
+      // Floating motion
+      groupRef.current.position.y = Math.sin(time * 0.5) * 0.5;
+      groupRef.current.rotation.x = 0.2;
     }
 
-    // Explode speed multiplier
-    const speedMult = 1 + explosion * 10;
+    const speedMult = 1 + explosion * 20;
 
     if (sunRef.current) {
-      sunRef.current.rotation.x = time * 0.5 * speedMult;
-      sunRef.current.rotation.y = time * 0.7 * speedMult;
-      // Pulse scale
-      const pulse = 1 + Math.sin(time * 5) * 0.05 + (explosion * 2);
+      sunRef.current.rotation.y = time * 2 * speedMult;
+      const pulse = 1 + Math.sin(time * 20) * 0.05 + (explosion * 3);
       sunRef.current.scale.set(pulse, pulse, pulse);
     }
     
-    // Rotate rings on different axes
-    if (ring1Ref.current) {
-      ring1Ref.current.rotation.x = time * 1.2 * speedMult;
-      ring1Ref.current.rotation.y = time * 0.4 * speedMult;
-      if (explosion > 0) ring1Ref.current.position.x = Math.sin(time * 20) * explosion;
+    if (haloRef.current) {
+      const haloScale = 1.2 + Math.sin(time * 15) * 0.1 + (explosion * 5);
+      haloRef.current.scale.set(haloScale, haloScale, haloScale);
     }
-    if (ring2Ref.current) {
-      ring2Ref.current.rotation.y = -time * 0.8 * speedMult;
-      ring2Ref.current.rotation.z = time * 1.5 * speedMult;
-      if (explosion > 0) ring2Ref.current.position.y = Math.cos(time * 25) * explosion;
+    
+    if (ringRef.current) {
+      ringRef.current.rotation.x = Math.PI / 2 + Math.sin(time) * 0.1;
+      ringRef.current.rotation.z = -time * speedMult;
+      const ringScale = 1 + explosion * 5;
+      ringRef.current.scale.set(ringScale, ringScale, ringScale);
     }
-    if (ring3Ref.current) {
-      ring3Ref.current.rotation.x = -time * 1.5 * speedMult;
-      ring3Ref.current.rotation.z = -time * 0.5 * speedMult;
-      if (explosion > 0) ring3Ref.current.position.z = Math.sin(time * 30) * explosion;
+
+    // Accretion Disk Simulation
+    if (diskRef.current) {
+      particles.forEach((p, i) => {
+        const currentAngle = p.angle + time * p.speed * speedMult;
+        
+        const scatterX = explosion > 0 ? (Math.random() - 0.5) * explosion * 50 : 0;
+        const scatterY = explosion > 0 ? (Math.random() - 0.5) * explosion * 50 : 0;
+        const scatterZ = explosion > 0 ? (Math.random() - 0.5) * explosion * 50 : 0;
+        
+        dummy.position.set(
+          Math.cos(currentAngle) * p.radius + scatterX,
+          p.yOffset + scatterY,
+          Math.sin(currentAngle) * p.radius + scatterZ
+        );
+        
+        // Elongate particles in the direction of motion
+        dummy.rotation.y = -currentAngle;
+        
+        const s = 1 + explosion * 2;
+        dummy.scale.set(s * 0.05, s * 0.05, s * 0.5);
+        dummy.updateMatrix();
+        
+        diskRef.current!.setMatrixAt(i, dummy.matrix);
+      });
+      diskRef.current.instanceMatrix.needsUpdate = true;
     }
   });
 
   const sunMat = useMemo(() => {
     if (isBlueprint) return new THREE.MeshBasicMaterial({ color: '#ffffff', wireframe: true, transparent: true, opacity: 0.8, clippingPlanes });
-    return new THREE.MeshStandardMaterial({ color: '#ffffff', emissive: '#ffffff', emissiveIntensity: 5, clippingPlanes });
+    return new THREE.MeshStandardMaterial({ color: '#000000', roughness: 0, clippingPlanes });
   }, [isBlueprint, clippingPlanes]);
 
-  const shellMat = useMemo(() => {
-    if (isBlueprint) return new THREE.MeshBasicMaterial({ color: '#34d399', wireframe: true, clippingPlanes });
-    return new THREE.MeshStandardMaterial({ color: '#1a1a1a', roughness: 0.2, metalness: 0.9, clippingPlanes });
+  const haloMat = useMemo(() => {
+    if (isBlueprint) return new THREE.MeshBasicMaterial({ color: '#ff00aa', wireframe: true, clippingPlanes });
+    return new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0.5, clippingPlanes });
   }, [isBlueprint, clippingPlanes]);
 
-  const innerRingMat = useMemo(() => {
-    if (isBlueprint) return new THREE.MeshBasicMaterial({ color: '#ff007f', wireframe: true, clippingPlanes });
+  const diskMat = useMemo(() => {
+    if (isBlueprint) return new THREE.MeshBasicMaterial({ color: '#00ccff', clippingPlanes });
+    return new THREE.MeshBasicMaterial({ color: '#ff00aa', clippingPlanes });
+  }, [isBlueprint, clippingPlanes]);
+  
+  const ringMat = useMemo(() => {
+    if (isBlueprint) return new THREE.MeshBasicMaterial({ color: '#ff00aa', wireframe: true, clippingPlanes });
     return new THREE.MeshPhysicalMaterial({ 
-      color: '#ffbf00', 
+      color: '#00ccff', 
       transmission: 0.9,
-      roughness: 0.1,
+      roughness: 0,
       ior: 1.5,
-      thickness: 0.5,
-      emissive: '#ffbf00',
-      emissiveIntensity: 0.5,
       clippingPlanes 
     });
   }, [isBlueprint, clippingPlanes]);
 
   return (
-    <group ref={groupRef} position={[0, -2, -5]}>
-      {/* Central Blinding Sun */}
+    <group ref={groupRef} position={[0, -2, -8]}>
+      {/* Central Black Hole */}
       <mesh ref={sunRef}>
-        <icosahedronGeometry args={[1, 2]} />
+        <sphereGeometry args={[1.5, 64, 64]} />
         <primitive object={sunMat} attach="material" />
       </mesh>
-
-      {/* Inner Energy Ring */}
-      <mesh ref={ring1Ref}>
-        <torusGeometry args={[1.5, 0.1, 16, 64]} />
-        <primitive object={innerRingMat} attach="material" />
+      
+      {/* Event Horizon Halo */}
+      <mesh ref={haloRef}>
+        <sphereGeometry args={[1.6, 32, 32]} />
+        <primitive object={haloMat} attach="material" />
       </mesh>
 
-      {/* Middle Heavy Plating Ring */}
-      <mesh ref={ring2Ref}>
-        <torusGeometry args={[2.5, 0.4, 6, 32]} />
-        <primitive object={shellMat} attach="material" />
-        {isBlueprint && <Edges scale={1.05} color="#34d399" />}
+      {/* Gravitational Lensing Ring */}
+      <mesh ref={ringRef} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[3, 0.2, 16, 100]} />
+        <primitive object={ringMat} attach="material" />
       </mesh>
 
-      {/* Outer Hexagonal Structure */}
-      <mesh ref={ring3Ref}>
-        <torusGeometry args={[3.5, 0.1, 3, 64]} />
-        <primitive object={shellMat} attach="material" />
-        {isBlueprint && <Edges scale={1.05} color="#ff007f" />}
-      </mesh>
+      {/* Accretion Disk Particles */}
+      <instancedMesh ref={diskRef} args={[undefined as any, undefined as any, PARTICLE_COUNT]}>
+        <boxGeometry args={[1, 1, 1]} />
+        <primitive object={diskMat} attach="material" />
+      </instancedMesh>
     </group>
   );
 }
