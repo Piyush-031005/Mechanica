@@ -10,6 +10,7 @@ import { ScrollControls, Scroll, Environment } from "@react-three/drei";
 
 import { CyberBird } from "@/components/Artifacts/CyberBird";
 import { TheSpine } from "@/components/Artifacts/TheSpine";
+import { TheCore } from "@/components/Artifacts/TheCore";
 import { AudioSystem } from "@/components/Mechanics/AudioSystem";
 import { SecretManager } from "@/components/Mechanics/SecretManager";
 
@@ -33,11 +34,12 @@ export default function Home() {
           {/* Hidden Developer / Easter Egg Mechanics */}
           <SecretManager />
           
-          {/* Extended to 12 pages for the colossal scale */}
-          <ScrollControls pages={12} damping={0.1}>
+          {/* Extended to 16 pages for the grand finale */}
+          <ScrollControls pages={16} damping={0.1}>
             <MechanicalAssembly />
             <CyberBird />
             <TheSpine />
+            <TheCore />
             
             <Scroll html style={{ width: '100vw', mixBlendMode: 'multiply' }}>
               
@@ -171,6 +173,49 @@ export default function Home() {
                 </h1>
                 <p style={{ position: 'absolute', fontSize: '24px', fontWeight: 700, letterSpacing: '0.5em', color: '#ff007f' }}>
                   THE ABYSS
+                </p>
+              </div>
+
+              {/* PAGE 13-16: ORGAN 04 (THE CORE) */}
+              <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-end', padding: '10vw' }}>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: '10px', letterSpacing: '0.2em', opacity: 0.5, marginBottom: '20px' }}>ARCHIVE ENTRY // 004</div>
+                  <h1 style={{ fontSize: '8vw', fontWeight: 900, lineHeight: 0.9, letterSpacing: '-0.02em', color: 'var(--foreground)' }}>
+                    ORGAN 04<br/><span style={{ color: '#ffbf00' }}>THE CORE</span>
+                  </h1>
+                  <p style={{ marginTop: '20px', maxWidth: '400px', fontSize: '14px', opacity: 0.7, letterSpacing: '0.05em', marginLeft: 'auto' }}>
+                    The heart of the Colossus. A contained Dyson sphere harnessing the power of a miniature dying sun.
+                  </p>
+                </div>
+              </div>
+
+              <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', padding: '10vw' }}>
+                <div style={{ maxWidth: '400px' }}>
+                  <h2 className="text-jp" style={{ fontSize: '4vw', fontWeight: 900, color: '#ff007f' }}>核</h2>
+                  <h3 style={{ fontSize: '2vw', fontWeight: 700, letterSpacing: '0.1em', marginTop: '10px' }}>DYSON ARCHITECTURE</h3>
+                  <p style={{ marginTop: '20px', fontSize: '14px', opacity: 0.7, textAlign: 'justify' }}>
+                    Concentric geometric rings orbit the sun at wildly varying speeds, shifting into overdrive when the global explosion mechanic is triggered.
+                  </p>
+                </div>
+              </div>
+              
+              <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', padding: '10vw' }}>
+                <div style={{ padding: '40px', border: '1px solid #ffbf00', backgroundColor: 'rgba(240, 234, 221, 0.1)', backdropFilter: 'blur(5px)' }}>
+                  <h3 style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.2em', color: '#ff007f', marginBottom: '20px' }}>CRITICAL WARNING</h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '12px', width: '300px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(44, 40, 37, 0.2)', paddingBottom: '5px' }}>
+                      <span style={{ color: '#ff0000', fontWeight: 700 }}>HOLD SPACEBAR TO INITIATE SHATTER MECHANIC</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                <h1 className="text-jp" style={{ fontSize: '15vw', fontWeight: 900, WebkitTextStroke: '2px var(--foreground)', color: 'transparent', opacity: 0.1 }}>
+                  神
+                </h1>
+                <p style={{ position: 'absolute', fontSize: '24px', fontWeight: 700, letterSpacing: '0.5em', color: '#ffbf00' }}>
+                  THE CREATOR
                 </p>
               </div>
 
