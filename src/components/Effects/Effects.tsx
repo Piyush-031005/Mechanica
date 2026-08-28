@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import { EffectComposer, Noise, Bloom, ChromaticAberration, Glitch } from "@react-three/postprocessing";
-import { BlendFunction } from "postprocessing";
+import { BlendFunction, GlitchMode } from "postprocessing";
 import { useScroll } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
@@ -19,10 +19,13 @@ export function Effects() {
       const scrollSpeed = Math.abs(scroll.delta);
       const isGlitching = scrollSpeed > 0.005 || explosion > 0.5;
       
-      // Control glitch strength dynamically
-      glitchRef.current.active = isGlitching;
-      if (isGlitching) {
-        glitchRef.current.ratio = explosion > 0 ? 0.9 : 0.2;
+      // Control glitch mode dynamically (avoiding .active getter error)
+      if (explosion > 0.5) {
+        glitchRef.current.mode = GlitchMode.CONSTANT_WILD;
+      } else if (isGlitching) {
+        glitchRef.current.mode = GlitchMode.SPORADIC;
+      } else {
+        glitchRef.current.mode = GlitchMode.DISABLED;
       }
     }
   });
@@ -46,8 +49,6 @@ export function Effects() {
         delay={new THREE.Vector2(1.5, 3.5)} // min, max delay
         duration={new THREE.Vector2(0.1, 0.3)} // min, max duration
         strength={new THREE.Vector2(0.1, 0.5)} // min, max strength
-        active={false} // Toggled dynamically in useFrame
-        ratio={0.2}
       />
 
       {/* Subtle Chromatic Aberration for premium digital lens effect */}
