@@ -15,6 +15,7 @@ import { AudioSystem } from "@/components/Mechanics/AudioSystem";
 import { SecretManager } from "@/components/Mechanics/SecretManager";
 import { AstrolabeGrid } from "@/components/Environment/AstrolabeGrid";
 import { FluidVortex } from "@/components/Environment/FluidVortex";
+import { RealitySplit } from "@/components/Effects/RealitySplit";
 
 export default function Home() {
   return (
@@ -230,6 +231,8 @@ export default function Home() {
           </ScrollControls>
         </Canvas>
       </div>
+
+      <RealitySplit />
     </main>
   );
 }
