@@ -6,48 +6,49 @@ import { useScroll, Edges } from "@react-three/drei";
 import { useStore } from "@/store/useStore";
 import * as THREE from "three";
 
-// The core assembly component, instantiated twice (once for sketch, once for reality)
-function AssemblyPart({ isSketch, clippingPlanes }: { isSketch: boolean, clippingPlanes: THREE.Plane[] }) {
+const WIRE_COUNT = 150;
+const GEAR_COUNT = 50;
+
+function ScannerPart({ isBlueprint, clippingPlanes }: { isBlueprint: boolean, clippingPlanes: THREE.Plane[] }) {
   const scroll = useScroll();
   const explosion = useStore((state) => state.explosion);
   
   const groupRef = useRef<THREE.Group>(null);
-  const outerRingRef = useRef<THREE.Mesh>(null);
-  const innerRingRef = useRef<THREE.Mesh>(null);
-  const coreRef = useRef<THREE.Mesh>(null);
-  const topCapRef = useRef<THREE.Mesh>(null);
-  const bottomCapRef = useRef<THREE.Mesh>(null);
-  const swarmRef = useRef<THREE.Points>(null);
-  const topLaserRef = useRef<THREE.Mesh>(null);
-  const bottomLaserRef = useRef<THREE.Mesh>(null);
+  const outerHullRef = useRef<THREE.Mesh>(null);
+  const wiresRef = useRef<THREE.InstancedMesh>(null);
+  const gearsRef = useRef<THREE.InstancedMesh>(null);
 
-  // Generate the Orbital Swarm Particles
-  const swarmCount = isSketch ? 1000 : 5000; // Sketch has fewer particles like dust
-  const [swarmPositions, swarmColors] = useMemo(() => {
-    const pos = new Float32Array(swarmCount * 3);
-    const col = new Float32Array(swarmCount * 3);
-    const color = new THREE.Color();
-    
-    for (let i = 0; i < swarmCount; i++) {
-      const r = 2 + Math.random() * 3;
-      const theta = Math.random() * Math.PI * 2;
-      const phi = (Math.random() - 0.5) * 1.5; 
-      
-      pos[i * 3] = r * Math.cos(theta) * Math.cos(phi);
-      pos[i * 3 + 1] = r * Math.sin(phi);
-      pos[i * 3 + 2] = r * Math.sin(theta) * Math.cos(phi);
-      
-      if (isSketch) {
-        color.set('#2c2825'); // Ink color for sketch
-      } else {
-        color.lerpColors(new THREE.Color('#00f0ff'), new THREE.Color('#ff003c'), Math.random() > 0.8 ? 1 : 0);
-      }
-      col[i * 3] = color.r;
-      col[i * 3 + 1] = color.g;
-      col[i * 3 + 2] = color.b;
+  const dummy = useMemo(() => new THREE.Object3D(), []);
+
+  // Precompute complex internal wiring
+  const wireData = useMemo(() => {
+    const data = [];
+    for (let i = 0; i < WIRE_COUNT; i++) {
+      data.push({
+        radius: Math.random() * 2.5,
+        height: (Math.random() - 0.5) * 6,
+        angle: Math.random() * Math.PI * 2,
+        tubeRadius: 0.02 + Math.random() * 0.03
+      });
     }
-    return [pos, col];
-  }, [isSketch]);
+    return data;
+  }, []);
+
+  // Precompute internal gears
+  const gearData = useMemo(() => {
+    const data = [];
+    for (let i = 0; i < GEAR_COUNT; i++) {
+      data.push({
+        x: (Math.random() - 0.5) * 4,
+        y: (Math.random() - 0.5) * 4,
+        z: (Math.random() - 0.5) * 4,
+        size: 0.2 + Math.random() * 0.8,
+        speed: (Math.random() - 0.5) * 5,
+        axis: new THREE.Vector3(Math.random(), Math.random(), Math.random()).normalize()
+      });
+    }
+    return data;
+  }, []);
 
   useFrame((state) => {
     const offset = scroll.offset; 
@@ -60,13 +61,11 @@ function AssemblyPart({ isSketch, clippingPlanes }: { isSketch: boolean, clippin
       groupRef.current.rotation.y = time * 0.1 + localOffset * Math.PI * 4;
       groupRef.current.rotation.x = THREE.MathUtils.lerp(0, Math.PI / 4, localOffset);
 
-      // If we scroll past 0.25 (end of page 4), the object zooms massively past the camera
       if (offset > 0.25) {
-        const flyby = (offset - 0.25) * 4; // 0 to 1 for the next quarter
+        const flyby = (offset - 0.25) * 4; 
         const scale = THREE.MathUtils.lerp(1, 15, flyby);
         groupRef.current.scale.set(scale, scale, scale);
         groupRef.current.position.z = THREE.MathUtils.lerp(0, 10, flyby);
-        // Fade out
         groupRef.current.visible = flyby < 0.8;
       } else {
         groupRef.current.scale.set(1, 1, 1);
@@ -75,177 +74,148 @@ function AssemblyPart({ isSketch, clippingPlanes }: { isSketch: boolean, clippin
       }
     }
     
-    // Use localOffset for kinematics so it finishes exploding by 0.25
-    const kOffset = Math.min(1, offset * 4);
-
-    if (outerRingRef.current) {
-      outerRingRef.current.position.y = THREE.MathUtils.lerp(0, 5, kOffset) + (Math.sin(time * 5) * explosion * 10);
-      outerRingRef.current.position.x = Math.cos(time * 5) * explosion * 5;
-      outerRingRef.current.rotation.x = time * 0.5 + (explosion * 5);
-    }
-    
-    if (innerRingRef.current) {
-      innerRingRef.current.position.y = THREE.MathUtils.lerp(0, -5, kOffset) + (Math.cos(time * 7) * explosion * 10);
-      innerRingRef.current.position.z = Math.sin(time * 7) * explosion * 5;
-      innerRingRef.current.rotation.z = time * -0.5 - (explosion * 5);
-    }
-    
-    if (topCapRef.current) {
-      topCapRef.current.position.y = THREE.MathUtils.lerp(1.2, 7, kOffset) + (explosion * 20);
-      topCapRef.current.rotation.x = explosion * time * 10;
-    }
-    
-    if (bottomCapRef.current) {
-      bottomCapRef.current.position.y = THREE.MathUtils.lerp(-1.2, -7, kOffset) - (explosion * 20);
-      bottomCapRef.current.rotation.z = explosion * time * 10;
-    }
-    
-    if (coreRef.current) {
-      const pulseSpeed = THREE.MathUtils.lerp(1, 10, kOffset) + (explosion * 20);
-      const scale = 1 + Math.sin(time * pulseSpeed) * 0.05 + (explosion * 3);
-      coreRef.current.scale.set(scale, scale, scale);
+    // Wires Simulation
+    if (wiresRef.current) {
+      wireData.forEach((w, i) => {
+        const scatterX = explosion > 0 ? (Math.random() - 0.5) * explosion * 10 : 0;
+        const scatterY = explosion > 0 ? (Math.random() - 0.5) * explosion * 10 : 0;
+        const scatterZ = explosion > 0 ? (Math.random() - 0.5) * explosion * 10 : 0;
+        
+        dummy.position.set(
+          Math.cos(w.angle + time * 0.5) * w.radius + scatterX,
+          w.height + scatterY,
+          Math.sin(w.angle + time * 0.5) * w.radius + scatterZ
+        );
+        dummy.rotation.set(0, -w.angle, Math.PI / 2);
+        
+        const s = 1 + explosion;
+        dummy.scale.set(w.tubeRadius * s, w.radius * Math.PI * s, w.tubeRadius * s);
+        dummy.updateMatrix();
+        wiresRef.current!.setMatrixAt(i, dummy.matrix);
+      });
+      wiresRef.current.instanceMatrix.needsUpdate = true;
     }
 
-    if (swarmRef.current) {
-      swarmRef.current.rotation.y = time * 0.2 + kOffset * Math.PI * 2 + (explosion * 5);
-      swarmRef.current.rotation.x = time * -0.1 + (explosion * 5);
-      const swarmExpand = THREE.MathUtils.lerp(1, 2.5, kOffset) + (explosion * 10);
-      swarmRef.current.scale.set(swarmExpand, swarmExpand, swarmExpand);
+    // Gears Simulation
+    if (gearsRef.current) {
+      gearData.forEach((g, i) => {
+        const scatterX = explosion > 0 ? (Math.random() - 0.5) * explosion * 20 : 0;
+        const scatterY = explosion > 0 ? (Math.random() - 0.5) * explosion * 20 : 0;
+        const scatterZ = explosion > 0 ? (Math.random() - 0.5) * explosion * 20 : 0;
+        
+        dummy.position.set(g.x + scatterX, g.y + scatterY, g.z + scatterZ);
+        
+        const q = new THREE.Quaternion().setFromAxisAngle(g.axis, time * g.speed + (explosion * Math.random() * 10));
+        dummy.quaternion.copy(q);
+        
+        const s = g.size * (1 + explosion * 2);
+        dummy.scale.set(s, s, s);
+        dummy.updateMatrix();
+        gearsRef.current!.setMatrixAt(i, dummy.matrix);
+      });
+      gearsRef.current.instanceMatrix.needsUpdate = true;
     }
 
-    if (topLaserRef.current && topCapRef.current) {
-       const dist = topCapRef.current.position.y - 1.2;
-       topLaserRef.current.scale.y = Math.max(0.001, dist);
-       topLaserRef.current.position.y = 1.2 + (dist / 2);
-    }
-    if (bottomLaserRef.current && bottomCapRef.current) {
-       const dist = Math.abs(bottomCapRef.current.position.y + 1.2);
-       bottomLaserRef.current.scale.y = Math.max(0.001, dist);
-       bottomLaserRef.current.position.y = -1.2 - (dist / 2);
+    if (outerHullRef.current) {
+      const pulse = 1 + explosion * 2;
+      outerHullRef.current.scale.set(pulse, pulse, pulse);
     }
   });
 
-  const sketchMat = useMemo(() => new THREE.MeshBasicMaterial({ color: '#2c2825', wireframe: true, clippingPlanes }), [clippingPlanes]);
-  const inkEdges = isSketch ? '#2c2825' : '#00f0ff';
-  const redEdges = isSketch ? '#a31a1a' : '#ff003c';
+  const solidMat = useMemo(() => new THREE.MeshPhysicalMaterial({ 
+    color: '#0a0a0a', 
+    metalness: 1, 
+    roughness: 0.2,
+    clearcoat: 1,
+    clippingPlanes 
+  }), [clippingPlanes]);
+  
+  const wireMat = useMemo(() => new THREE.MeshBasicMaterial({ 
+    color: '#00ccff', 
+    wireframe: true, 
+    transparent: true, 
+    opacity: 0.6,
+    clippingPlanes 
+  }), [clippingPlanes]);
+
+  const gearMat = useMemo(() => {
+    if (isBlueprint) return new THREE.MeshBasicMaterial({ color: '#ff00aa', wireframe: true, clippingPlanes });
+    return new THREE.MeshStandardMaterial({ color: '#222222', metalness: 0.8, roughness: 0.5, clippingPlanes });
+  }, [isBlueprint, clippingPlanes]);
+
+  const tubeMat = useMemo(() => {
+    if (isBlueprint) return new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0.3, clippingPlanes });
+    return new THREE.MeshStandardMaterial({ color: '#ff00aa', emissive: '#ff00aa', emissiveIntensity: 2, clippingPlanes });
+  }, [isBlueprint, clippingPlanes]);
 
   return (
     <group ref={groupRef}>
-      {/* Blueprint Axes */}
-      <axesHelper args={[4]} material={new THREE.LineBasicMaterial({ clippingPlanes, transparent: true, opacity: 0.3 })} />
+      {/* The solid exterior hull (only visible on one side of scanner) */}
+      {!isBlueprint && (
+        <mesh ref={outerHullRef}>
+          <capsuleGeometry args={[3, 4, 32, 64]} />
+          <primitive object={solidMat} attach="material" />
+        </mesh>
+      )}
 
-      {/* Particle Swarm */}
-      <points ref={swarmRef}>
-        <bufferGeometry>
-          <bufferAttribute attach="attributes-position" args={[swarmPositions, 3]} />
-          <bufferAttribute attach="attributes-color" args={[swarmColors, 3]} />
-        </bufferGeometry>
-        <pointsMaterial size={isSketch ? 0.01 : 0.02} vertexColors transparent opacity={0.6} sizeAttenuation blending={isSketch ? THREE.NormalBlending : THREE.AdditiveBlending} depthWrite={false} clippingPlanes={clippingPlanes} />
-      </points>
+      {/* The internal anatomical wires */}
+      <instancedMesh ref={wiresRef} args={[undefined as any, undefined as any, WIRE_COUNT]}>
+        <cylinderGeometry args={[1, 1, 1, 8]} />
+        <primitive object={tubeMat} attach="material" />
+      </instancedMesh>
 
-      {/* Core */}
-      <mesh ref={coreRef}>
-        <sphereGeometry args={[1.2, 32, 32]} />
-        {isSketch ? (
-          <meshBasicMaterial color="#f0eadd" transparent opacity={0.8} clippingPlanes={clippingPlanes} />
-        ) : (
-          <meshPhysicalMaterial 
-            transmission={1} 
-            thickness={2.5} 
-            roughness={0.05} 
-            ior={1.45} 
-            clearcoat={1} 
-            color="#ffffff" 
-            attenuationDistance={5} 
-            attenuationColor="#ff003c" 
-            clippingPlanes={clippingPlanes} 
-          />
-        )}
-        <Edges scale={1.02} threshold={15}>
-          <lineBasicMaterial attach="material" color={inkEdges} clippingPlanes={clippingPlanes} />
-        </Edges>
-      </mesh>
+      {/* The internal anatomical gears */}
+      <instancedMesh ref={gearsRef} args={[undefined as any, undefined as any, GEAR_COUNT]}>
+        <torusGeometry args={[1, 0.2, 16, 32]} />
+        <primitive object={gearMat} attach="material" />
+      </instancedMesh>
 
-      {/* Rings */}
-      <mesh ref={outerRingRef} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[3.5, 0.05, 16, 100]} />
-        {isSketch ? <primitive object={sketchMat} attach="material" /> : <meshPhysicalMaterial color="#111111" metalness={1} roughness={0.2} clippingPlanes={clippingPlanes} />}
-        <Edges>
-          <lineBasicMaterial attach="material" color={redEdges} clippingPlanes={clippingPlanes} />
-        </Edges>
-      </mesh>
-      <mesh ref={innerRingRef} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[2.5, 0.02, 16, 100]} />
-        {isSketch ? <primitive object={sketchMat} attach="material" /> : <meshPhysicalMaterial color="#111111" metalness={1} roughness={0.2} clippingPlanes={clippingPlanes} />}
-        <Edges>
-          <lineBasicMaterial attach="material" color={inkEdges} clippingPlanes={clippingPlanes} />
-        </Edges>
-      </mesh>
-      
-      {/* Caps */}
-      <mesh ref={topCapRef} position={[0, 1.2, 0]}>
-        <cylinderGeometry args={[0.5, 0.8, 0.4, 32]} />
-        {isSketch ? <primitive object={sketchMat} attach="material" /> : <meshPhysicalMaterial color="#111111" metalness={1} roughness={0.5} wireframe clippingPlanes={clippingPlanes} />}
-        <Edges>
-          <lineBasicMaterial attach="material" color={redEdges} clippingPlanes={clippingPlanes} />
-        </Edges>
-      </mesh>
-      <mesh ref={bottomCapRef} position={[0, -1.2, 0]}>
-        <cylinderGeometry args={[0.8, 0.5, 0.4, 32]} />
-        {isSketch ? <primitive object={sketchMat} attach="material" /> : <meshPhysicalMaterial color="#111111" metalness={1} roughness={0.5} wireframe clippingPlanes={clippingPlanes} />}
-        <Edges>
-          <lineBasicMaterial attach="material" color={inkEdges} clippingPlanes={clippingPlanes} />
-        </Edges>
-      </mesh>
-
-      {/* Lasers */}
-      <mesh ref={topLaserRef}>
-        <cylinderGeometry args={[0.02, 0.02, 1, 8]} />
-        <meshBasicMaterial color={redEdges} transparent opacity={isSketch ? 0.2 : 0.5} clippingPlanes={clippingPlanes} />
-      </mesh>
-      <mesh ref={bottomLaserRef}>
-        <cylinderGeometry args={[0.02, 0.02, 1, 8]} />
-        <meshBasicMaterial color={inkEdges} transparent opacity={isSketch ? 0.2 : 0.5} clippingPlanes={clippingPlanes} />
-      </mesh>
+      {/* Blueprint outline for hull */}
+      {isBlueprint && (
+        <mesh>
+          <capsuleGeometry args={[3, 4, 16, 32]} />
+          <primitive object={wireMat} attach="material" />
+        </mesh>
+      )}
     </group>
   );
 }
 
-// The master component that manages the clipping planes and renders both realities
 export function MechanicalAssembly() {
-  const { viewport } = useThree();
+  // MRI Sweeping Scanner Planes
+  const planeBlueprint = useMemo(() => new THREE.Plane(new THREE.Vector3(0, -1, 0), 0), []);
+  const planeMachine = useMemo(() => new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), []);
   
-  // Normal points left [-1, 0, 0], so it clips everything to the right of the plane
-  const planeSketch = useMemo(() => new THREE.Plane(new THREE.Vector3(-1, 0, 0), 0), []);
-  // Normal points right [1, 0, 0], so it clips everything to the left of the plane
-  const planeReality = useMemo(() => new THREE.Plane(new THREE.Vector3(1, 0, 0), 0), []);
-  
-  const splitLineRef = useRef<THREE.Mesh>(null);
-
   useFrame((state) => {
-    // Convert normalized device coordinates (-1 to 1) to world units
-    const mouseX = (state.pointer.x * viewport.width) / 2;
-    
-    // Update clipping planes to follow the mouse
-    planeSketch.constant = mouseX;
-    planeReality.constant = -mouseX;
-
-    // Move the glowing red split line
-    if (splitLineRef.current) {
-      splitLineRef.current.position.x = mouseX;
-    }
+    // MRI scanner sweeping up and down over time
+    const yPos = Math.sin(state.clock.elapsedTime * 1.5) * 4; 
+    planeBlueprint.constant = yPos;
+    planeMachine.constant = -yPos;
   });
 
   return (
-    <>
-      <AssemblyPart isSketch={true} clippingPlanes={[planeSketch]} />
-      <AssemblyPart isSketch={false} clippingPlanes={[planeReality]} />
+    <group position={[0, 0, -5]}>
+      <ScannerPart isBlueprint={true} clippingPlanes={[planeBlueprint]} />
+      <ScannerPart isBlueprint={false} clippingPlanes={[planeMachine]} />
       
-      {/* The Reality Splitter Line */}
-      <mesh ref={splitLineRef} position={[0, 0, 2]}>
-        <planeGeometry args={[0.02, 20]} />
-        <meshBasicMaterial color="#ff003c" transparent opacity={0.8} />
+      {/* Scanner laser visual */}
+      <mesh rotation={[Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[20, 20]} />
+        <meshBasicMaterial 
+          color="#00ffff" 
+          transparent 
+          opacity={0.1} 
+          side={THREE.DoubleSide} 
+          depthWrite={false}
+        />
+        <meshBasicMaterial 
+          color="#00ffff" 
+          wireframe 
+          transparent 
+          opacity={0.5} 
+          side={THREE.DoubleSide} 
+        />
       </mesh>
-    </>
+    </group>
   );
 }
