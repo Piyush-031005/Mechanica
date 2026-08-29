@@ -72,11 +72,11 @@ export function CyberMask() {
       <MaskHalf isBlueprint={true} clippingPlanes={[planeBlueprint]} dRef={dismantleProgress} explosion={explosion} />
       <MaskHalf isBlueprint={false} clippingPlanes={[planeMachine]} dRef={dismantleProgress} explosion={explosion} />
       
-      {/* MRI Laser */}
+      {/* Scanner Laser */}
       <mesh ref={laserRef} rotation={[Math.PI / 2, 0, 0]}>
         <planeGeometry args={[20, 20]} />
-        <meshBasicMaterial color="#00ffff" transparent opacity={0.1} side={THREE.DoubleSide} depthWrite={false} />
-        <meshBasicMaterial color="#00ffff" wireframe transparent opacity={0.3} side={THREE.DoubleSide} />
+        <meshBasicMaterial color="#ffffff" transparent opacity={0.1} side={THREE.DoubleSide} depthWrite={false} />
+        <meshBasicMaterial color="#ffffff" wireframe transparent opacity={0.3} side={THREE.DoubleSide} />
       </mesh>
     </group>
   );
@@ -125,7 +125,7 @@ function MaskHalf({ isBlueprint, clippingPlanes, dRef, explosion }: { isBlueprin
   
   // Changed from messy wireframe to a clean, solid, flat graphic material
   const graphicMat = useMemo(() => new THREE.MeshBasicMaterial({ 
-    color: '#00ccff', 
+    color: '#ff0033', // Nuclear Red
     transparent: true, 
     opacity: 0.8,
     clippingPlanes,
@@ -133,8 +133,8 @@ function MaskHalf({ isBlueprint, clippingPlanes, dRef, explosion }: { isBlueprin
   }), [clippingPlanes]);
 
   const eyeMat = useMemo(() => {
-    if (isBlueprint) return new THREE.MeshBasicMaterial({ color: '#ff00aa', clippingPlanes });
-    return new THREE.MeshBasicMaterial({ color: '#ffffff', clippingPlanes });
+    if (isBlueprint) return new THREE.MeshBasicMaterial({ color: '#ffffff', clippingPlanes });
+    return new THREE.MeshBasicMaterial({ color: '#ff0033', clippingPlanes }); // Nuclear Red
   }, [isBlueprint, clippingPlanes]);
 
   return (

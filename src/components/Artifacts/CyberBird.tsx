@@ -85,7 +85,7 @@ function MantaPart({ isBlueprint, clippingPlanes }: { isBlueprint: boolean, clip
   });
 
   const solidMat = useMemo(() => new THREE.MeshPhysicalMaterial({ 
-    color: '#00ccff', 
+    color: '#ff0033', // Nuclear Red
     metalness: 0.9, 
     roughness: 0.1,
     clearcoat: 1,
@@ -93,7 +93,7 @@ function MantaPart({ isBlueprint, clippingPlanes }: { isBlueprint: boolean, clip
   }), [clippingPlanes]);
   
   const wireMat = useMemo(() => new THREE.MeshBasicMaterial({ 
-    color: '#ff00aa', 
+    color: '#ffffff', // Bright White
     wireframe: true, 
     transparent: true, 
     opacity: 0.3,
@@ -102,7 +102,7 @@ function MantaPart({ isBlueprint, clippingPlanes }: { isBlueprint: boolean, clip
 
   const coreMat = useMemo(() => new THREE.MeshStandardMaterial({
     color: '#ffffff',
-    emissive: '#00ccff',
+    emissive: '#ff0033',
     emissiveIntensity: 5,
     clippingPlanes
   }), [clippingPlanes]);
@@ -149,8 +149,8 @@ export function CyberBird() {
       
       <mesh ref={laserRef} rotation={[Math.PI / 2, 0, 0]}>
         <planeGeometry args={[30, 30]} />
-        <meshBasicMaterial color="#00ccff" transparent opacity={0.1} side={THREE.DoubleSide} depthWrite={false} />
-        <meshBasicMaterial color="#00ccff" wireframe transparent opacity={0.3} side={THREE.DoubleSide} />
+        <meshBasicMaterial color="#ffffff" transparent opacity={0.1} side={THREE.DoubleSide} depthWrite={false} />
+        <meshBasicMaterial color="#ffffff" wireframe transparent opacity={0.3} side={THREE.DoubleSide} />
       </mesh>
     </group>
   );

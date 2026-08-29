@@ -25,8 +25,8 @@ export function ArachnidCore() {
   // Procedural Web Generation (Ultra-fine deliberate lines)
   const webGeometry = useMemo(() => {
     const points: THREE.Vector3[] = [];
-    const radials = 16;
-    const spirals = 20;
+    const radials = 32; // Doubled density for crazier web
+    const spirals = 40; // Doubled density
     const maxRadius = 15;
 
     // Radial Threads
@@ -186,23 +186,22 @@ export function ArachnidCore() {
               position={[0.5 * xDir, yPos, 0]} 
               rotation={[0, 0, isLeft ? Math.PI : 0]}
             >
-              {/* Coxa (Shoulder joint) */}
               <group 
                 ref={(el) => {
                   if (el) legRefs.current[i] = el;
                 }}
                 rotation={[0, 0, 1.5]}
               >
-                {/* Femur */}
+                {/* Femur (Sharper) */}
                 <mesh position={[1.5, 0, 0]}>
-                  <boxGeometry args={[3, 0.1, 0.1]} />
+                  <boxGeometry args={[3, 0.05, 0.05]} />
                   <primitive object={isLeft ? blueprintMat : machineMat} attach="material" />
                 </mesh>
                 
-                {/* Tibia (folds down) */}
-                <group position={[3, 0, 0]} rotation={[0, 0, -2]}>
-                  <mesh position={[2, 0, 0]}>
-                    <boxGeometry args={[4, 0.05, 0.05]} />
+                {/* Tibia (Longer, sharper, aggressive) */}
+                <group position={[3, 0, 0]} rotation={[0, 0, -2.5]}>
+                  <mesh position={[3, 0, 0]}>
+                    <coneGeometry args={[0.05, 6, 4]} />
                     <primitive object={isLeft ? blueprintMat : machineMat} attach="material" />
                   </mesh>
                 </group>
@@ -210,6 +209,18 @@ export function ArachnidCore() {
             </group>
           );
         })}
+
+        {/* Aggressive Pedipalps (Fangs) */}
+        <group position={[0, 1.8, 0]}>
+          <mesh position={[-0.3, 0.5, 0]} rotation={[0, 0, 0.5]}>
+            <coneGeometry args={[0.1, 1.5, 4]} />
+            <primitive object={blueprintMat} attach="material" />
+          </mesh>
+          <mesh position={[0.3, 0.5, 0]} rotation={[0, 0, -0.5]}>
+            <coneGeometry args={[0.1, 1.5, 4]} />
+            <primitive object={machineMat} attach="material" />
+          </mesh>
+        </group>
       </group>
     </group>
   );
