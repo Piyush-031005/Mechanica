@@ -50,16 +50,33 @@ function ScannerPart({ isBlueprint, clippingPlanes }: { isBlueprint: boolean, cl
     return data;
   }, []);
 
+  const isDismantled = useStore((state) => state.isDismantled);
+  const dismantleProgress = useRef(0);
+
   useFrame((state) => {
     const offset = scroll.offset; 
     const time = state.clock.elapsedTime;
+    
+    dismantleProgress.current = THREE.MathUtils.lerp(
+      dismantleProgress.current, 
+      isDismantled ? 1 : 0, 
+      0.05
+    );
+    const d = dismantleProgress.current;
 
     if (groupRef.current) {
-      // 0 to 0.25 maps to local 0 to 1 for explosion
       const localOffset = Math.min(1, offset * 4);
       
-      groupRef.current.rotation.y = time * 0.1 + localOffset * Math.PI * 4;
-      groupRef.current.rotation.x = THREE.MathUtils.lerp(0, Math.PI / 4, localOffset);
+      groupRef.current.rotation.y = THREE.MathUtils.lerp(
+        time * 0.1 + localOffset * Math.PI * 4,
+        0, // Face forward when dismantled
+        d
+      );
+      groupRef.current.rotation.x = THREE.MathUtils.lerp(
+        THREE.MathUtils.lerp(0, Math.PI / 4, localOffset),
+        0, // Face forward when dismantled
+        d
+      );
 
       if (offset > 0.25) {
         const flyby = (offset - 0.25) * 4; 
@@ -74,39 +91,66 @@ function ScannerPart({ isBlueprint, clippingPlanes }: { isBlueprint: boolean, cl
       }
     }
     
-    // Wires Simulation
+    // Wires Simulation (Dismantles into 2D Grid)
     if (wiresRef.current) {
       wireData.forEach((w, i) => {
         const scatterX = explosion > 0 ? (Math.random() - 0.5) * explosion * 10 : 0;
         const scatterY = explosion > 0 ? (Math.random() - 0.5) * explosion * 10 : 0;
         const scatterZ = explosion > 0 ? (Math.random() - 0.5) * explosion * 10 : 0;
         
+        const gridX = (i % 15) * 0.5 - 3.5;
+        const gridY = Math.floor(i / 15) * 0.5 - 3.5;
+        
+        const posX = Math.cos(w.angle + time * 0.5) * w.radius + scatterX;
+        const posY = w.height + scatterY;
+        const posZ = Math.sin(w.angle + time * 0.5) * w.radius + scatterZ;
+
         dummy.position.set(
-          Math.cos(w.angle + time * 0.5) * w.radius + scatterX,
-          w.height + scatterY,
-          Math.sin(w.angle + time * 0.5) * w.radius + scatterZ
+          THREE.MathUtils.lerp(posX, gridX, d),
+          THREE.MathUtils.lerp(posY, gridY, d),
+          THREE.MathUtils.lerp(posZ, 0, d)
         );
-        dummy.rotation.set(0, -w.angle, Math.PI / 2);
+        
+        // Flatten rotation for blueprint
+        dummy.rotation.set(
+          THREE.MathUtils.lerp(0, Math.PI / 2, d), 
+          THREE.MathUtils.lerp(-w.angle, 0, d), 
+          THREE.MathUtils.lerp(Math.PI / 2, 0, d)
+        );
         
         const s = 1 + explosion;
-        dummy.scale.set(w.tubeRadius * s, w.radius * Math.PI * s, w.tubeRadius * s);
+        // Make them all uniform boxes in dismantled mode
+        const sx = THREE.MathUtils.lerp(w.tubeRadius * s, 0.4, d);
+        const sy = THREE.MathUtils.lerp(w.radius * Math.PI * s, 0.4, d);
+        const sz = THREE.MathUtils.lerp(w.tubeRadius * s, 0.1, d);
+        
+        dummy.scale.set(sx, sy, sz);
         dummy.updateMatrix();
         wiresRef.current!.setMatrixAt(i, dummy.matrix);
       });
       wiresRef.current.instanceMatrix.needsUpdate = true;
     }
 
-    // Gears Simulation
+    // Gears Simulation (Dismantles into top arch)
     if (gearsRef.current) {
       gearData.forEach((g, i) => {
         const scatterX = explosion > 0 ? (Math.random() - 0.5) * explosion * 20 : 0;
         const scatterY = explosion > 0 ? (Math.random() - 0.5) * explosion * 20 : 0;
         const scatterZ = explosion > 0 ? (Math.random() - 0.5) * explosion * 20 : 0;
         
-        dummy.position.set(g.x + scatterX, g.y + scatterY, g.z + scatterZ);
+        const archAngle = (i / GEAR_COUNT) * Math.PI;
+        const gridX = Math.cos(archAngle) * 4;
+        const gridY = Math.sin(archAngle) * 4 + 2;
+
+        dummy.position.set(
+          THREE.MathUtils.lerp(g.x + scatterX, gridX, d),
+          THREE.MathUtils.lerp(g.y + scatterY, gridY, d),
+          THREE.MathUtils.lerp(g.z + scatterZ, 0, d)
+        );
         
-        const q = new THREE.Quaternion().setFromAxisAngle(g.axis, time * g.speed + (explosion * Math.random() * 10));
-        dummy.quaternion.copy(q);
+        const q3D = new THREE.Quaternion().setFromAxisAngle(g.axis, time * g.speed + (explosion * Math.random() * 10));
+        const q2D = new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.PI / 2, 0, 0));
+        dummy.quaternion.copy(q3D).slerp(q2D, d);
         
         const s = g.size * (1 + explosion * 2);
         dummy.scale.set(s, s, s);
@@ -118,7 +162,9 @@ function ScannerPart({ isBlueprint, clippingPlanes }: { isBlueprint: boolean, cl
 
     if (outerHullRef.current) {
       const pulse = 1 + explosion * 2;
-      outerHullRef.current.scale.set(pulse, pulse, pulse);
+      // Shrink away the hull when dismantled
+      const finalScale = THREE.MathUtils.lerp(pulse, 0.001, d);
+      outerHullRef.current.scale.set(finalScale, finalScale, finalScale);
     }
   });
 

@@ -56,6 +56,10 @@ interface GameState {
   explosion: number;
   triggerGlobalExplosion: () => void;
   resetExplosion: () => void;
+
+  // Dismantle Mechanic
+  isDismantled: boolean;
+  toggleDismantle: () => void;
 }
 
 export const useStore = create<GameState>((set) => ({
@@ -88,4 +92,7 @@ export const useStore = create<GameState>((set) => ({
   explosion: 0,
   triggerGlobalExplosion: () => set({ explosion: 1 }),
   resetExplosion: () => set({ explosion: 0 }),
+
+  isDismantled: false,
+  toggleDismantle: () => set((state) => ({ isDismantled: !state.isDismantled })),
 }));

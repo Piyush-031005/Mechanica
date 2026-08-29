@@ -1,4 +1,9 @@
+import { useStore } from "@/store/useStore";
+
 export function BlueprintHUD() {
+  const isDismantled = useStore(state => state.isDismantled);
+  const toggleDismantle = useStore(state => state.toggleDismantle);
+
   return (
     <div style={{
       position: 'fixed',
@@ -71,6 +76,37 @@ export function BlueprintHUD() {
       <div style={{ position: 'absolute', top: 40, left: '50%', width: 1, height: 20, backgroundColor: 'var(--accent-cyan)' }} />
       <div style={{ position: 'absolute', bottom: 40, left: '50%', width: 1, height: 20, backgroundColor: 'var(--accent-cyan)' }} />
       
+      {/* DISMANTLE BUTTON */}
+      <div 
+        onClick={toggleDismantle}
+        style={{ 
+          position: 'absolute', 
+          bottom: 100, 
+          left: '50%', 
+          transform: 'translateX(-50%)',
+          padding: '10px 40px',
+          border: `2px solid ${isDismantled ? '#ff0000' : 'var(--accent-cyan)'}`,
+          backgroundColor: isDismantled ? 'rgba(255,0,0,0.2)' : 'rgba(0, 204, 255, 0.1)',
+          color: isDismantled ? '#ff0000' : 'var(--accent-cyan)',
+          cursor: 'pointer',
+          pointerEvents: 'auto',
+          fontWeight: 900,
+          letterSpacing: '0.4em',
+          fontSize: '14px',
+          transition: 'all 0.3s ease',
+          backdropFilter: 'blur(10px)',
+          textShadow: `0 0 10px ${isDismantled ? '#ff0000' : 'var(--accent-cyan)'}`
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = isDismantled ? 'rgba(255,0,0,0.5)' : 'rgba(0, 204, 255, 0.3)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = isDismantled ? 'rgba(255,0,0,0.2)' : 'rgba(0, 204, 255, 0.1)';
+        }}
+      >
+        {isDismantled ? 'REASSEMBLE' : 'DISMANTLE'}
+      </div>
+
       {/* Center Target (Subtle) */}
       <div style={{ 
         position: 'absolute', 
