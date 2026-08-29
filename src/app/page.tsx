@@ -9,7 +9,7 @@ import { Effects } from "@/components/Effects/Effects";
 import { ScrollControls, Scroll, Environment } from "@react-three/drei";
 
 import { CyberBird } from "@/components/Artifacts/CyberBird";
-import { SeraphimRings } from "@/components/Artifacts/SeraphimRings";
+import { CyberLotus } from "@/components/Artifacts/CyberLotus";
 import { TheCore } from "@/components/Artifacts/TheCore";
 import { AudioSystem } from "@/components/Mechanics/AudioSystem";
 import { SecretManager } from "@/components/Mechanics/SecretManager";
@@ -42,7 +42,7 @@ export default function Home() {
             <SecretManager />
             <CyberMask />
             <CyberBird />
-            <SeraphimRings />
+            <CyberLotus />
             <TheCore />
             <Scroll html style={{ width: '100vw', mixBlendMode: 'normal' }}>
               
@@ -136,19 +136,19 @@ export default function Home() {
               <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '10vw' }}>
                 <div style={{ fontSize: '10px', letterSpacing: '0.2em', opacity: 0.5, marginBottom: '20px' }}>ARCHIVE ENTRY // 003</div>
                 <h1 style={{ fontSize: '8vw', fontWeight: 900, lineHeight: 0.9, letterSpacing: '-0.02em', color: 'var(--text-color)' }}>
-                  ORGAN 03<br/><span style={{ color: '#ff007f' }}>THE SERAPHIM</span>
+                  ORGAN 03<br/><span style={{ color: '#ff0033' }}>CYBER LOTUS</span>
                 </h1>
                 <p style={{ marginTop: '20px', maxWidth: '400px', fontSize: '14px', opacity: 0.7, letterSpacing: '0.05em' }}>
-                  A celestial gyroscope. Perfectly nested interlocking halos that distribute raw divine energy throughout the Colossus.
+                  A mathematical anomaly. 500 perfectly arranged anatomical petals forming a divine Fibonacci spiral.
                 </p>
               </div>
 
               <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', padding: '10vw' }}>
                 <div style={{ textAlign: 'right', maxWidth: '400px' }}>
-                  <h2 className="text-jp" style={{ fontSize: '4vw', fontWeight: 900, color: '#fbbf24' }}>熾天使</h2>
-                  <h3 style={{ fontSize: '2vw', fontWeight: 700, letterSpacing: '0.1em', marginTop: '10px' }}>CELESTIAL GYROSCOPE</h3>
+                  <h2 className="text-jp" style={{ fontSize: '4vw', fontWeight: 900, color: '#ffffff' }}>曼荼羅</h2>
+                  <h3 style={{ fontSize: '2vw', fontWeight: 700, letterSpacing: '0.1em', marginTop: '10px', color: '#ff0033' }}>ETHEREAL MANDALA</h3>
                   <p style={{ marginTop: '20px', fontSize: '14px', opacity: 0.7, textAlign: 'justify' }}>
-                    Three massive titanium rings rotate on independent axes, housing an ethereal glowing geometric core. Absolute neatness and symmetry.
+                    Upon dismantling, the 3D biological structure snaps instantaneously into a flawless 2D geometric vector map. Extreme precision.
                   </p>
                 </div>
               </div>
