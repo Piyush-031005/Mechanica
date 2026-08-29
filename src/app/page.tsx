@@ -1,7 +1,7 @@
 "use client";
 
 import { BlueprintHUD } from "@/components/UI/BlueprintHUD";
-import { MechanicalAssembly } from "@/components/Artifacts/MechanicalAssembly";
+import { CyberMask } from "@/components/Artifacts/CyberMask";
 import { PosterBackground } from "@/components/Environment/PosterBackground";
 import { Canvas } from "@react-three/fiber";
 import { CameraController } from "@/components/Camera/CameraController";
@@ -42,7 +42,7 @@ export default function Home() {
             
             {/* Hidden Developer / Easter Egg Mechanics */}
             <SecretManager />
-            <MechanicalAssembly />
+            <CyberMask />
             <CyberBird />
             <TheSpine />
             <TheCore />
@@ -52,18 +52,18 @@ export default function Home() {
               <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '10vw' }}>
                 <div style={{ fontSize: '10px', letterSpacing: '0.2em', opacity: 0.5, marginBottom: '20px' }}>ARCHIVE ENTRY // 001</div>
                 <h1 style={{ fontSize: '8vw', fontWeight: 900, lineHeight: 0.9, letterSpacing: '-0.02em', color: 'var(--text-color)' }}>
-                  ORGAN 01<br/><span style={{ color: 'var(--accent-magenta)' }}>OPTICAL NERVE</span>
+                  ORGAN 01<br/><span style={{ color: 'var(--accent-magenta)' }}>CYBER MASK</span>
                 </h1>
                 <p style={{ marginTop: '20px', maxWidth: '400px', fontSize: '14px', opacity: 0.7, letterSpacing: '0.05em' }}>
-                  A microscopic component of the Colossus. Deciphering the glass core geometry.
+                  A majestic, perfectly symmetrical God Mask. The central eye sees across multiple realities simultaneously.
                 </p>
               </div>
               <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', padding: '10vw' }}>
                 <div style={{ textAlign: 'right', maxWidth: '400px' }}>
-                  <h2 className="text-jp" style={{ fontSize: '4vw', fontWeight: 900, color: '#fbbf24' }}>解剖図</h2>
-                  <h3 style={{ fontSize: '2vw', fontWeight: 700, letterSpacing: '0.1em', marginTop: '10px' }}>ANATOMICAL BREAKDOWN</h3>
+                  <h2 className="text-jp" style={{ fontSize: '4vw', fontWeight: 900, color: '#fbbf24' }}>神の顔</h2>
+                  <h3 style={{ fontSize: '2vw', fontWeight: 700, letterSpacing: '0.1em', marginTop: '10px' }}>DIVINE SYMMETRY</h3>
                   <p style={{ marginTop: '20px', fontSize: '14px', opacity: 0.7, textAlign: 'justify' }}>
-                    Outer titanium arteries disengaged. The central refraction sphere acts as a memory lens.
+                    Geometric wings unfold mathematically on command. The intersecting halos maintain absolute balance against the void.
                   </p>
                 </div>
               </div>
