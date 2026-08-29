@@ -157,20 +157,33 @@ function CorePart({ isBlueprint, clippingPlanes }: { isBlueprint: boolean, clipp
 }
 
 export function TheCore() {
-  const { viewport } = useThree();
-  const planeBlueprint = useMemo(() => new THREE.Plane(new THREE.Vector3(-1, 0, 0), 0), []);
-  const planeMachine = useMemo(() => new THREE.Plane(new THREE.Vector3(1, 0, 0), 0), []);
+  const laserRef = useRef<THREE.Mesh>(null);
+  
+  // MRI Sweeping Scanner Planes
+  const planeBlueprint = useMemo(() => new THREE.Plane(new THREE.Vector3(0, -1, 0), 0), []);
+  const planeMachine = useMemo(() => new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), []);
   
   useFrame((state) => {
-    const mouseX = (state.pointer.x * viewport.width) / 2;
-    planeBlueprint.constant = mouseX;
-    planeMachine.constant = -mouseX;
+    // MRI scanner sweeping up and down over time
+    const yPos = Math.sin(state.clock.elapsedTime * 2) * 3; 
+    planeBlueprint.constant = yPos;
+    planeMachine.constant = -yPos;
+    
+    if (laserRef.current) {
+      laserRef.current.position.y = yPos;
+    }
   });
 
   return (
     <group position={[0, 0, -3]}>
       <CorePart isBlueprint={true} clippingPlanes={[planeBlueprint]} />
       <CorePart isBlueprint={false} clippingPlanes={[planeMachine]} />
+      
+      <mesh ref={laserRef} rotation={[Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[20, 20]} />
+        <meshBasicMaterial color="#ffffff" transparent opacity={0.1} side={THREE.DoubleSide} depthWrite={false} />
+        <meshBasicMaterial color="#ffffff" wireframe transparent opacity={0.3} side={THREE.DoubleSide} />
+      </mesh>
     </group>
   );
 }

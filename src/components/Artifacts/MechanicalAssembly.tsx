@@ -182,6 +182,8 @@ function ScannerPart({ isBlueprint, clippingPlanes }: { isBlueprint: boolean, cl
 }
 
 export function MechanicalAssembly() {
+  const laserRef = useRef<THREE.Mesh>(null);
+  
   // MRI Sweeping Scanner Planes
   const planeBlueprint = useMemo(() => new THREE.Plane(new THREE.Vector3(0, -1, 0), 0), []);
   const planeMachine = useMemo(() => new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), []);
@@ -191,6 +193,10 @@ export function MechanicalAssembly() {
     const yPos = Math.sin(state.clock.elapsedTime * 1.5) * 4; 
     planeBlueprint.constant = yPos;
     planeMachine.constant = -yPos;
+    
+    if (laserRef.current) {
+      laserRef.current.position.y = yPos;
+    }
   });
 
   return (
@@ -199,7 +205,7 @@ export function MechanicalAssembly() {
       <ScannerPart isBlueprint={false} clippingPlanes={[planeMachine]} />
       
       {/* Scanner laser visual */}
-      <mesh rotation={[Math.PI / 2, 0, 0]}>
+      <mesh ref={laserRef} rotation={[Math.PI / 2, 0, 0]}>
         <planeGeometry args={[20, 20]} />
         <meshBasicMaterial 
           color="#00ffff" 

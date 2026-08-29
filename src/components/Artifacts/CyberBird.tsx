@@ -125,20 +125,33 @@ function MantaPart({ isBlueprint, clippingPlanes }: { isBlueprint: boolean, clip
 }
 
 export function CyberBird() {
-  const { viewport } = useThree();
-  const planeBlueprint = useMemo(() => new THREE.Plane(new THREE.Vector3(-1, 0, 0), 0), []);
-  const planeMachine = useMemo(() => new THREE.Plane(new THREE.Vector3(1, 0, 0), 0), []);
+  const laserRef = useRef<THREE.Mesh>(null);
+  
+  // MRI Sweeping Scanner Planes
+  const planeBlueprint = useMemo(() => new THREE.Plane(new THREE.Vector3(0, -1, 0), 0), []);
+  const planeMachine = useMemo(() => new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), []);
   
   useFrame((state) => {
-    const mouseX = (state.pointer.x * viewport.width) / 2;
-    planeBlueprint.constant = mouseX;
-    planeMachine.constant = -mouseX;
+    // MRI scanner sweeping up and down over time
+    const yPos = Math.sin(state.clock.elapsedTime * 1.2) * 5; 
+    planeBlueprint.constant = yPos;
+    planeMachine.constant = -yPos;
+    
+    if (laserRef.current) {
+      laserRef.current.position.y = yPos;
+    }
   });
 
   return (
     <group position={[0, 2, -10]}>
       <MantaPart isBlueprint={true} clippingPlanes={[planeBlueprint]} />
       <MantaPart isBlueprint={false} clippingPlanes={[planeMachine]} />
+      
+      <mesh ref={laserRef} rotation={[Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[30, 30]} />
+        <meshBasicMaterial color="#00ccff" transparent opacity={0.1} side={THREE.DoubleSide} depthWrite={false} />
+        <meshBasicMaterial color="#00ccff" wireframe transparent opacity={0.3} side={THREE.DoubleSide} />
+      </mesh>
     </group>
   );
 }
