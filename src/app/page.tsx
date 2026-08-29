@@ -46,17 +46,6 @@ export default function Home() {
             <TheSpine />
             <TheCore />
             
-            <Scroll html style={{ width: '100vw', mixBlendMode: 'multiply' }}>
-              
-              {/* PAGE 1-4: ORGAN 01 (OPTICAL NERVE) */}
-              <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '10vw' }}>
-                <div style={{ fontSize: '10px', letterSpacing: '0.2em', opacity: 0.5, marginBottom: '20px' }}>ARCHIVE ENTRY // 001</div>
-                <h1 style={{ fontSize: '8vw', fontWeight: 900, lineHeight: 0.9, letterSpacing: '-0.02em', color: 'var(--foreground)' }}>
-                  ORGAN 01<br/><span style={{ color: '#ff007f' }}>OPTICAL NERVE</span>
-                </h1>
-                <p style={{ marginTop: '20px', maxWidth: '400px', fontSize: '14px', opacity: 0.7, letterSpacing: '0.05em' }}>
-                  A microscopic component of the Colossus. Deciphering the glass core geometry.
-                </p>
               </div>
 
               <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', padding: '10vw' }}>
@@ -79,7 +68,7 @@ export default function Home() {
               </div>
 
               <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-                <h1 className="text-jp" style={{ fontSize: '15vw', fontWeight: 900, WebkitTextStroke: '2px var(--foreground)', color: 'transparent', opacity: 0.1 }}>
+                <h1 className="text-jp" style={{ fontSize: '15vw', fontWeight: 900, WebkitTextStroke: '2px var(--text-color)', color: 'transparent', opacity: 0.1 }}>
                   巨像
                 </h1>
                 <p style={{ position: 'absolute', fontSize: '24px', fontWeight: 700, letterSpacing: '0.5em', color: '#ff007f' }}>
@@ -91,7 +80,7 @@ export default function Home() {
               <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-end', padding: '10vw' }}>
                 <div style={{ textAlign: 'right' }}>
                   <div style={{ fontSize: '10px', letterSpacing: '0.2em', opacity: 0.5, marginBottom: '20px' }}>ARCHIVE ENTRY // 002</div>
-                  <h1 style={{ fontSize: '8vw', fontWeight: 900, lineHeight: 0.9, letterSpacing: '-0.02em', color: 'var(--foreground)' }}>
+                  <h1 style={{ fontSize: '8vw', fontWeight: 900, lineHeight: 0.9, letterSpacing: '-0.02em', color: 'var(--text-color)' }}>
                     ORGAN 02<br/><span style={{ color: '#ff007f' }}>CYBER PHOENIX</span>
                   </h1>
                   <p style={{ marginTop: '20px', maxWidth: '400px', fontSize: '14px', opacity: 0.7, letterSpacing: '0.05em', marginLeft: 'auto' }}>
@@ -127,7 +116,7 @@ export default function Home() {
               </div>
 
               <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-                <h1 className="text-jp" style={{ fontSize: '15vw', fontWeight: 900, WebkitTextStroke: '2px var(--foreground)', color: 'transparent', opacity: 0.1 }}>
+                <h1 className="text-jp" style={{ fontSize: '15vw', fontWeight: 900, WebkitTextStroke: '2px var(--text-color)', color: 'transparent', opacity: 0.1 }}>
                   覚醒
                 </h1>
                 <p style={{ position: 'absolute', fontSize: '24px', fontWeight: 700, letterSpacing: '0.5em', color: '#ff007f' }}>
@@ -138,7 +127,7 @@ export default function Home() {
               {/* PAGE 9-12: ORGAN 03 (THE SPINE) */}
               <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '10vw' }}>
                 <div style={{ fontSize: '10px', letterSpacing: '0.2em', opacity: 0.5, marginBottom: '20px' }}>ARCHIVE ENTRY // 003</div>
-                <h1 style={{ fontSize: '8vw', fontWeight: 900, lineHeight: 0.9, letterSpacing: '-0.02em', color: 'var(--foreground)' }}>
+                <h1 style={{ fontSize: '8vw', fontWeight: 900, lineHeight: 0.9, letterSpacing: '-0.02em', color: 'var(--text-color)' }}>
                   ORGAN 03<br/><span style={{ color: '#ff007f' }}>THE SPINE</span>
                 </h1>
                 <p style={{ marginTop: '20px', maxWidth: '400px', fontSize: '14px', opacity: 0.7, letterSpacing: '0.05em' }}>
@@ -173,7 +162,7 @@ export default function Home() {
               </div>
 
               <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-                <h1 className="text-jp" style={{ fontSize: '15vw', fontWeight: 900, WebkitTextStroke: '2px var(--foreground)', color: 'transparent', opacity: 0.1 }}>
+                <h1 className="text-jp" style={{ fontSize: '15vw', fontWeight: 900, WebkitTextStroke: '2px var(--text-color)', color: 'transparent', opacity: 0.1 }}>
                   深淵
                 </h1>
                 <p style={{ position: 'absolute', fontSize: '24px', fontWeight: 700, letterSpacing: '0.5em', color: '#ff007f' }}>
@@ -185,7 +174,7 @@ export default function Home() {
               <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-end', padding: '10vw' }}>
                 <div style={{ textAlign: 'right' }}>
                   <div style={{ fontSize: '10px', letterSpacing: '0.2em', opacity: 0.5, marginBottom: '20px' }}>ARCHIVE ENTRY // 004</div>
-                  <h1 style={{ fontSize: '8vw', fontWeight: 900, lineHeight: 0.9, letterSpacing: '-0.02em', color: 'var(--foreground)' }}>
+                  <h1 style={{ fontSize: '8vw', fontWeight: 900, lineHeight: 0.9, letterSpacing: '-0.02em', color: 'var(--text-color)' }}>
                     ORGAN 04<br/><span style={{ color: '#ffbf00' }}>THE CORE</span>
                   </h1>
                   <p style={{ marginTop: '20px', maxWidth: '400px', fontSize: '14px', opacity: 0.7, letterSpacing: '0.05em', marginLeft: 'auto' }}>
@@ -216,7 +205,7 @@ export default function Home() {
               </div>
 
               <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-                <h1 className="text-jp" style={{ fontSize: '15vw', fontWeight: 900, WebkitTextStroke: '2px var(--foreground)', color: 'transparent', opacity: 0.1 }}>
+                <h1 className="text-jp" style={{ fontSize: '15vw', fontWeight: 900, WebkitTextStroke: '2px var(--text-color)', color: 'transparent', opacity: 0.1 }}>
                   神
                 </h1>
                 <p style={{ position: 'absolute', fontSize: '24px', fontWeight: 700, letterSpacing: '0.5em', color: '#ffbf00' }}>
