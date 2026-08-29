@@ -150,8 +150,8 @@ export function AstrolabeGrid() {
   return (
     <group ref={groupRef} position={[0, 0, -25]}>
       <instancedMesh ref={ringsRef} args={[undefined as any, undefined as any, RING_COUNT]}>
-        <torusGeometry args={[1, 1, 16, 100]} />
-        <meshBasicMaterial color="#34d399" transparent opacity={0.15} wireframe />
+        <torusGeometry args={[1, 0.005, 8, 100]} />
+        <meshBasicMaterial color="#34d399" transparent opacity={0.4} />
       </instancedMesh>
       
       {/* Constellation Squares (Blue) */}
