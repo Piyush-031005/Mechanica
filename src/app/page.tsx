@@ -32,9 +32,9 @@ export default function Home() {
           <ambientLight intensity={0.5} />
           <directionalLight position={[10, 10, 5]} intensity={2} />
           {/* Removed Environment preset to fix network fetch crash */}
-          <ambientLight intensity={1.5} />
-          <directionalLight position={[10, 10, 10]} intensity={2} />
-          <directionalLight position={[-10, -10, -10]} intensity={1} color="#00ccff" />
+          <ambientLight intensity={0.2} />
+          <directionalLight position={[10, 10, 10]} intensity={0.5} />
+          <directionalLight position={[-10, -10, -10]} intensity={0.5} color="#333333" />
           
           {/* Hidden Developer / Easter Egg Mechanics */}
           <SecretManager />
@@ -45,7 +45,7 @@ export default function Home() {
             <CyberBird />
             <TheSpine />
             <TheCore />
-            <Scroll html style={{ width: '100vw', mixBlendMode: 'difference' }}>
+            <Scroll html style={{ width: '100vw', mixBlendMode: 'normal' }}>
               
               {/* PAGE 1-4: ORGAN 01 (OPTICAL NERVE) */}
               <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '10vw' }}>

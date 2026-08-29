@@ -101,8 +101,8 @@ function CorePart({ isBlueprint, clippingPlanes }: { isBlueprint: boolean, clipp
   }, [isBlueprint, clippingPlanes]);
 
   const diskMat = useMemo(() => {
-    if (isBlueprint) return new THREE.MeshBasicMaterial({ color: '#0044ff', clippingPlanes }); // Deep blue
-    return new THREE.MeshBasicMaterial({ color: '#00ccff', clippingPlanes }); // Bright cyan blue
+    if (isBlueprint) return new THREE.MeshBasicMaterial({ color: '#0044ff', transparent: true, opacity: 0.4, blending: THREE.AdditiveBlending, depthWrite: false, clippingPlanes }); 
+    return new THREE.MeshBasicMaterial({ color: '#00ccff', transparent: true, opacity: 0.2, blending: THREE.AdditiveBlending, depthWrite: false, clippingPlanes }); 
   }, [isBlueprint, clippingPlanes]);
 
   return (
