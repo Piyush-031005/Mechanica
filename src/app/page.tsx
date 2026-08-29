@@ -13,7 +13,6 @@ import { SeraphimRings } from "@/components/Artifacts/SeraphimRings";
 import { TheCore } from "@/components/Artifacts/TheCore";
 import { AudioSystem } from "@/components/Mechanics/AudioSystem";
 import { SecretManager } from "@/components/Mechanics/SecretManager";
-import { AstrolabeGrid } from "@/components/Environment/AstrolabeGrid";
 import { FluidVortex } from "@/components/Environment/FluidVortex";
 import { RealitySplit } from "@/components/Effects/RealitySplit";
 
@@ -31,7 +30,6 @@ export default function Home() {
         >
           <ScrollControls pages={16} damping={0.1}>
             <CameraController />
-            <AstrolabeGrid />
             <FluidVortex />
             <ambientLight intensity={0.5} />
             <directionalLight position={[10, 10, 5]} intensity={2} />

@@ -117,68 +117,67 @@ function MaskHalf({ isBlueprint, clippingPlanes, dRef, explosion }: { isBlueprin
     }
   });
 
-  const solidMat = useMemo(() => new THREE.MeshStandardMaterial({ 
-    color: '#020202', 
-    metalness: 0.9, 
-    roughness: 0.1,
+  const solidMat = useMemo(() => new THREE.MeshBasicMaterial({ 
+    color: '#050505', 
     clippingPlanes,
     side: THREE.DoubleSide
   }), [clippingPlanes]);
   
-  const wireMat = useMemo(() => new THREE.MeshBasicMaterial({ 
+  // Changed from messy wireframe to a clean, solid, flat graphic material
+  const graphicMat = useMemo(() => new THREE.MeshBasicMaterial({ 
     color: '#00ccff', 
-    wireframe: true, 
     transparent: true, 
-    opacity: 0.5,
-    clippingPlanes 
+    opacity: 0.8,
+    clippingPlanes,
+    side: THREE.DoubleSide
   }), [clippingPlanes]);
 
   const eyeMat = useMemo(() => {
-    if (isBlueprint) return new THREE.MeshBasicMaterial({ color: '#ff00aa', wireframe: true, clippingPlanes });
+    if (isBlueprint) return new THREE.MeshBasicMaterial({ color: '#ff00aa', clippingPlanes });
     return new THREE.MeshBasicMaterial({ color: '#ffffff', clippingPlanes });
   }, [isBlueprint, clippingPlanes]);
 
   return (
     <group>
-      {/* The Central Eye (God core) */}
+      {/* The Central Eye (God core) - Solid Graphic Circle */}
       <mesh ref={eyeRef}>
-        <sphereGeometry args={[0.8, 64, 64]} />
+        <sphereGeometry args={[0.8, 32, 32]} />
         <primitive object={eyeMat} attach="material" />
       </mesh>
 
-      {/* The Celestial Halos */}
+      {/* The Celestial Halos - Solid clean rings instead of dense torus meshes */}
       <group ref={haloRef}>
         <mesh>
-          <torusGeometry args={[2.5, 0.02, 32, 128]} />
-          <primitive object={isBlueprint ? wireMat : solidMat} attach="material" />
+          <ringGeometry args={[2.5, 2.6, 64]} />
+          <primitive object={isBlueprint ? graphicMat : solidMat} attach="material" />
         </mesh>
         <mesh rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[3, 0.02, 32, 128]} />
-          <primitive object={wireMat} attach="material" />
+          <ringGeometry args={[3.0, 3.1, 64]} />
+          <primitive object={graphicMat} attach="material" />
         </mesh>
       </group>
 
-      {/* Left Plate (Sweeping Butterfly/Chariot Arcs) */}
+      {/* Left Plate (Sweeping Butterfly/Chariot Arcs) - Solid flat shapes */}
       <group ref={wingLeftRef}>
         <mesh position={[-1.2, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
           <ringGeometry args={[1.5, 3.5, 64, 1, 0, Math.PI]} />
-          <primitive object={isBlueprint ? wireMat : solidMat} attach="material" />
+          <primitive object={isBlueprint ? graphicMat : solidMat} attach="material" />
         </mesh>
-        <mesh position={[-2.5, 1, 0]} rotation={[0, 0, Math.PI / 2]}>
+        <mesh position={[-2.5, 1, 0.01]} rotation={[0, 0, Math.PI / 2]}>
           <ringGeometry args={[0.5, 2, 64, 1, 0, Math.PI]} />
-          <primitive object={isBlueprint ? wireMat : solidMat} attach="material" />
+          <primitive object={isBlueprint ? graphicMat : solidMat} attach="material" />
         </mesh>
       </group>
 
-      {/* Right Plate (Sweeping Butterfly/Chariot Arcs) */}
+      {/* Right Plate (Sweeping Butterfly/Chariot Arcs) - Solid flat shapes */}
       <group ref={wingRightRef}>
         <mesh position={[1.2, 0, 0]} rotation={[0, 0, -Math.PI / 2]}>
           <ringGeometry args={[1.5, 3.5, 64, 1, 0, Math.PI]} />
-          <primitive object={isBlueprint ? wireMat : solidMat} attach="material" />
+          <primitive object={isBlueprint ? graphicMat : solidMat} attach="material" />
         </mesh>
-        <mesh position={[2.5, 1, 0]} rotation={[0, 0, -Math.PI / 2]}>
+        <mesh position={[2.5, 1, 0.01]} rotation={[0, 0, -Math.PI / 2]}>
           <ringGeometry args={[0.5, 2, 64, 1, 0, Math.PI]} />
-          <primitive object={isBlueprint ? wireMat : solidMat} attach="material" />
+          <primitive object={isBlueprint ? graphicMat : solidMat} attach="material" />
         </mesh>
       </group>
     </group>
