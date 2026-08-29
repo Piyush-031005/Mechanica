@@ -29,21 +29,19 @@ export default function Home() {
           gl={{ antialias: true, alpha: true, powerPreference: "high-performance", localClippingEnabled: true }}
           camera={{ position: [0, 0, 15], fov: 45 }}
         >
-          <CameraController />
-          <AstrolabeGrid />
-          <FluidVortex />
-          <ambientLight intensity={0.5} />
-          <directionalLight position={[10, 10, 5]} intensity={2} />
-          {/* Removed Environment preset to fix network fetch crash */}
-          <ambientLight intensity={0.2} />
-          <directionalLight position={[10, 10, 10]} intensity={0.5} />
-          <directionalLight position={[-10, -10, -10]} intensity={0.5} color="#333333" />
-          
-          {/* Hidden Developer / Easter Egg Mechanics */}
-          <SecretManager />
-          
-          {/* Extended to 16 pages for the grand finale */}
           <ScrollControls pages={16} damping={0.1}>
+            <CameraController />
+            <AstrolabeGrid />
+            <FluidVortex />
+            <ambientLight intensity={0.5} />
+            <directionalLight position={[10, 10, 5]} intensity={2} />
+            {/* Removed Environment preset to fix network fetch crash */}
+            <ambientLight intensity={0.2} />
+            <directionalLight position={[10, 10, 10]} intensity={0.5} />
+            <directionalLight position={[-10, -10, -10]} intensity={0.5} color="#333333" />
+            
+            {/* Hidden Developer / Easter Egg Mechanics */}
+            <SecretManager />
             <MechanicalAssembly />
             <CyberBird />
             <TheSpine />
