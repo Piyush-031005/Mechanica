@@ -16,14 +16,23 @@ export function BlueprintHUD() {
       fontFamily: '"Geist Mono", monospace',
       color: 'var(--text-color)',
     }}>
-      {/* Top Left: Warning Frame */}
-      <div style={{ position: 'absolute', top: 40, left: 40, display: 'flex', flexDirection: 'column', gap: '5px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{ width: 15, height: 15, backgroundColor: 'var(--accent-magenta)' }} />
-          <div style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.2em', color: 'var(--accent-magenta)' }}>SYSTEM ACTIVE</div>
+      {/* Heavy Graphic Borders */}
+      <div style={{ position: 'absolute', top: 20, left: 20, width: '40px', height: '40px', borderTop: '4px solid #ff0033', borderLeft: '4px solid #ff0033' }} />
+      <div style={{ position: 'absolute', top: 20, right: 20, width: '40px', height: '40px', borderTop: '4px solid #ff0033', borderRight: '4px solid #ff0033' }} />
+      <div style={{ position: 'absolute', bottom: 20, left: 20, width: '40px', height: '40px', borderBottom: '4px solid #ff0033', borderLeft: '4px solid #ff0033' }} />
+      <div style={{ position: 'absolute', bottom: 20, right: 20, width: '40px', height: '40px', borderBottom: '4px solid #ff0033', borderRight: '4px solid #ff0033' }} />
+
+      {/* Top Left: Logo / System Status */}
+      <div style={{ position: 'absolute', top: '40px', left: '40px', pointerEvents: 'auto' }}>
+        <div style={{ fontSize: '10px', letterSpacing: '0.2em', opacity: 0.8, color: '#ff0033' }}>
+          SYSTEM ACTIVE
         </div>
-        <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '0.1em', marginTop: '5px' }}>PROJECT LEVIATHAN</div>
-        <div style={{ fontSize: '10px', opacity: 0.6, letterSpacing: '0.1em' }}>[SEC: 099-ALPHA-OMEGA]</div>
+        <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '0.1em', marginTop: '5px', textTransform: 'uppercase', background: '#ff0033', color: '#000', padding: '5px 10px', display: 'inline-block' }}>
+          PROJECT LEVIATHAN
+        </div>
+        <div style={{ fontSize: '8px', letterSpacing: '0.3em', opacity: 0.5, marginTop: '8px' }}>
+          [SEC: 099-ALPHA-OMEGA]
+        </div>
       </div>
 
       {/* Top Right: Cyberpunk Barcode & Data */}
@@ -59,14 +68,20 @@ export function BlueprintHUD() {
 
       {/* Bottom Right: Scale indicator */}
       <div style={{ position: 'absolute', bottom: 40, right: 40, textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-          <div style={{ fontSize: '10px', fontWeight: 900, color: 'var(--accent-magenta)' }}>R_99</div>
-          <div style={{ fontSize: '24px', fontWeight: 900, color: 'var(--accent-cyan)', letterSpacing: '0.1em' }}>0054</div>
-        </div>
-        <div style={{ width: '200px', height: '1px', backgroundColor: 'var(--text-color)', opacity: 0.3, marginBottom: '5px' }} />
-        <div style={{ display: 'flex', justifyContent: 'space-between', width: '200px', fontSize: '10px', opacity: 0.5 }}>
-          <span>0.0mm</span>
-          <span>100.0mm</span>
+        <h3 style={{ fontSize: '14px', fontWeight: 800, letterSpacing: '0.1em', color: '#ff0033', marginBottom: '15px' }}>
+          MATERIAL ANALYSIS
+        </h3>
+        
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '200px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '4px' }}>
+            <span style={{ fontSize: '10px', letterSpacing: '0.1em' }}>LOTUS CORE</span>
+            <span style={{ fontSize: '10px', letterSpacing: '0.1em', opacity: 0.7 }}>LIQUID GLASS</span>
+          </div>
+          
+          <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '4px' }}>
+            <span style={{ fontSize: '10px', letterSpacing: '0.1em' }}>PETAL GEOMETRY</span>
+            <span style={{ fontSize: '10px', letterSpacing: '0.1em', color: '#ff0033', fontWeight: 'bold' }}>NUCLEAR PLASMA</span>
+          </div>
         </div>
       </div>
 
@@ -77,35 +92,30 @@ export function BlueprintHUD() {
       <div style={{ position: 'absolute', bottom: 40, left: '50%', width: 1, height: 20, backgroundColor: 'var(--accent-cyan)' }} />
       
       {/* DISMANTLE BUTTON */}
-      <div 
+      <button 
         onClick={toggleDismantle}
         style={{ 
           position: 'absolute', 
           bottom: 100, 
           left: '50%', 
           transform: 'translateX(-50%)',
-          padding: '10px 40px',
-          border: `2px solid ${isDismantled ? '#ff0000' : 'var(--accent-cyan)'}`,
-          backgroundColor: isDismantled ? 'rgba(255,0,0,0.2)' : 'rgba(0, 204, 255, 0.1)',
-          color: isDismantled ? '#ff0000' : 'var(--accent-cyan)',
-          cursor: 'pointer',
-          pointerEvents: 'auto',
+          background: isDismantled ? '#ff0033' : 'transparent',
+          color: isDismantled ? '#000' : '#ffffff',
+          border: '2px solid #ff0033',
+          padding: '12px 40px',
+          fontSize: '14px',
           fontWeight: 900,
           letterSpacing: '0.4em',
-          fontSize: '14px',
+          cursor: 'pointer',
+          pointerEvents: 'auto',
+          textTransform: 'uppercase',
+          backdropFilter: 'blur(4px)',
           transition: 'all 0.3s ease',
-          backdropFilter: 'blur(10px)',
-          textShadow: `0 0 10px ${isDismantled ? '#ff0000' : 'var(--accent-cyan)'}`
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = isDismantled ? 'rgba(255,0,0,0.5)' : 'rgba(0, 204, 255, 0.3)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = isDismantled ? 'rgba(255,0,0,0.2)' : 'rgba(0, 204, 255, 0.1)';
+          boxShadow: isDismantled ? '0 0 20px rgba(255,0,51,0.5)' : 'none'
         }}
       >
-        {isDismantled ? 'REASSEMBLE' : 'DISMANTLE'}
-      </div>
+        {isDismantled ? 'ENGAGE SYSTEM' : 'DISMANTLE'}
+      </button>
 
       {/* Center Target (Subtle) */}
       <div style={{ 
