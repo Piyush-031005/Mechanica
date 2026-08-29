@@ -13,6 +13,7 @@ import { TheSpine } from "@/components/Artifacts/TheSpine";
 import { TheCore } from "@/components/Artifacts/TheCore";
 import { AudioSystem } from "@/components/Mechanics/AudioSystem";
 import { SecretManager } from "@/components/Mechanics/SecretManager";
+import { AstrolabeGrid } from "@/components/Environment/AstrolabeGrid";
 
 export default function Home() {
   return (
@@ -27,9 +28,13 @@ export default function Home() {
           camera={{ position: [0, 0, 15], fov: 45 }}
         >
           <CameraController />
+          <AstrolabeGrid />
           <ambientLight intensity={0.5} />
           <directionalLight position={[10, 10, 5]} intensity={2} />
-          <Environment preset="city" />
+          {/* Removed Environment preset to fix network fetch crash */}
+          <ambientLight intensity={1.5} />
+          <directionalLight position={[10, 10, 10]} intensity={2} />
+          <directionalLight position={[-10, -10, -10]} intensity={1} color="#00ccff" />
           
           {/* Hidden Developer / Easter Egg Mechanics */}
           <SecretManager />
