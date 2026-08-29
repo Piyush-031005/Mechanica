@@ -72,22 +72,25 @@ export function FluidVortex() {
         const finalX = THREE.MathUtils.lerp(meanderX, vortexX, spiralFactor);
         const finalZ = THREE.MathUtils.lerp(meanderZ, vortexZ, spiralFactor);
 
+        // PUSHED DEEP INTO BACKGROUND (Z: -80) for neatness
+        const zOffset = -80;
+
         dummy.position.set(
           finalX + p.offsetX * (1 + explosion * 2),
-          y + p.offsetY + globalScroll * riverLength * 0.3, // Parallax scroll opposite to camera
-          finalZ + p.offsetZ * (1 + explosion * 2) - 20
+          y + p.offsetY + globalScroll * riverLength * 0.3, 
+          finalZ + p.offsetZ * (1 + explosion * 2) + zOffset
         );
 
-        const s = p.scale * (1 + explosion * 3);
-        // Stretch particles along velocity for motion blur effect
+        // Substantially reduced scale to avoid messy "rush" of large dots
+        const s = (p.scale * 0.3) * (1 + explosion * 3);
+        
         dummy.scale.set(s, s * 4, s); 
         
-        // Align particle to the flow direction
         dummy.rotation.set(0, 0, 0);
         dummy.lookAt(
           finalX + p.offsetX,
           y - 1 + p.offsetY,
-          finalZ + p.offsetZ - 20
+          finalZ + p.offsetZ + zOffset
         );
 
         dummy.updateMatrix();
@@ -100,7 +103,8 @@ export function FluidVortex() {
   return (
     <instancedMesh ref={meshRef} args={[undefined as any, undefined as any, PARTICLE_COUNT]}>
       <sphereGeometry args={[1, 8, 8]} />
-      <primitive object={material} attach="material" />
+      {/* Lowered opacity for cleaner background integration */}
+      <meshBasicMaterial color="#00ccff" transparent opacity={0.15} blending={THREE.AdditiveBlending} depthWrite={false} />
     </instancedMesh>
   );
 }
