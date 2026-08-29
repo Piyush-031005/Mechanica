@@ -45,9 +45,18 @@ export default function Home() {
             <CyberBird />
             <TheSpine />
             <TheCore />
-            
+            <Scroll html style={{ width: '100vw', mixBlendMode: 'difference' }}>
+              
+              {/* PAGE 1-4: ORGAN 01 (OPTICAL NERVE) */}
+              <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '10vw' }}>
+                <div style={{ fontSize: '10px', letterSpacing: '0.2em', opacity: 0.5, marginBottom: '20px' }}>ARCHIVE ENTRY // 001</div>
+                <h1 style={{ fontSize: '8vw', fontWeight: 900, lineHeight: 0.9, letterSpacing: '-0.02em', color: 'var(--text-color)' }}>
+                  ORGAN 01<br/><span style={{ color: 'var(--accent-magenta)' }}>OPTICAL NERVE</span>
+                </h1>
+                <p style={{ marginTop: '20px', maxWidth: '400px', fontSize: '14px', opacity: 0.7, letterSpacing: '0.05em' }}>
+                  A microscopic component of the Colossus. Deciphering the glass core geometry.
+                </p>
               </div>
-
               <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', padding: '10vw' }}>
                 <div style={{ textAlign: 'right', maxWidth: '400px' }}>
                   <h2 className="text-jp" style={{ fontSize: '4vw', fontWeight: 900, color: '#fbbf24' }}>解剖図</h2>
