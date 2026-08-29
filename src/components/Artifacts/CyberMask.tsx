@@ -85,9 +85,8 @@ export function CyberMask() {
 function MaskHalf({ isBlueprint, clippingPlanes, dRef, explosion }: { isBlueprint: boolean, clippingPlanes: THREE.Plane[], dRef: React.MutableRefObject<number>, explosion: number }) {
   const eyeRef = useRef<THREE.Mesh>(null);
   const haloRef = useRef<THREE.Group>(null);
-  const wingLeftRef = useRef<THREE.Mesh>(null);
-  const wingRightRef = useRef<THREE.Mesh>(null);
-  const crownRef = useRef<THREE.Mesh>(null);
+  const wingLeftRef = useRef<THREE.Group>(null);
+  const wingRightRef = useRef<THREE.Group>(null);
 
   useFrame((state) => {
     const time = state.clock.elapsedTime;
@@ -99,34 +98,29 @@ function MaskHalf({ isBlueprint, clippingPlanes, dRef, explosion }: { isBlueprin
     }
     
     if (haloRef.current) {
-      haloRef.current.rotation.z = time * 0.2;
+      haloRef.current.rotation.z = time * 0.1;
       haloRef.current.rotation.x = THREE.MathUtils.lerp(Math.PI / 4, 0, d);
       haloRef.current.rotation.y = THREE.MathUtils.lerp(0, 0, d);
       haloRef.current.scale.setScalar(THREE.MathUtils.lerp(pulse, pulse * 1.5, d));
     }
 
-    if (wingLeftRef.current && wingRightRef.current && crownRef.current) {
-      // Wings flare out majesticly, then fold perfectly flat into a blueprint plane on dismantle
-      const flap = Math.sin(time * 2) * 0.05;
+    if (wingLeftRef.current && wingRightRef.current) {
+      // Smooth elegant breathing motion
+      const breathe = Math.sin(time) * 0.05;
       
-      // Unfold mathematically
-      wingLeftRef.current.rotation.y = THREE.MathUtils.lerp(Math.PI / 4 + flap, 0, d);
-      wingLeftRef.current.position.x = THREE.MathUtils.lerp(-1.2, -4, d);
-      wingLeftRef.current.rotation.z = THREE.MathUtils.lerp(-0.2, 0, d);
+      // Dismantle mathematically unfolding
+      wingLeftRef.current.rotation.y = THREE.MathUtils.lerp(Math.PI / 6 + breathe, 0, d);
+      wingLeftRef.current.position.x = THREE.MathUtils.lerp(0, -2, d);
       
-      wingRightRef.current.rotation.y = THREE.MathUtils.lerp(-Math.PI / 4 - flap, 0, d);
-      wingRightRef.current.position.x = THREE.MathUtils.lerp(1.2, 4, d);
-      wingRightRef.current.rotation.z = THREE.MathUtils.lerp(0.2, 0, d);
-
-      crownRef.current.position.y = THREE.MathUtils.lerp(2.2, 4, d);
-      crownRef.current.rotation.x = THREE.MathUtils.lerp(0.2, 0, d);
+      wingRightRef.current.rotation.y = THREE.MathUtils.lerp(-Math.PI / 6 - breathe, 0, d);
+      wingRightRef.current.position.x = THREE.MathUtils.lerp(0, 2, d);
     }
   });
 
   const solidMat = useMemo(() => new THREE.MeshStandardMaterial({ 
-    color: '#050505', 
-    metalness: 1, 
-    roughness: 0.2,
+    color: '#020202', 
+    metalness: 0.9, 
+    roughness: 0.1,
     clippingPlanes,
     side: THREE.DoubleSide
   }), [clippingPlanes]);
@@ -135,7 +129,7 @@ function MaskHalf({ isBlueprint, clippingPlanes, dRef, explosion }: { isBlueprin
     color: '#00ccff', 
     wireframe: true, 
     transparent: true, 
-    opacity: 0.6,
+    opacity: 0.5,
     clippingPlanes 
   }), [clippingPlanes]);
 
@@ -148,40 +142,45 @@ function MaskHalf({ isBlueprint, clippingPlanes, dRef, explosion }: { isBlueprin
     <group>
       {/* The Central Eye (God core) */}
       <mesh ref={eyeRef}>
-        <sphereGeometry args={[0.8, 32, 32]} />
+        <sphereGeometry args={[0.8, 64, 64]} />
         <primitive object={eyeMat} attach="material" />
       </mesh>
 
       {/* The Celestial Halos */}
       <group ref={haloRef}>
         <mesh>
-          <torusGeometry args={[2.5, 0.05, 16, 64]} />
+          <torusGeometry args={[2.5, 0.02, 32, 128]} />
           <primitive object={isBlueprint ? wireMat : solidMat} attach="material" />
         </mesh>
         <mesh rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[3, 0.02, 16, 64]} />
+          <torusGeometry args={[3, 0.02, 32, 128]} />
           <primitive object={wireMat} attach="material" />
         </mesh>
       </group>
 
-      {/* Left Plate (Geometric Wing) */}
-      <mesh ref={wingLeftRef}>
-        {/* Diamond/Hexagon shape */}
-        <coneGeometry args={[1.5, 4, 3]} />
-        <primitive object={isBlueprint ? wireMat : solidMat} attach="material" />
-      </mesh>
+      {/* Left Plate (Sweeping Butterfly/Chariot Arcs) */}
+      <group ref={wingLeftRef}>
+        <mesh position={[-1.2, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+          <ringGeometry args={[1.5, 3.5, 64, 1, 0, Math.PI]} />
+          <primitive object={isBlueprint ? wireMat : solidMat} attach="material" />
+        </mesh>
+        <mesh position={[-2.5, 1, 0]} rotation={[0, 0, Math.PI / 2]}>
+          <ringGeometry args={[0.5, 2, 64, 1, 0, Math.PI]} />
+          <primitive object={isBlueprint ? wireMat : solidMat} attach="material" />
+        </mesh>
+      </group>
 
-      {/* Right Plate (Geometric Wing) */}
-      <mesh ref={wingRightRef} rotation={[0, 0, Math.PI]}>
-        <coneGeometry args={[1.5, 4, 3]} />
-        <primitive object={isBlueprint ? wireMat : solidMat} attach="material" />
-      </mesh>
-      
-      {/* The Crown */}
-      <mesh ref={crownRef}>
-        <coneGeometry args={[0.8, 2.5, 4]} />
-        <primitive object={isBlueprint ? wireMat : solidMat} attach="material" />
-      </mesh>
+      {/* Right Plate (Sweeping Butterfly/Chariot Arcs) */}
+      <group ref={wingRightRef}>
+        <mesh position={[1.2, 0, 0]} rotation={[0, 0, -Math.PI / 2]}>
+          <ringGeometry args={[1.5, 3.5, 64, 1, 0, Math.PI]} />
+          <primitive object={isBlueprint ? wireMat : solidMat} attach="material" />
+        </mesh>
+        <mesh position={[2.5, 1, 0]} rotation={[0, 0, -Math.PI / 2]}>
+          <ringGeometry args={[0.5, 2, 64, 1, 0, Math.PI]} />
+          <primitive object={isBlueprint ? wireMat : solidMat} attach="material" />
+        </mesh>
+      </group>
     </group>
   );
 }
