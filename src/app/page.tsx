@@ -183,20 +183,20 @@ export default function Home() {
                 <div style={{ textAlign: 'right' }}>
                   <div style={{ fontSize: '10px', letterSpacing: '0.2em', opacity: 0.5, marginBottom: '20px' }}>ARCHIVE ENTRY // 004</div>
                   <h1 style={{ fontSize: '8vw', fontWeight: 900, lineHeight: 0.9, letterSpacing: '-0.02em', color: 'var(--text-color)' }}>
-                    ORGAN 04<br/><span style={{ color: '#ffbf00' }}>THE CORE</span>
+                    ORGAN 04<br/><span style={{ color: '#ff0033' }}>NUCLEAR EYE</span>
                   </h1>
                   <p style={{ marginTop: '20px', maxWidth: '400px', fontSize: '14px', opacity: 0.7, letterSpacing: '0.05em', marginLeft: 'auto' }}>
-                    The heart of the Colossus. A contained Dyson sphere harnessing the power of a miniature dying sun.
+                    A perfectly flat, vector-graphic orbital structure. Sharp overlapping geometric planes representing an omniscient mechanical eye.
                   </p>
                 </div>
               </div>
 
               <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', padding: '10vw' }}>
                 <div style={{ maxWidth: '400px' }}>
-                  <h2 className="text-jp" style={{ fontSize: '4vw', fontWeight: 900, color: '#ff007f' }}>核</h2>
-                  <h3 style={{ fontSize: '2vw', fontWeight: 700, letterSpacing: '0.1em', marginTop: '10px' }}>DYSON ARCHITECTURE</h3>
+                  <h2 className="text-jp" style={{ fontSize: '4vw', fontWeight: 900, color: '#ffffff' }}>監視眼</h2>
+                  <h3 style={{ fontSize: '2vw', fontWeight: 700, letterSpacing: '0.1em', marginTop: '10px', color: '#ff0033' }}>ABSOLUTE SYMMETRY</h3>
                   <p style={{ marginTop: '20px', fontSize: '14px', opacity: 0.7, textAlign: 'justify' }}>
-                    Concentric geometric rings orbit the sun at wildly varying speeds, shifting into overdrive when the global explosion mechanic is triggered.
+                    Upon dismantling, the flat 3D structure violently shifts to face the user perfectly head-on, revealing flawless 2D technical vector graphics with zero noise.
                   </p>
                 </div>
               </div>
