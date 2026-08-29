@@ -53,15 +53,29 @@ export function AstrolabeGrid() {
     return geo;
   }, []);
 
+  // Precompute geometric squares (Constellation aesthetic)
+  const squareData = useMemo(() => {
+    const data = [];
+    for (let i = 0; i < 20; i++) {
+      data.push({
+        x: (Math.random() - 0.5) * 40,
+        y: (Math.random() - 0.5) * 40,
+        z: (Math.random() - 0.5) * 20 - 10,
+        size: Math.random() > 0.8 ? 3 : 1, // Some are massive
+        speed: (Math.random() - 0.5) * 0.1
+      });
+    }
+    return data;
+  }, []);
+
+  const squaresRef = useRef<THREE.InstancedMesh>(null);
+
   useFrame((state) => {
     const time = state.clock.elapsedTime;
 
     if (groupRef.current) {
-      // Slow majestic rotation of the entire system
       groupRef.current.rotation.y = time * 0.02;
       groupRef.current.rotation.x = Math.sin(time * 0.01) * 0.1;
-      
-      // Slight parallax to mouse
       groupRef.current.position.x = THREE.MathUtils.lerp(groupRef.current.position.x, (state.pointer.x * 2), 0.05);
       groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, (state.pointer.y * 2), 0.05);
     }
@@ -77,6 +91,18 @@ export function AstrolabeGrid() {
       ringsRef.current.instanceMatrix.needsUpdate = true;
     }
 
+    if (squaresRef.current) {
+      squareData.forEach((sq, i) => {
+        dummy.position.set(sq.x, sq.y, sq.z);
+        // Squares rotate in locked 90 degree increments or slowly
+        dummy.rotation.set(0, 0, time * sq.speed);
+        dummy.scale.set(sq.size, sq.size, 0.1);
+        dummy.updateMatrix();
+        squaresRef.current!.setMatrixAt(i, dummy.matrix);
+      });
+      squaresRef.current.instanceMatrix.needsUpdate = true;
+    }
+
     const nodePositions: THREE.Vector3[] = [];
 
     if (nodesRef.current) {
@@ -84,7 +110,6 @@ export function AstrolabeGrid() {
         const ring = ringData[node.ringIndex];
         const currentAngle = node.angle + time * node.speed;
         
-        // Calculate world position on the tilted ring
         const x = Math.cos(currentAngle) * ring.radius;
         const y = Math.sin(currentAngle) * ring.radius;
         
@@ -103,16 +128,11 @@ export function AstrolabeGrid() {
       nodesRef.current.instanceMatrix.needsUpdate = true;
     }
 
-    // Update connecting lines
     if (linesRef.current) {
       const positions = linesRef.current.geometry.attributes.position.array as Float32Array;
       let lineIndex = 0;
-      
-      // Connect each node to the next 2 closest nodes to form a web
       for (let i = 0; i < NODE_COUNT; i++) {
         const p1 = nodePositions[i];
-        
-        // Find a nearby node
         const p2 = nodePositions[(i + 1) % NODE_COUNT];
         
         positions[lineIndex++] = p1.x;
@@ -134,6 +154,12 @@ export function AstrolabeGrid() {
         <meshBasicMaterial color="#34d399" transparent opacity={0.15} wireframe />
       </instancedMesh>
       
+      {/* Constellation Squares (Blue) */}
+      <instancedMesh ref={squaresRef} args={[undefined as any, undefined as any, 20]}>
+        <planeGeometry args={[1, 1]} />
+        <meshBasicMaterial color="#0044ff" transparent opacity={0.4} side={THREE.DoubleSide} depthWrite={false} />
+      </instancedMesh>
+
       <instancedMesh ref={nodesRef} args={[undefined as any, undefined as any, NODE_COUNT]}>
         <octahedronGeometry args={[1, 0]} />
         <meshBasicMaterial color="#ffffff" transparent opacity={0.8} />
