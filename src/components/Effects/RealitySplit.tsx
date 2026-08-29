@@ -51,10 +51,14 @@ export function RealitySplit() {
           left: `${splitX}%`,
           width: '6px',
           height: '100vh',
-          backgroundColor: isHovered || isDragging ? '#ff00aa' : 'rgba(255, 0, 170, 0.5)',
+          background: `linear-gradient(90deg, 
+            transparent 0%, 
+            rgba(255, 0, 51, 0.2) 80%, 
+            rgba(255, 0, 51, 0.8) 98%, 
+            #ff0033 100%)`,
           cursor: 'col-resize',
           zIndex: 50,
-          boxShadow: '0 0 20px #ff00aa',
+          boxShadow: '0 0 20px #ff0033',
           transform: 'translateX(-50%)',
           transition: 'background-color 0.2s ease',
           pointerEvents: 'auto'
@@ -67,7 +71,7 @@ export function RealitySplit() {
           transform: 'translate(-50%, -50%)',
           width: '60px',
           height: '60px',
-          border: `2px solid ${isHovered || isDragging ? '#ff00aa' : 'rgba(255, 0, 170, 0.5)'}`,
+          border: `2px solid ${isHovered || isDragging ? '#ff0033' : 'rgba(255, 0, 51, 0.5)'}`,
           borderRadius: '50%',
           display: 'flex',
           justifyContent: 'center',
@@ -76,7 +80,7 @@ export function RealitySplit() {
           transition: 'all 0.2s ease',
           scale: isHovered || isDragging ? '1.1' : '1'
         }}>
-          <div style={{ color: '#ff00aa', fontSize: '10px', fontWeight: 900, letterSpacing: '0.1em' }}>DRAG</div>
+          <div style={{ color: '#ff0033', fontSize: '10px', fontWeight: 900, letterSpacing: '0.1em' }}>DRAG</div>
         </div>
       </div>
     </>
