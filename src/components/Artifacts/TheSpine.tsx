@@ -2,11 +2,10 @@
 
 import { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
-import { useScroll, Edges } from "@react-three/drei";
+import { useScroll } from "@react-three/drei";
 import { useStore } from "@/store/useStore";
 import * as THREE from "three";
 
-const HELIX_HEIGHT = 40;
 const HELIX_COUNT = 150;
 const TOTEM_COUNT = 20;
 
@@ -58,103 +57,99 @@ function HelixPart({ isBlueprint, clippingPlanes }: { isBlueprint: boolean, clip
       groupRef.current.position.y = THREE.MathUtils.lerp(-20, 0, localOffset);
       
       groupRef.current.visible = offset > 0.4 && offset < 0.8;
+    }
 
-        dummy.position.set(
-          Math.cos(angle) * radius + scatterX,
-          y + scatterY,
-          Math.sin(angle) * radius + scatterZ
-        );
+    const scatterMult = explosion * 10;
+
+    if (helixRef.current) {
+      helixData.forEach((h, i) => {
+        const x = Math.cos(h.angle + time) * h.radius;
+        const z = Math.sin(h.angle + time) * h.radius;
         
-        dummy.rotation.set(
-          explosion * Math.random() * 10,
-          -angle + (explosion * Math.random() * 10),
-          explosion * Math.random() * 10
-        );
+        const scatterX = explosion > 0 ? (Math.random() - 0.5) * scatterMult : 0;
+        const scatterY = explosion > 0 ? (Math.random() - 0.5) * scatterMult : 0;
+        const scatterZ = explosion > 0 ? (Math.random() - 0.5) * scatterMult : 0;
 
-        const s = 1 + explosion * 2;
+        dummy.position.set(x + scatterX, h.y + scatterY, z + scatterZ);
+        dummy.rotation.set(time, h.angle, 0);
+        
+        const s = 1 + explosion;
+        dummy.scale.set(s, s * 0.2, s);
+        dummy.updateMatrix();
+        helixRef.current!.setMatrixAt(i, dummy.matrix);
+      });
+      helixRef.current.instanceMatrix.needsUpdate = true;
+    }
+
+    if (coreRef.current) {
+      helixData.forEach((h, i) => {
+        dummy.position.set(0, h.y, 0);
+        dummy.rotation.set(0, time * 2, 0);
+        
+        const s = (0.5 + Math.sin(h.y + time * 5) * 0.2) * (1 + explosion * 3);
         dummy.scale.set(s, s, s);
         dummy.updateMatrix();
-        strand2Ref.current.setMatrixAt(i, dummy.matrix);
-      }
-      strand2Ref.current.instanceMatrix.needsUpdate = true;
+        coreRef.current!.setMatrixAt(i, dummy.matrix);
+      });
+      coreRef.current.instanceMatrix.needsUpdate = true;
     }
 
-    // Rungs (Connecting bridges)
-    if (rungsRef.current) {
-      for (let i = 0; i < RUNG_COUNT; i++) {
-        const y = (i / RUNG_COUNT) * HELIX_HEIGHT - (HELIX_HEIGHT / 2);
-        const angle = y * frequency + time;
-        
-        const scatterX = explosion > 0 ? (Math.random() - 0.5) * explosion * 30 : 0;
-        const scatterY = explosion > 0 ? (Math.random() - 0.5) * explosion * 30 : 0;
-        const scatterZ = explosion > 0 ? (Math.random() - 0.5) * explosion * 30 : 0;
+    if (totemRef.current) {
+      totemData.forEach((t, i) => {
+        const scatterX = explosion > 0 ? (Math.random() - 0.5) * scatterMult * 2 : 0;
+        const scatterY = explosion > 0 ? (Math.random() - 0.5) * scatterMult * 2 : 0;
+        const scatterZ = explosion > 0 ? (Math.random() - 0.5) * scatterMult * 2 : 0;
 
-        dummy.position.set(scatterX, y + scatterY, scatterZ);
-        dummy.rotation.set(0, -angle + (explosion * Math.random() * 5), explosion * Math.random() * 5);
+        dummy.position.set(scatterX, t.y + scatterY, scatterZ);
         
-        const scaleX = radius * 2 + explosion * 5;
-        dummy.scale.set(scaleX, 1, 1);
+        // Chaotic wobbling rotation like the graffiti image
+        dummy.rotation.set(
+          Math.sin(time * t.speed) * t.wobble, 
+          time * t.speed, 
+          Math.cos(time * t.speed) * t.wobble
+        );
+        
+        const s = t.size * (1 + explosion);
+        dummy.scale.set(s, 0.5, s);
         dummy.updateMatrix();
-        rungsRef.current.setMatrixAt(i, dummy.matrix);
-      }
-      rungsRef.current.instanceMatrix.needsUpdate = true;
-    }
-
-    if (plasmaRef.current) {
-      plasmaRef.current.rotation.y = -time * 0.5;
-      const pulse = 1 + Math.sin(time * 5) * 0.1 + (explosion * 5);
-      plasmaRef.current.scale.set(pulse, 1, pulse);
+        totemRef.current!.setMatrixAt(i, dummy.matrix);
+      });
+      totemRef.current.instanceMatrix.needsUpdate = true;
     }
   });
 
-  const solidMat = useMemo(() => new THREE.MeshStandardMaterial({ 
-    color: '#1a1a1a', 
-    metalness: 0.9, 
-    roughness: 0.4,
-    clippingPlanes 
-  }), [clippingPlanes]);
-  
-  const wireMat = useMemo(() => new THREE.MeshBasicMaterial({ 
-    color: '#00ccff', 
-    wireframe: true, 
-    transparent: true, 
-    opacity: 0.5,
-    clippingPlanes 
-  }), [clippingPlanes]);
+  const material = useMemo(() => {
+    if (isBlueprint) return new THREE.MeshBasicMaterial({ color: '#ff00aa', wireframe: true, transparent: true, opacity: 0.5, clippingPlanes });
+    return new THREE.MeshStandardMaterial({ color: '#111111', metalness: 0.9, roughness: 0.2, clippingPlanes });
+  }, [isBlueprint, clippingPlanes]);
 
-  const plasmaMat = useMemo(() => new THREE.MeshStandardMaterial({
-    color: '#ffffff',
-    emissive: '#ff00aa',
-    emissiveIntensity: 4,
-    transparent: true,
-    opacity: 0.8,
-    clippingPlanes
-  }), [clippingPlanes]);
+  const coreMat = useMemo(() => {
+    if (isBlueprint) return new THREE.MeshBasicMaterial({ color: '#ffffff', wireframe: true, clippingPlanes });
+    return new THREE.MeshStandardMaterial({ color: '#ff0000', emissive: '#ff0000', emissiveIntensity: 2, clippingPlanes });
+  }, [isBlueprint, clippingPlanes]);
+
+  const totemMat = useMemo(() => {
+    if (isBlueprint) return new THREE.MeshBasicMaterial({ color: '#00ffff', wireframe: true, transparent: true, opacity: 0.8, clippingPlanes });
+    return new THREE.MeshStandardMaterial({ color: '#222222', metalness: 1, roughness: 0.5, flatShading: true, clippingPlanes });
+  }, [isBlueprint, clippingPlanes]);
 
   return (
     <group ref={groupRef}>
-      {/* Outer Strands */}
-      <instancedMesh ref={strand1Ref} args={[undefined as any, undefined as any, STRAND_COUNT]}>
-        <boxGeometry args={[1, 0.2, 1]} />
-        <primitive object={isBlueprint ? wireMat : solidMat} attach="material" />
-      </instancedMesh>
-      <instancedMesh ref={strand2Ref} args={[undefined as any, undefined as any, STRAND_COUNT]}>
-        <boxGeometry args={[1, 0.2, 1]} />
-        <primitive object={isBlueprint ? wireMat : solidMat} attach="material" />
+      <instancedMesh ref={helixRef} args={[undefined as any, undefined as any, HELIX_COUNT]}>
+        <boxGeometry args={[2, 1, 0.5]} />
+        <primitive object={material} attach="material" />
       </instancedMesh>
       
-      {/* Inner Rungs */}
-      <instancedMesh ref={rungsRef} args={[undefined as any, undefined as any, RUNG_COUNT]}>
-        <cylinderGeometry args={[0.1, 0.1, 1]} />
-        <primitive object={isBlueprint ? wireMat : solidMat} attach="material" />
+      <instancedMesh ref={coreRef} args={[undefined as any, undefined as any, HELIX_COUNT]}>
+        <octahedronGeometry args={[1, 0]} />
+        <primitive object={coreMat} attach="material" />
       </instancedMesh>
 
-      {/* Inner Plasma Core */}
-      <mesh ref={plasmaRef}>
-        <cylinderGeometry args={[0.5, 0.5, HELIX_HEIGHT, 16]} />
-        <primitive object={plasmaMat} attach="material" />
-        {isBlueprint && <Edges scale={1.05} color="#ffffff" />}
-      </mesh>
+      {/* Chaotic Totem Gears */}
+      <instancedMesh ref={totemRef} args={[undefined as any, undefined as any, TOTEM_COUNT]}>
+        <torusGeometry args={[1, 0.2, 8, 7]} />
+        <primitive object={totemMat} attach="material" />
+      </instancedMesh>
     </group>
   );
 }
