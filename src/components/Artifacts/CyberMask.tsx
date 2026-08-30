@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
 import { useStore } from "@/store/useStore";
@@ -16,122 +16,134 @@ export function CyberMask() {
   // Layers
   const brainRef = useRef<THREE.Mesh>(null);
   const skullRef = useRef<THREE.Mesh>(null);
-  const symbioteSkinRef = useRef<THREE.Mesh>(null);
+  const symbioteRingsRef = useRef<THREE.Group>(null);
   
   const brainMatRef = useRef<THREE.MeshBasicMaterial>(null);
   const skullMatRef = useRef<THREE.MeshBasicMaterial>(null);
-  const skinMatRef = useRef<THREE.MeshBasicMaterial>(null);
+  const ringMatRef = useRef<THREE.MeshBasicMaterial>(null);
+
+  // Procedural Spider Lenses
+  const lensShape = useMemo(() => {
+    const shape = new THREE.Shape();
+    shape.moveTo(0, 0);
+    shape.quadraticCurveTo(0.5, 0.8, 1.2, 1);
+    shape.quadraticCurveTo(0.8, 0, 0, -0.2);
+    shape.lineTo(0, 0);
+    return new THREE.ShapeGeometry(shape);
+  }, []);
 
   useFrame((state) => {
     const time = state.clock.elapsedTime;
     
-    // Smooth transition between Alien and Symbiote
     mutateProgress.current = THREE.MathUtils.lerp(mutateProgress.current, isMutated ? 1 : 0, 0.1);
     const m = mutateProgress.current;
-    const pulse = 1 + explosion * 2;
+    const pulse = 1 + Math.sin(time * 5) * 0.1 + explosion * 2;
 
     if (groupRef.current) {
-      groupRef.current.position.y = Math.sin(time) * 0.2;
-      const twitch = m > 0.5 ? Math.sin(time * 20) * 0.05 : 0;
-      groupRef.current.rotation.y = Math.sin(time * 0.5) * 0.3 + twitch;
+      groupRef.current.position.y = Math.sin(time * 2) * 0.2;
+      const twitch = m > 0.5 ? Math.sin(time * 30) * 0.05 : 0;
+      groupRef.current.rotation.y = Math.sin(time * 0.5) * 0.2 + twitch;
       groupRef.current.rotation.x = twitch;
       
-      const scale = THREE.MathUtils.lerp(1, 1.2, m);
+      const scale = THREE.MathUtils.lerp(1, 1.3, m);
       groupRef.current.scale.set(scale, scale, scale);
-      groupRef.current.position.z = THREE.MathUtils.lerp(0, 2, m);
     }
 
     if (brainRef.current) {
-      // Inner brain pulses heavily
-      const brainScale = THREE.MathUtils.lerp(pulse, pulse * 1.5, m) * 0.5;
+      // Alien Brain twists and writhes
+      brainRef.current.rotation.x = time * 0.5;
+      brainRef.current.rotation.y = time * 0.3;
+      const brainScale = THREE.MathUtils.lerp(pulse, pulse * 1.5, m) * 0.6;
       brainRef.current.scale.setScalar(brainScale);
     }
     
     if (skullRef.current) {
-      // Skull counter rotates
+      // Containment field / Skull snaps open
       skullRef.current.rotation.y = -time * 0.2;
-      skullRef.current.scale.setScalar(0.7);
+      const skullScale = THREE.MathUtils.lerp(1.2, 1.5 + Math.sin(time * 15) * 0.1, m);
+      skullRef.current.scale.setScalar(skullScale);
     }
 
-    if (symbioteSkinRef.current) {
-      // Outer skin violently expands and distorts
-      symbioteSkinRef.current.rotation.y = time * 0.1;
-      symbioteSkinRef.current.rotation.x = time * 0.05;
-      
-      // Expand skin off the skull when mutated
-      const skinDistortion = THREE.MathUtils.lerp(1, 1.5 + Math.sin(time * 10) * 0.1, m);
-      symbioteSkinRef.current.scale.set(1, skinDistortion, 1);
+    if (symbioteRingsRef.current) {
+      // Rings orbit like a chaotic atom when mutated
+      symbioteRingsRef.current.children.forEach((ring, i) => {
+        ring.rotation.x = time * (0.2 + m * 2) + i;
+        ring.rotation.y = time * (0.3 + m * 2) + i;
+      });
     }
 
     // Material interpolations
     if (brainMatRef.current) {
       brainMatRef.current.color.lerpColors(
-        new THREE.Color('#ffffff'), // White energy brain
-        new THREE.Color('#ff0033'), // Symbiote core
+        new THREE.Color('#ffffff'), 
+        new THREE.Color('#ff0033'), 
         m
       );
     }
     if (skullMatRef.current) {
       skullMatRef.current.color.lerpColors(
-        new THREE.Color('#39ff14'), // Alien Green bones
-        new THREE.Color('#050505'), // Void black bones
+        new THREE.Color('#39ff14'), 
+        new THREE.Color('#050505'), 
         m
       );
+      skullMatRef.current.wireframe = m < 0.5; // Becomes solid void when mutated
     }
-    if (skinMatRef.current) {
-      skinMatRef.current.color.lerpColors(
+    if (ringMatRef.current) {
+      ringMatRef.current.color.lerpColors(
         new THREE.Color('#39ff14'), 
         new THREE.Color('#ff0033'), 
         m
       );
-      // Fade out skin in normal mode to see skull better, make it opaque when mutated
-      skinMatRef.current.opacity = THREE.MathUtils.lerp(0.1, 0.4, m);
     }
   });
 
   return (
     <group ref={groupRef}>
-      {/* LAYER 1: INNER NEURAL CORE */}
+      {/* LAYER 1: INNER NEURAL CORE (Torus Knot) */}
       <mesh ref={brainRef}>
-        <icosahedronGeometry args={[1, 2]} />
+        <torusKnotGeometry args={[1, 0.4, 128, 32]} />
         <meshBasicMaterial ref={brainMatRef} wireframe />
-        <Html position={[1.5, 0.5, 0]} center style={{ pointerEvents: 'none' }}>
+        <Html position={[2, 1, 0]} center style={{ pointerEvents: 'none' }}>
           <div style={{ color: isMutated ? '#ff0033' : '#ffffff', fontFamily: 'monospace', fontSize: '10px', width: '150px', borderLeft: '1px solid currentColor', paddingLeft: '8px', textShadow: '0 0 5px currentColor' }}>
             {isMutated ? 'CORRUPTED NEURAL MATRIX' : 'OMNI-ENERGY CEREBRUM'}
           </div>
         </Html>
       </mesh>
 
-      {/* LAYER 2: STRUCTURAL SKULL / MASK */}
+      {/* LAYER 2: STRUCTURAL SKULL / CONTAINMENT FIELD */}
       <mesh ref={skullRef}>
-        <sphereGeometry args={[1.5, 16, 16]} />
+        <icosahedronGeometry args={[1, 2]} />
         <meshBasicMaterial ref={skullMatRef} wireframe />
-        <Html position={[-2, 1, 0]} center style={{ pointerEvents: 'none' }}>
+        <Html position={[-2.5, 1, 0]} center style={{ pointerEvents: 'none' }}>
           <div style={{ color: isMutated ? '#050505' : '#39ff14', fontFamily: 'monospace', fontSize: '10px', width: '120px', borderBottom: '1px solid currentColor', paddingBottom: '4px', textAlign: 'right' }}>
             {isMutated ? 'HOST CRANIUM COMPROMISED' : 'GALVANIC SKULL LATTICE'}
           </div>
         </Html>
       </mesh>
 
-      {/* LAYER 3: OUTER SYMBIOTE / ALIEN SKIN */}
-      <mesh ref={symbioteSkinRef}>
-        <sphereGeometry args={[1.8, 32, 32]} />
-        <meshBasicMaterial ref={skinMatRef} transparent depthWrite={false} />
-        <Html position={[0, -2, 0]} center style={{ pointerEvents: 'none' }}>
+      {/* LAYER 3: ORBITING SYMBIOTE RINGS */}
+      <group ref={symbioteRingsRef}>
+        {[1.8, 2.0, 2.2].map((radius, i) => (
+          <mesh key={i}>
+            <torusGeometry args={[radius, 0.02, 16, 100]} />
+            <meshBasicMaterial ref={i === 0 ? ringMatRef : undefined} color={isMutated ? '#ff0033' : '#39ff14'} />
+          </mesh>
+        ))}
+        <Html position={[0, -2.5, 0]} center style={{ pointerEvents: 'none' }}>
           <div style={{ color: isMutated ? '#ff0033' : '#39ff14', fontFamily: 'monospace', fontSize: '10px', width: '200px', borderTop: '1px solid currentColor', paddingTop: '4px', textAlign: 'center' }}>
-            {isMutated ? 'SYMBIOTIC BINDING ENVELOPE' : 'ALIEN EXOSKELETON'}
+            {isMutated ? 'SYMBIOTIC BINDING RINGS' : 'DNA CONTAINMENT FIELD'}
           </div>
         </Html>
-      </mesh>
+      </group>
 
       {/* Spider-Man Lenses Overlay */}
-      <group position={[0, 0, 1.8]}>
-        <mesh position={[-0.5, 0.3, 0]} rotation={[0, 0, 0.2]}>
-          <planeGeometry args={[0.6, 0.3]} />
+      <group position={[0, 0, 1.3]}>
+        <mesh position={[-0.2, 0, 0]} rotation={[0, 0, 0.2]}>
+          <primitive object={lensShape} />
           <meshBasicMaterial color="#ffffff" side={THREE.DoubleSide} />
         </mesh>
-        <mesh position={[0.5, 0.3, 0]} rotation={[0, 0, -0.2]}>
-          <planeGeometry args={[0.6, 0.3]} />
+        <mesh position={[0.2, 0, 0]} rotation={[0, Math.PI, -0.2]}>
+          <primitive object={lensShape} />
           <meshBasicMaterial color="#ffffff" side={THREE.DoubleSide} />
         </mesh>
       </group>
