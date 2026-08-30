@@ -13,23 +13,33 @@ export function CyberMask() {
   
   const groupRef = useRef<THREE.Group>(null);
   
-  // Layers
-  const brainRef = useRef<THREE.Mesh>(null);
-  const skullRef = useRef<THREE.Mesh>(null);
-  const symbioteRingsRef = useRef<THREE.Group>(null);
-  
-  const brainMatRef = useRef<THREE.MeshBasicMaterial>(null);
-  const skullMatRef = useRef<THREE.MeshBasicMaterial>(null);
-  const ringMatRef = useRef<THREE.MeshBasicMaterial>(null);
+  const strand1MatRef = useRef<THREE.MeshBasicMaterial>(null);
+  const strand2MatRef = useRef<THREE.MeshBasicMaterial>(null);
+  const rungMatRef = useRef<THREE.MeshBasicMaterial>(null);
 
-  // Procedural Spider Lenses
-  const lensShape = useMemo(() => {
-    const shape = new THREE.Shape();
-    shape.moveTo(0, 0);
-    shape.quadraticCurveTo(0.5, 0.8, 1.2, 1);
-    shape.quadraticCurveTo(0.8, 0, 0, -0.2);
-    shape.lineTo(0, 0);
-    return new THREE.ShapeGeometry(shape);
+  const numPairs = 40;
+  
+  // Mathematical positions for the double helix
+  const { positions1, positions2, rungs } = useMemo(() => {
+    const p1 = [];
+    const p2 = [];
+    const r = [];
+    for (let i = 0; i < numPairs; i++) {
+      const t = (i / numPairs) * Math.PI * 4; // 2 full turns
+      const radius = 1.5;
+      const y = (i - numPairs / 2) * 0.2;
+      
+      const x1 = Math.cos(t) * radius;
+      const z1 = Math.sin(t) * radius;
+      
+      const x2 = Math.cos(t + Math.PI) * radius;
+      const z2 = Math.sin(t + Math.PI) * radius;
+
+      p1.push(new THREE.Vector3(x1, y, z1));
+      p2.push(new THREE.Vector3(x2, y, z2));
+      r.push({ p1: new THREE.Vector3(x1, y, z1), p2: new THREE.Vector3(x2, y, z2) });
+    }
+    return { positions1: p1, positions2: p2, rungs: r };
   }, []);
 
   useFrame((state) => {
@@ -37,116 +47,70 @@ export function CyberMask() {
     
     mutateProgress.current = THREE.MathUtils.lerp(mutateProgress.current, isMutated ? 1 : 0, 0.1);
     const m = mutateProgress.current;
-    const pulse = 1 + Math.sin(time * 5) * 0.1 + explosion * 2;
 
     if (groupRef.current) {
-      groupRef.current.position.y = Math.sin(time * 2) * 0.2;
-      const twitch = m > 0.5 ? Math.sin(time * 30) * 0.05 : 0;
-      groupRef.current.rotation.y = Math.sin(time * 0.5) * 0.2 + twitch;
-      groupRef.current.rotation.x = twitch;
+      // Smooth elegant rotation
+      groupRef.current.rotation.y = time * 0.5 + (m * time);
+      groupRef.current.position.y = Math.sin(time) * 0.2;
       
-      const scale = THREE.MathUtils.lerp(1, 1.3, m);
-      groupRef.current.scale.set(scale, scale, scale);
+      // When mutated, the DNA unzips (expands outward)
+      const scaleX = THREE.MathUtils.lerp(1, 2.5, m);
+      groupRef.current.scale.set(scaleX, 1, scaleX);
     }
 
-    if (brainRef.current) {
-      // Alien Brain twists and writhes
-      brainRef.current.rotation.x = time * 0.5;
-      brainRef.current.rotation.y = time * 0.3;
-      const brainScale = THREE.MathUtils.lerp(pulse, pulse * 1.5, m) * 0.6;
-      brainRef.current.scale.setScalar(brainScale);
-    }
-    
-    if (skullRef.current) {
-      // Containment field / Skull snaps open
-      skullRef.current.rotation.y = -time * 0.2;
-      const skullScale = THREE.MathUtils.lerp(1.2, 1.5 + Math.sin(time * 15) * 0.1, m);
-      skullRef.current.scale.setScalar(skullScale);
-    }
+    if (strand1MatRef.current && strand2MatRef.current && rungMatRef.current) {
+      const green = new THREE.Color('#39ff14');
+      const red = new THREE.Color('#ff0033');
+      const black = new THREE.Color('#050505');
 
-    if (symbioteRingsRef.current) {
-      // Rings orbit like a chaotic atom when mutated
-      symbioteRingsRef.current.children.forEach((ring, i) => {
-        ring.rotation.x = time * (0.2 + m * 2) + i;
-        ring.rotation.y = time * (0.3 + m * 2) + i;
-      });
-    }
-
-    // Material interpolations
-    if (brainMatRef.current) {
-      brainMatRef.current.color.lerpColors(
-        new THREE.Color('#ffffff'), 
-        new THREE.Color('#ff0033'), 
-        m
-      );
-    }
-    if (skullMatRef.current) {
-      skullMatRef.current.color.lerpColors(
-        new THREE.Color('#39ff14'), 
-        new THREE.Color('#050505'), 
-        m
-      );
-      skullMatRef.current.wireframe = m < 0.5; // Becomes solid void when mutated
-    }
-    if (ringMatRef.current) {
-      ringMatRef.current.color.lerpColors(
-        new THREE.Color('#39ff14'), 
-        new THREE.Color('#ff0033'), 
-        m
-      );
+      strand1MatRef.current.color.lerpColors(green, red, m);
+      strand2MatRef.current.color.lerpColors(green, black, m);
+      rungMatRef.current.color.lerpColors(green, red, m);
+      
+      // Break the bonds when mutated
+      rungMatRef.current.opacity = THREE.MathUtils.lerp(0.8, 0.0, m);
     }
   });
 
   return (
     <group ref={groupRef}>
-      {/* LAYER 1: INNER NEURAL CORE (Torus Knot) */}
-      <mesh ref={brainRef}>
-        <torusKnotGeometry args={[1, 0.4, 128, 32]} />
-        <meshBasicMaterial ref={brainMatRef} wireframe />
-        <Html position={[2, 1, 0]} center style={{ pointerEvents: 'none' }}>
-          <div style={{ color: isMutated ? '#ff0033' : '#ffffff', fontFamily: 'monospace', fontSize: '10px', width: '150px', borderLeft: '1px solid currentColor', paddingLeft: '8px', textShadow: '0 0 5px currentColor' }}>
-            {isMutated ? 'CORRUPTED NEURAL MATRIX' : 'OMNI-ENERGY CEREBRUM'}
-          </div>
-        </Html>
-      </mesh>
+      {/* STRAND 1 */}
+      {positions1.map((pos, i) => (
+        <mesh key={`s1-${i}`} position={pos}>
+          <sphereGeometry args={[0.15, 16, 16]} />
+          <meshBasicMaterial ref={i === 0 ? strand1MatRef : undefined} color="#39ff14" />
+        </mesh>
+      ))}
 
-      {/* LAYER 2: STRUCTURAL SKULL / CONTAINMENT FIELD */}
-      <mesh ref={skullRef}>
-        <icosahedronGeometry args={[1, 2]} />
-        <meshBasicMaterial ref={skullMatRef} wireframe />
-        <Html position={[-2.5, 1, 0]} center style={{ pointerEvents: 'none' }}>
-          <div style={{ color: isMutated ? '#050505' : '#39ff14', fontFamily: 'monospace', fontSize: '10px', width: '120px', borderBottom: '1px solid currentColor', paddingBottom: '4px', textAlign: 'right' }}>
-            {isMutated ? 'HOST CRANIUM COMPROMISED' : 'GALVANIC SKULL LATTICE'}
-          </div>
-        </Html>
-      </mesh>
+      {/* STRAND 2 */}
+      {positions2.map((pos, i) => (
+        <mesh key={`s2-${i}`} position={pos}>
+          <sphereGeometry args={[0.15, 16, 16]} />
+          <meshBasicMaterial ref={i === 0 ? strand2MatRef : undefined} color="#39ff14" />
+        </mesh>
+      ))}
 
-      {/* LAYER 3: ORBITING SYMBIOTE RINGS */}
-      <group ref={symbioteRingsRef}>
-        {[1.8, 2.0, 2.2].map((radius, i) => (
-          <mesh key={i}>
-            <torusGeometry args={[radius, 0.02, 16, 100]} />
-            <meshBasicMaterial ref={i === 0 ? ringMatRef : undefined} color={isMutated ? '#ff0033' : '#39ff14'} />
+      {/* RUNGS (BONDS) */}
+      {rungs.map((rung, i) => {
+        const distance = rung.p1.distanceTo(rung.p2);
+        const center = new THREE.Vector3().addVectors(rung.p1, rung.p2).multiplyScalar(0.5);
+        // Calculate rotation for cylinder
+        const direction = new THREE.Vector3().subVectors(rung.p2, rung.p1).normalize();
+        const quaternion = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction);
+
+        return (
+          <mesh key={`r-${i}`} position={center} quaternion={quaternion}>
+            <cylinderGeometry args={[0.02, 0.02, distance, 8]} />
+            <meshBasicMaterial ref={i === 0 ? rungMatRef : undefined} color="#39ff14" transparent />
           </mesh>
-        ))}
-        <Html position={[0, -2.5, 0]} center style={{ pointerEvents: 'none' }}>
-          <div style={{ color: isMutated ? '#ff0033' : '#39ff14', fontFamily: 'monospace', fontSize: '10px', width: '200px', borderTop: '1px solid currentColor', paddingTop: '4px', textAlign: 'center' }}>
-            {isMutated ? 'SYMBIOTIC BINDING RINGS' : 'DNA CONTAINMENT FIELD'}
-          </div>
-        </Html>
-      </group>
+        );
+      })}
 
-      {/* Spider-Man Lenses Overlay */}
-      <group position={[0, 0, 1.3]}>
-        <mesh position={[-0.2, 0, 0]} rotation={[0, 0, 0.2]}>
-          <primitive object={lensShape} />
-          <meshBasicMaterial color="#ffffff" side={THREE.DoubleSide} />
-        </mesh>
-        <mesh position={[0.2, 0, 0]} rotation={[0, Math.PI, -0.2]}>
-          <primitive object={lensShape} />
-          <meshBasicMaterial color="#ffffff" side={THREE.DoubleSide} />
-        </mesh>
-      </group>
+      <Html position={[2, 0, 0]} center style={{ pointerEvents: 'none' }}>
+        <div style={{ color: isMutated ? '#ff0033' : '#39ff14', fontFamily: 'monospace', fontSize: '10px', width: '200px', borderLeft: '1px solid currentColor', paddingLeft: '8px' }}>
+          {isMutated ? 'DNA STRANDS UNZIPPING... HOST TAKEOVER' : 'STABLE SYMBIOTE DOUBLE HELIX'}
+        </div>
+      </Html>
     </group>
   );
 }

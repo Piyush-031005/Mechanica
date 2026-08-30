@@ -12,7 +12,7 @@ import { Effects } from "@/components/Effects/Effects";
 import { OmniBlueprintGrid } from "@/components/Environment/OmniBlueprintGrid";
 
 const ORGANS = [
-  { id: 0, title: "SYMBIOTE MASK", subtitle: "DNA SAMPLE 01" },
+  { id: 0, title: "SYMBIOTE DNA", subtitle: "DNA SAMPLE 01" }, // Renamed to fit the new helix
   { id: 1, title: "AERO GLIDER", subtitle: "DNA SAMPLE 02" },
   { id: 2, title: "RADIOACTIVE SPIDER", subtitle: "DNA SAMPLE 03" },
   { id: 3, title: "OMNI CORE", subtitle: "DNA SAMPLE 04" },
@@ -30,14 +30,12 @@ export default function Home() {
 
   const handleWheel = (e: React.WheelEvent) => {
     const now = Date.now();
-    if (now - lastScrollTime.current > 800) { // 800ms cooldown for smooth stepping
+    if (now - lastScrollTime.current > 800) { 
       if (e.deltaY > 20) {
         setDialIndex((dialIndex + 1) % 4);
-        triggerExplosion();
         lastScrollTime.current = now;
       } else if (e.deltaY < -20) {
         setDialIndex((dialIndex - 1 + 4) % 4);
-        triggerExplosion();
         lastScrollTime.current = now;
       }
     }
@@ -48,7 +46,6 @@ export default function Home() {
       onWheel={handleWheel}
       style={{ width: "100vw", height: "100vh", background: "var(--background)", overflow: "hidden", position: "relative" }}
     >
-      {/* Background radial glow & Blueprint Grid */}
       <OmniBlueprintGrid />
       <div style={{
         position: 'absolute',
@@ -60,7 +57,6 @@ export default function Home() {
         transition: 'background 0.5s ease',
       }} />
 
-      {/* 3D Canvas */}
       <Canvas
         camera={{ position: [0, 0, 15], fov: 45 }}
         style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }}
@@ -68,8 +64,6 @@ export default function Home() {
         <ambientLight intensity={0.5} />
         <directionalLight position={[10, 10, 10]} intensity={1} color={isMutated ? "#ff0033" : "#39ff14"} />
         
-        {/* We rely on ambient and directional light to avoid network fetch errors from HDR environments */}
-
         <group position={[0, 0, 0]}>
           {dialIndex === 0 && <CyberMask />}
           {dialIndex === 1 && <CyberBird />}
@@ -80,7 +74,6 @@ export default function Home() {
         <Effects />
       </Canvas>
 
-      {/* The Omni-Web Circular UI Overlay */}
       <div style={{
         position: 'absolute',
         top: 0, left: 0, width: '100%', height: '100%',
@@ -91,7 +84,6 @@ export default function Home() {
         justifyContent: 'center'
       }}>
         
-        {/* Central Reticle */}
         <div style={{
           width: '80vh', height: '80vh',
           border: `2px solid ${isMutated ? 'var(--symbiote-red)' : 'var(--alien-green)'}`,
@@ -104,7 +96,6 @@ export default function Home() {
           transition: 'all 0.3s ease',
           boxShadow: `0 0 50px ${isMutated ? 'rgba(255,0,51,0.2)' : 'rgba(57,255,20,0.2)'}`
         }}>
-          {/* Dial Sectors */}
           {ORGANS.map((organ, index) => {
             const angle = (index * 90) * (Math.PI / 180);
             const x = Math.sin(angle) * 45;
@@ -114,10 +105,7 @@ export default function Home() {
             return (
               <div 
                 key={organ.id}
-                onClick={() => {
-                  setDialIndex(index);
-                  triggerExplosion();
-                }}
+                onClick={() => setDialIndex(index)}
                 style={{
                   position: 'absolute',
                   top: `calc(50% + ${y}vh)`,
@@ -136,7 +124,6 @@ export default function Home() {
           })}
         </div>
 
-        {/* Info Text */}
         <div style={{
           position: 'absolute',
           bottom: '10vh',
@@ -149,7 +136,6 @@ export default function Home() {
           <h1 style={{ fontSize: '3vw', fontWeight: 900, letterSpacing: '0.1em', marginTop: '10px' }}>{activeOrgan.title}</h1>
         </div>
 
-        {/* Scroll Hint */}
         <div style={{
           position: 'absolute',
           top: '5vh',
@@ -162,7 +148,6 @@ export default function Home() {
           [ SCROLL MOUSE WHEEL TO CYCLE BLUEPRINTS ]
         </div>
 
-        {/* MUTATE BUTTON */}
         <button
           onClick={() => {
             toggleMutation();
