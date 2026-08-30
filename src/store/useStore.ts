@@ -64,6 +64,12 @@ interface GameState {
   // Omnitrix Dial Mechanic
   dialIndex: number;
   setDialIndex: (index: number) => void;
+
+  // Progress mechanics
+  scrollProgress: number;
+  setScrollProgress: (progress: number) => void;
+  infectionLevel: number;
+  setInfectionLevel: (level: number) => void;
 }
 
 export const useStore = create<GameState>((set) => ({
@@ -102,4 +108,10 @@ export const useStore = create<GameState>((set) => ({
 
   dialIndex: 0,
   setDialIndex: (index) => set({ dialIndex: index, isDismantled: false }),
+
+  scrollProgress: 0,
+  setScrollProgress: (progress) => set({ scrollProgress: progress }),
+  
+  infectionLevel: 0,
+  setInfectionLevel: (level) => set({ infectionLevel: level }),
 }));
