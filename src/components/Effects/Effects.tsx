@@ -3,26 +3,20 @@
 import { useRef } from "react";
 import { EffectComposer, Noise, Bloom, ChromaticAberration, Glitch } from "@react-three/postprocessing";
 import { BlendFunction, GlitchMode } from "postprocessing";
-import { useScroll } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { useStore } from "@/store/useStore";
 
 export function Effects() {
-  const scroll = useScroll();
   const explosion = useStore((state) => state.explosion);
   const glitchRef = useRef<any>(null);
 
   useFrame(() => {
     if (glitchRef.current) {
-      // Trigger glitch if scrolling fast, OR if explosion is active
-      const scrollSpeed = Math.abs(scroll.delta);
-      const isGlitching = scrollSpeed > 0.005 || explosion > 0.5;
-      
-      // Control glitch mode dynamically (avoiding .active getter error)
+      // Control glitch mode dynamically based on explosion
       if (explosion > 0.5) {
         glitchRef.current.mode = GlitchMode.CONSTANT_WILD;
-      } else if (isGlitching) {
+      } else if (explosion > 0.1) {
         glitchRef.current.mode = GlitchMode.SPORADIC;
       } else {
         glitchRef.current.mode = GlitchMode.DISABLED;
