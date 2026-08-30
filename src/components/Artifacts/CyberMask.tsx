@@ -59,34 +59,49 @@ export function CyberMask() {
     }
 
     if (strand1MatRef.current && strand2MatRef.current && rungMatRef.current) {
-      const green = new THREE.Color('#39ff14');
-      const red = new THREE.Color('#ff0033');
+      const green = new THREE.Color('#39ff14').multiplyScalar(2); // Emissive boost
+      const red = new THREE.Color('#ff0033').multiplyScalar(2);
       const black = new THREE.Color('#050505');
 
-      strand1MatRef.current.color.lerpColors(green, red, m);
-      strand2MatRef.current.color.lerpColors(green, black, m);
-      rungMatRef.current.color.lerpColors(green, red, m);
+      strand1MatRef.current.emissive.lerpColors(green, red, m);
+      strand1MatRef.current.color.lerpColors(new THREE.Color('#ffffff'), new THREE.Color('#330000'), m);
+
+      strand2MatRef.current.emissive.lerpColors(green, black, m);
+      strand2MatRef.current.color.lerpColors(new THREE.Color('#ffffff'), black, m);
+
+      rungMatRef.current.emissive.lerpColors(green, red, m);
       
       // Break the bonds when mutated
-      rungMatRef.current.opacity = THREE.MathUtils.lerp(0.8, 0.0, m);
+      rungMatRef.current.opacity = THREE.MathUtils.lerp(0.9, 0.0, m);
     }
   });
+
+  // Premium Glass/Metal Material Base
+  const physicalProps = {
+    roughness: 0.1,
+    metalness: 0.8,
+    transmission: 0.9, // Glass effect
+    thickness: 0.5,
+    clearcoat: 1,
+    clearcoatRoughness: 0.1,
+    envMapIntensity: 2
+  };
 
   return (
     <group ref={groupRef}>
       {/* STRAND 1 */}
       {positions1.map((pos, i) => (
         <mesh key={`s1-${i}`} position={pos}>
-          <sphereGeometry args={[0.15, 16, 16]} />
-          <meshBasicMaterial ref={i === 0 ? strand1MatRef : undefined} color="#39ff14" />
+          <sphereGeometry args={[0.2, 32, 32]} />
+          <meshPhysicalMaterial ref={i === 0 ? strand1MatRef : undefined} {...physicalProps} emissive="#39ff14" emissiveIntensity={0.5} />
         </mesh>
       ))}
 
       {/* STRAND 2 */}
       {positions2.map((pos, i) => (
         <mesh key={`s2-${i}`} position={pos}>
-          <sphereGeometry args={[0.15, 16, 16]} />
-          <meshBasicMaterial ref={i === 0 ? strand2MatRef : undefined} color="#39ff14" />
+          <sphereGeometry args={[0.2, 32, 32]} />
+          <meshPhysicalMaterial ref={i === 0 ? strand2MatRef : undefined} {...physicalProps} emissive="#39ff14" emissiveIntensity={0.5} />
         </mesh>
       ))}
 
@@ -100,14 +115,14 @@ export function CyberMask() {
 
         return (
           <mesh key={`r-${i}`} position={center} quaternion={quaternion}>
-            <cylinderGeometry args={[0.02, 0.02, distance, 8]} />
-            <meshBasicMaterial ref={i === 0 ? rungMatRef : undefined} color="#39ff14" transparent />
+            <cylinderGeometry args={[0.04, 0.04, distance, 16]} />
+            <meshPhysicalMaterial ref={i === 0 ? rungMatRef : undefined} {...physicalProps} transmission={0.2} emissive="#39ff14" emissiveIntensity={1} transparent />
           </mesh>
         );
       })}
 
-      <Html position={[2, 0, 0]} center style={{ pointerEvents: 'none' }}>
-        <div style={{ color: isMutated ? '#ff0033' : '#39ff14', fontFamily: 'monospace', fontSize: '10px', width: '200px', borderLeft: '1px solid currentColor', paddingLeft: '8px' }}>
+      <Html position={[2.5, 0, 0]} center style={{ pointerEvents: 'none' }}>
+        <div style={{ color: isMutated ? '#ff0033' : '#39ff14', fontFamily: 'monospace', fontSize: '10px', width: '220px', borderLeft: '1px solid currentColor', paddingLeft: '10px', textShadow: '0 0 10px currentColor' }}>
           {isMutated ? 'DNA STRANDS UNZIPPING... HOST TAKEOVER' : 'STABLE SYMBIOTE DOUBLE HELIX'}
         </div>
       </Html>

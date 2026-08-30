@@ -46,23 +46,17 @@ export default function Home() {
       onWheel={handleWheel}
       style={{ width: "100vw", height: "100vh", background: "var(--background)", overflow: "hidden", position: "relative" }}
     >
-      <OmniBlueprintGrid />
-      <div style={{
-        position: 'absolute',
-        top: '50%', left: '50%',
-        transform: 'translate(-50%, -50%)',
-        width: '60vw', height: '60vw',
-        background: isMutated ? 'radial-gradient(circle, rgba(255,0,51,0.15) 0%, transparent 70%)' : 'radial-gradient(circle, rgba(57,255,20,0.15) 0%, transparent 70%)',
-        pointerEvents: 'none',
-        transition: 'background 0.5s ease',
-      }} />
-
+      {/* 3D Canvas */}
       <Canvas
         camera={{ position: [0, 0, 15], fov: 45 }}
         style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }}
       >
-        <ambientLight intensity={0.5} />
-        <directionalLight position={[10, 10, 10]} intensity={1} color={isMutated ? "#ff0033" : "#39ff14"} />
+        <OmniBlueprintGrid />
+
+        <ambientLight intensity={0.2} />
+        {/* Cinematic Rim Lights */}
+        <spotLight position={[10, 10, 10]} intensity={150} color={isMutated ? "#ff0033" : "#39ff14"} penumbra={1} distance={50} />
+        <spotLight position={[-10, -10, -10]} intensity={100} color="#ffffff" penumbra={1} distance={50} />
         
         <group position={[0, 0, 0]}>
           {dialIndex === 0 && <CyberMask />}
