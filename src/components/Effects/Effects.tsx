@@ -29,8 +29,6 @@ export function Effects() {
       {/* Aberration strictly used for organic infection distortion */}
       <ChromaticAberration 
         offset={new THREE.Vector2(0.0005 + (infectionLevel * 0.005), 0.0005 + (infectionLevel * 0.005))} 
-        radialModulation={false}
-        modulationOffset={0}
       />
 
       {/* Deep photographic vignette */}
