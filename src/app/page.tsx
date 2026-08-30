@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import { Canvas } from "@react-three/fiber";
 import { useStore } from "@/store/useStore";
 
@@ -25,9 +26,28 @@ export default function Home() {
   const triggerExplosion = useStore((state) => state.triggerGlobalExplosion);
 
   const activeOrgan = ORGANS[dialIndex];
+  const lastScrollTime = useRef(0);
+
+  const handleWheel = (e: React.WheelEvent) => {
+    const now = Date.now();
+    if (now - lastScrollTime.current > 800) { // 800ms cooldown for smooth stepping
+      if (e.deltaY > 20) {
+        setDialIndex((dialIndex + 1) % 4);
+        triggerExplosion();
+        lastScrollTime.current = now;
+      } else if (e.deltaY < -20) {
+        setDialIndex((dialIndex - 1 + 4) % 4);
+        triggerExplosion();
+        lastScrollTime.current = now;
+      }
+    }
+  };
 
   return (
-    <main style={{ width: "100vw", height: "100vh", background: "var(--background)", overflow: "hidden", position: "relative" }}>
+    <main 
+      onWheel={handleWheel}
+      style={{ width: "100vw", height: "100vh", background: "var(--background)", overflow: "hidden", position: "relative" }}
+    >
       {/* Background radial glow & Blueprint Grid */}
       <OmniBlueprintGrid />
       <div style={{
@@ -127,6 +147,19 @@ export default function Home() {
         }}>
           <h2 style={{ fontSize: '14px', letterSpacing: '0.3em', opacity: 0.7 }}>{activeOrgan.subtitle}</h2>
           <h1 style={{ fontSize: '3vw', fontWeight: 900, letterSpacing: '0.1em', marginTop: '10px' }}>{activeOrgan.title}</h1>
+        </div>
+
+        {/* Scroll Hint */}
+        <div style={{
+          position: 'absolute',
+          top: '5vh',
+          color: isMutated ? 'var(--symbiote-red)' : 'var(--alien-green)',
+          fontSize: '10px',
+          letterSpacing: '0.2em',
+          opacity: 0.5,
+          fontFamily: 'monospace'
+        }}>
+          [ SCROLL MOUSE WHEEL TO CYCLE BLUEPRINTS ]
         </div>
 
         {/* MUTATE BUTTON */}

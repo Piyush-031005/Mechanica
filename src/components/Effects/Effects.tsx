@@ -31,9 +31,9 @@ export function Effects() {
 
       {/* Smooth Bloom for the glowing elements without blowing them out */}
       <Bloom 
-        luminanceThreshold={1.2} 
+        luminanceThreshold={0.2} 
         luminanceSmoothing={0.9} 
-        intensity={1.5} 
+        intensity={2.5} 
         mipmapBlur 
       />
 
