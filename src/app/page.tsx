@@ -1,7 +1,6 @@
 "use client";
 
 import { Canvas } from "@react-three/fiber";
-import { Environment } from "@react-three/drei";
 import { useStore } from "@/store/useStore";
 
 import { CyberMask } from "@/components/Artifacts/CyberMask";
@@ -9,6 +8,7 @@ import { CyberBird } from "@/components/Artifacts/CyberBird";
 import { ArachnidCore } from "@/components/Artifacts/ArachnidCore";
 import { TheCore } from "@/components/Artifacts/TheCore";
 import { Effects } from "@/components/Effects/Effects";
+import { OmniBlueprintGrid } from "@/components/Environment/OmniBlueprintGrid";
 
 const ORGANS = [
   { id: 0, title: "SYMBIOTE MASK", subtitle: "DNA SAMPLE 01" },
@@ -28,7 +28,8 @@ export default function Home() {
 
   return (
     <main style={{ width: "100vw", height: "100vh", background: "var(--background)", overflow: "hidden", position: "relative" }}>
-      {/* Background radial glow */}
+      {/* Background radial glow & Blueprint Grid */}
+      <OmniBlueprintGrid />
       <div style={{
         position: 'absolute',
         top: '50%', left: '50%',
@@ -46,7 +47,8 @@ export default function Home() {
       >
         <ambientLight intensity={0.5} />
         <directionalLight position={[10, 10, 10]} intensity={1} color={isMutated ? "#ff0033" : "#39ff14"} />
-        <Environment preset="city" />
+        
+        {/* We rely on ambient and directional light to avoid network fetch errors from HDR environments */}
 
         <group position={[0, 0, 0]}>
           {dialIndex === 0 && <CyberMask />}
