@@ -57,9 +57,13 @@ interface GameState {
   triggerGlobalExplosion: () => void;
   resetExplosion: () => void;
 
-  // Dismantle Mechanic
+  // Dismantle Mechanic (Repurposed as Mutate)
   isDismantled: boolean;
   toggleDismantle: () => void;
+
+  // Omnitrix Dial Mechanic
+  dialIndex: number;
+  setDialIndex: (index: number) => void;
 }
 
 export const useStore = create<GameState>((set) => ({
@@ -95,4 +99,7 @@ export const useStore = create<GameState>((set) => ({
 
   isDismantled: false,
   toggleDismantle: () => set((state) => ({ isDismantled: !state.isDismantled })),
+
+  dialIndex: 0,
+  setDialIndex: (index) => set({ dialIndex: index, isDismantled: false }),
 }));

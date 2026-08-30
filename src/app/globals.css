@@ -1,9 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
-  --background: #f0eadd; /* Aged parchment */
-  --foreground: #2c2825; /* Ink black/brown */
-  --blueprint-line: rgba(44, 40, 37, 0.15); /* Ink lines */
-  --blueprint-grid: rgba(44, 40, 37, 0.05); /* Faint grid */
-  --crimson: #a31a1a; /* Red ink / dried blood */
+  --background: #050505; /* Deep Void Black */
+  --foreground: #ffffff; /* White */
+  --alien-green: #39ff14; /* Ben 10 Neon Green */
+  --symbiote-red: #ff0033; /* Carnage/Venom Red */
+  --blueprint-line: rgba(57, 255, 20, 0.15); /* Green holographic lines */
+  --blueprint-grid: rgba(57, 255, 20, 0.05);
   --font-primary: var(--font-oswald), sans-serif;
   --font-jp: var(--font-noto-sans-jp), sans-serif;
 }
@@ -13,9 +18,6 @@ body {
   margin: 0;
   padding: 0;
 }
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
 @layer base {
   :root {

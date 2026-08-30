@@ -2,42 +2,40 @@
 
 import { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
-import { useScroll, Text } from "@react-three/drei";
+import { Text } from "@react-three/drei";
 import { useStore } from "@/store/useStore";
 import * as THREE from "three";
 
 const ROMAN_NUMERALS = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
 
-function CorePart({ isBlueprint, clippingPlanes }: { isBlueprint: boolean, clippingPlanes: THREE.Plane[] }) {
-  const scroll = useScroll();
+export function TheCore() {
+  const isMutated = useStore((state) => state.isDismantled);
   const explosion = useStore((state) => state.explosion);
-  const isDismantled = useStore((state) => state.isDismantled);
-  const dismantleProgress = useRef(0);
+  const mutateProgress = useRef(0);
   
   const groupRef = useRef<THREE.Group>(null);
   const pupilRef = useRef<THREE.Mesh>(null);
   const irisRef = useRef<THREE.Group>(null);
   const clockRef = useRef<THREE.Group>(null);
 
+  const irisMatRef = useRef<THREE.MeshBasicMaterial>(null);
+  const clockMatRef = useRef<THREE.MeshBasicMaterial>(null);
+
   useFrame((state) => {
-    const offset = scroll.offset; 
     const time = state.clock.elapsedTime;
     
-    dismantleProgress.current = THREE.MathUtils.lerp(dismantleProgress.current, isDismantled ? 1 : 0, 0.1);
-    const d = dismantleProgress.current;
+    mutateProgress.current = THREE.MathUtils.lerp(mutateProgress.current, isMutated ? 1 : 0, 0.1);
+    const m = mutateProgress.current;
 
     if (groupRef.current) {
-      // Enter animation
-      const localOffset = Math.max(0, (offset - 0.7) * 4);
-      const scale = THREE.MathUtils.lerp(0.001, 1, Math.min(1, localOffset)); 
       const explodeScale = 1 + explosion * 2; 
       
-      groupRef.current.scale.setScalar(scale * explodeScale);
-      groupRef.current.visible = offset > 0.65;
+      // Snaps to perfect head-on view on mutation
+      groupRef.current.position.y = THREE.MathUtils.lerp(Math.sin(time * 0.5) * 0.5, 0, m);
+      groupRef.current.rotation.x = THREE.MathUtils.lerp(Math.PI / 6, 0, m);
       
-      // Floating motion (flattens on dismantle)
-      groupRef.current.position.y = THREE.MathUtils.lerp(Math.sin(time * 0.5) * 0.5, 0, d);
-      groupRef.current.rotation.x = THREE.MathUtils.lerp(0, Math.PI / 4, d);
+      const s = THREE.MathUtils.lerp(1, 1.2, m) * explodeScale;
+      groupRef.current.scale.set(s, s, s);
     }
 
     const speedMult = 1 + explosion * 20;
@@ -48,62 +46,62 @@ function CorePart({ isBlueprint, clippingPlanes }: { isBlueprint: boolean, clipp
     }
     
     if (irisRef.current) {
-      irisRef.current.rotation.z = time * 0.5 * speedMult;
-      // Dilation effect
-      const dilation = THREE.MathUtils.lerp(1, 1.5, d);
+      irisRef.current.rotation.z = time * (0.5 + m) * speedMult;
+      const dilation = THREE.MathUtils.lerp(1, 1.5, m);
       irisRef.current.scale.setScalar(dilation);
     }
 
     if (clockRef.current) {
-      clockRef.current.rotation.z = -time * 0.2 * speedMult;
+      clockRef.current.rotation.z = -time * (0.2 + m * 0.5) * speedMult;
       const clockScale = 1 + explosion * 2;
       clockRef.current.scale.setScalar(clockScale);
     }
+
+    if (irisMatRef.current) {
+      irisMatRef.current.color.lerpColors(
+        new THREE.Color('#39ff14'), // Alien Green
+        new THREE.Color('#ff0033'), // Symbiote Red
+        m
+      );
+    }
+    if (clockMatRef.current) {
+      clockMatRef.current.color.lerpColors(
+        new THREE.Color('#39ff14'),
+        new THREE.Color('#ff0033'),
+        m
+      );
+    }
   });
 
-  const pupilMat = useMemo(() => {
-    if (isBlueprint) return new THREE.MeshBasicMaterial({ color: '#ffffff', wireframe: true, clippingPlanes });
-    return new THREE.MeshBasicMaterial({ color: '#000000', clippingPlanes });
-  }, [isBlueprint, clippingPlanes]);
-
-  const irisMat = useMemo(() => {
-    if (isBlueprint) return new THREE.MeshBasicMaterial({ color: '#ffffff', clippingPlanes, transparent: true, opacity: 0.5, side: THREE.DoubleSide });
-    return new THREE.MeshBasicMaterial({ color: '#ff0033', clippingPlanes, side: THREE.DoubleSide });
-  }, [isBlueprint, clippingPlanes]);
-
-  const clockMat = useMemo(() => {
-    return new THREE.MeshBasicMaterial({ color: isBlueprint ? '#ffffff' : '#ff0033', clippingPlanes, side: THREE.DoubleSide });
-  }, [isBlueprint, clippingPlanes]);
-
   return (
-    <group ref={groupRef} position={[0, -2, -8]}>
+    <group ref={groupRef} position={[0, 0, -8]}>
       {/* Central Pupil */}
       <mesh ref={pupilRef}>
         <sphereGeometry args={[1.5, 64, 64]} />
-        <primitive object={pupilMat} attach="material" />
+        <meshBasicMaterial color="#000000" />
       </mesh>
 
-      {/* Iris Rings (Stark graphic overlap) */}
+      {/* Iris Rings */}
       <group ref={irisRef}>
         <mesh position={[0, 0, 0.1]}>
           <ringGeometry args={[1.6, 2.2, 64, 1, 0, Math.PI * 1.5]} />
-          <primitive object={irisMat} attach="material" />
+          <meshBasicMaterial ref={irisMatRef} color="#39ff14" side={THREE.DoubleSide} />
         </mesh>
         <mesh position={[0, 0, -0.1]} rotation={[0, 0, Math.PI]}>
           <ringGeometry args={[2.5, 3.5, 64, 1, 0, Math.PI * 1.2]} />
-          <primitive object={irisMat} attach="material" />
+          <meshBasicMaterial ref={irisMatRef} color="#39ff14" side={THREE.DoubleSide} />
         </mesh>
       </group>
       
-      {/* The Red Clockwork Outer Boundary */}
+      {/* The Clockwork Outer Boundary */}
       <group ref={clockRef} rotation={[0, 0, 0]}>
         <mesh>
           <ringGeometry args={[5, 5.05, 64]} />
-          <primitive object={clockMat} attach="material" />
+          <meshBasicMaterial ref={clockMatRef} color="#39ff14" side={THREE.DoubleSide} />
         </mesh>
         <mesh>
           <ringGeometry args={[6, 6.02, 64]} />
-          <primitive object={clockMat} attach="material" />
+          <meshBasicMaterial ref={clockMatRef} color="#39ff14" side={THREE.DoubleSide} />
         </mesh>
         
         {/* Roman Numerals */}
@@ -116,7 +114,7 @@ function CorePart({ isBlueprint, clippingPlanes }: { isBlueprint: boolean, clipp
           return (
             <group key={i} position={[x, y, 0]} rotation={[0, 0, angle + Math.PI/12]}>
               <Text
-                color={isBlueprint ? "#ffffff" : "#ff0033"}
+                color="#ffffff"
                 fontSize={0.6}
                 maxWidth={2}
                 lineHeight={1}
@@ -125,7 +123,6 @@ function CorePart({ isBlueprint, clippingPlanes }: { isBlueprint: boolean, clipp
                 font="https://fonts.gstatic.com/s/raleway/v14/1Ptrg8zYS_SKggPNwK4vaqI.woff"
                 anchorX="center"
                 anchorY="middle"
-                material-clippingPlanes={clippingPlanes}
               >
                 {num}
               </Text>
@@ -133,36 +130,6 @@ function CorePart({ isBlueprint, clippingPlanes }: { isBlueprint: boolean, clipp
           );
         })}
       </group>
-    </group>
-  );
-}
-
-export function TheCore() {
-  const laserRef = useRef<THREE.Mesh>(null);
-  
-  const planeBlueprint = useMemo(() => new THREE.Plane(new THREE.Vector3(0, -1, 0), 0), []);
-  const planeMachine = useMemo(() => new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), []);
-  
-  useFrame((state) => {
-    const yPos = Math.sin(state.clock.elapsedTime * 2) * 4; 
-    planeBlueprint.constant = yPos;
-    planeMachine.constant = -yPos;
-    
-    if (laserRef.current) {
-      laserRef.current.position.y = yPos;
-    }
-  });
-
-  return (
-    <group position={[0, 0, -3]}>
-      <CorePart isBlueprint={true} clippingPlanes={[planeBlueprint]} />
-      <CorePart isBlueprint={false} clippingPlanes={[planeMachine]} />
-      
-      {/* Scanner Line */}
-      <mesh ref={laserRef} rotation={[Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[30, 30]} />
-        <meshBasicMaterial color="#ffffff" transparent opacity={0.05} side={THREE.DoubleSide} depthWrite={false} />
-      </mesh>
     </group>
   );
 }

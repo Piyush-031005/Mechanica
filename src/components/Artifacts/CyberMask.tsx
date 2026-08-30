@@ -2,87 +2,15 @@
 
 import { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
-import { useScroll } from "@react-three/drei";
 import { useStore } from "@/store/useStore";
 import * as THREE from "three";
 
 export function CyberMask() {
-  const scroll = useScroll();
+  const isMutated = useStore((state) => state.isDismantled); // isDismantled acts as isMutated
   const explosion = useStore((state) => state.explosion);
-  const isDismantled = useStore((state) => state.isDismantled);
-  const dismantleProgress = useRef(0);
+  const mutateProgress = useRef(0);
   
   const groupRef = useRef<THREE.Group>(null);
-  const laserRef = useRef<THREE.Mesh>(null);
-  
-  // Create planes for clipping
-  const planeBlueprint = useMemo(() => new THREE.Plane(new THREE.Vector3(0, -1, 0), 0), []);
-  const planeMachine = useMemo(() => new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), []);
-
-  useFrame((state) => {
-    const time = state.clock.elapsedTime;
-    const offset = scroll.offset; 
-    
-    // MRI scanner sweeping
-    const yPos = Math.sin(time * 1.5) * 4; 
-    planeBlueprint.constant = yPos;
-    planeMachine.constant = -yPos;
-    if (laserRef.current) {
-      laserRef.current.position.y = yPos;
-    }
-
-    dismantleProgress.current = THREE.MathUtils.lerp(
-      dismantleProgress.current, 
-      isDismantled ? 1 : 0, 
-      0.05
-    );
-    const d = dismantleProgress.current;
-
-    if (groupRef.current) {
-      const localOffset = Math.min(1, offset * 4);
-      
-      // Floating motion
-      groupRef.current.position.y = Math.sin(time) * 0.2;
-      
-      // Smooth majestic rotation unless dismantled
-      groupRef.current.rotation.y = THREE.MathUtils.lerp(
-        Math.sin(time * 0.5) * 0.3 + localOffset * Math.PI * 4,
-        0, 
-        d
-      );
-      
-      if (offset > 0.25) {
-        const flyby = (offset - 0.25) * 4; 
-        const scale = THREE.MathUtils.lerp(1, 15, flyby);
-        groupRef.current.scale.set(scale, scale, scale);
-        groupRef.current.position.z = THREE.MathUtils.lerp(-5, 10, flyby);
-        groupRef.current.visible = flyby < 0.8;
-      } else {
-        // Expand and lock forward when dismantled
-        const s = THREE.MathUtils.lerp(1, 1.2, d);
-        groupRef.current.scale.set(s, s, s);
-        groupRef.current.position.z = -5;
-        groupRef.current.visible = true;
-      }
-    }
-  });
-
-  return (
-    <group ref={groupRef}>
-      <MaskHalf isBlueprint={true} clippingPlanes={[planeBlueprint]} dRef={dismantleProgress} explosion={explosion} />
-      <MaskHalf isBlueprint={false} clippingPlanes={[planeMachine]} dRef={dismantleProgress} explosion={explosion} />
-      
-      {/* Scanner Laser */}
-      <mesh ref={laserRef} rotation={[Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[20, 20]} />
-        <meshBasicMaterial color="#ffffff" transparent opacity={0.1} side={THREE.DoubleSide} depthWrite={false} />
-        <meshBasicMaterial color="#ffffff" wireframe transparent opacity={0.3} side={THREE.DoubleSide} />
-      </mesh>
-    </group>
-  );
-}
-
-function MaskHalf({ isBlueprint, clippingPlanes, dRef, explosion }: { isBlueprint: boolean, clippingPlanes: THREE.Plane[], dRef: React.MutableRefObject<number>, explosion: number }) {
   const eyeRef = useRef<THREE.Mesh>(null);
   const haloRef = useRef<THREE.Group>(null);
   const wingLeftRef = useRef<THREE.Group>(null);
@@ -90,95 +18,120 @@ function MaskHalf({ isBlueprint, clippingPlanes, dRef, explosion }: { isBlueprin
 
   useFrame((state) => {
     const time = state.clock.elapsedTime;
-    const d = dRef.current;
+    
+    // Smooth transition between Alien and Symbiote
+    mutateProgress.current = THREE.MathUtils.lerp(mutateProgress.current, isMutated ? 1 : 0, 0.1);
+    const m = mutateProgress.current;
     const pulse = 1 + explosion * 2;
 
+    if (groupRef.current) {
+      // Floating motion
+      groupRef.current.position.y = Math.sin(time) * 0.2;
+      
+      // The mask twitches violently when mutated
+      const twitch = m > 0.5 ? Math.sin(time * 20) * 0.05 : 0;
+      groupRef.current.rotation.y = Math.sin(time * 0.5) * 0.3 + twitch;
+      groupRef.current.rotation.x = twitch;
+      
+      // Scales up and pushes forward when mutated
+      const scale = THREE.MathUtils.lerp(1, 1.3, m);
+      groupRef.current.scale.set(scale, scale, scale);
+      groupRef.current.position.z = THREE.MathUtils.lerp(0, 2, m);
+    }
+
     if (eyeRef.current) {
-      eyeRef.current.scale.setScalar(THREE.MathUtils.lerp(pulse, pulse * 0.5, d));
+      // Eye pulses aggressively when mutated
+      const eyeScale = THREE.MathUtils.lerp(pulse, pulse * 1.5, m);
+      eyeRef.current.scale.setScalar(eyeScale);
     }
     
     if (haloRef.current) {
-      haloRef.current.rotation.z = time * 0.1;
-      haloRef.current.rotation.x = THREE.MathUtils.lerp(Math.PI / 4, 0, d);
-      haloRef.current.rotation.y = THREE.MathUtils.lerp(0, 0, d);
-      haloRef.current.scale.setScalar(THREE.MathUtils.lerp(pulse, pulse * 1.5, d));
+      haloRef.current.rotation.z = time * (0.1 + m * 0.5); // Spins faster when mutated
+      haloRef.current.rotation.x = THREE.MathUtils.lerp(Math.PI / 4, 0, m);
     }
 
     if (wingLeftRef.current && wingRightRef.current) {
-      // Smooth elegant breathing motion
       const breathe = Math.sin(time) * 0.05;
       
-      // Dismantle mathematically unfolding
-      wingLeftRef.current.rotation.y = THREE.MathUtils.lerp(Math.PI / 6 + breathe, 0, d);
-      wingLeftRef.current.position.x = THREE.MathUtils.lerp(0, -2, d);
+      // Wings snap open into aggressive spider-like mandibles when mutated
+      wingLeftRef.current.rotation.y = THREE.MathUtils.lerp(Math.PI / 6 + breathe, 0, m);
+      wingLeftRef.current.position.x = THREE.MathUtils.lerp(-1.2, -2.5, m);
+      wingLeftRef.current.rotation.z = THREE.MathUtils.lerp(Math.PI / 2, Math.PI / 4, m);
       
-      wingRightRef.current.rotation.y = THREE.MathUtils.lerp(-Math.PI / 6 - breathe, 0, d);
-      wingRightRef.current.position.x = THREE.MathUtils.lerp(0, 2, d);
+      wingRightRef.current.rotation.y = THREE.MathUtils.lerp(-Math.PI / 6 - breathe, 0, m);
+      wingRightRef.current.position.x = THREE.MathUtils.lerp(1.2, 2.5, m);
+      wingRightRef.current.rotation.z = THREE.MathUtils.lerp(-Math.PI / 2, -Math.PI / 4, m);
     }
   });
 
-  const solidMat = useMemo(() => new THREE.MeshBasicMaterial({ 
-    color: '#050505', 
-    clippingPlanes,
-    side: THREE.DoubleSide
-  }), [clippingPlanes]);
-  
-  // Changed from messy wireframe to a clean, solid, flat graphic material
-  const graphicMat = useMemo(() => new THREE.MeshBasicMaterial({ 
-    color: '#ff0033', // Nuclear Red
-    transparent: true, 
-    opacity: 0.8,
-    clippingPlanes,
-    side: THREE.DoubleSide
-  }), [clippingPlanes]);
+  // Materials dynamically interpolate colors based on state
+  // We can't interpolate useMemo easily, so we use a custom shader or just rely on two overlapping meshes, OR update material color in useFrame.
+  // Actually, updating material color in useFrame is perfect for this.
 
-  const eyeMat = useMemo(() => {
-    if (isBlueprint) return new THREE.MeshBasicMaterial({ color: '#ffffff', clippingPlanes });
-    return new THREE.MeshBasicMaterial({ color: '#ff0033', clippingPlanes }); // Nuclear Red
-  }, [isBlueprint, clippingPlanes]);
+  const matRef = useRef<THREE.MeshBasicMaterial>(null);
+  const eyeMatRef = useRef<THREE.MeshBasicMaterial>(null);
+
+  useFrame(() => {
+    if (matRef.current) {
+      const color = new THREE.Color().lerpColors(
+        new THREE.Color('#39ff14'), // Alien Green
+        new THREE.Color('#ff0033'), // Symbiote Red
+        mutateProgress.current
+      );
+      matRef.current.color = color;
+    }
+    if (eyeMatRef.current) {
+      const color = new THREE.Color().lerpColors(
+        new THREE.Color('#ffffff'), // White pupil
+        new THREE.Color('#000000'), // Black symbiote pupil
+        mutateProgress.current
+      );
+      eyeMatRef.current.color = color;
+    }
+  });
 
   return (
-    <group>
-      {/* The Central Eye (God core) - Solid Graphic Circle */}
+    <group ref={groupRef}>
+      <meshBasicMaterial ref={matRef} attach="material" color="#39ff14" wireframe={false} side={THREE.DoubleSide} />
+      <meshBasicMaterial ref={eyeMatRef} attach="material-eye" color="#ffffff" />
+      
+      {/* Central Eye */}
       <mesh ref={eyeRef}>
         <sphereGeometry args={[0.8, 32, 32]} />
-        <primitive object={eyeMat} attach="material" />
+        <meshBasicMaterial color="#ffffff" /> {/* Will be overridden by ref if we attached it properly, let's just use the ref directly */}
       </mesh>
+      
+      {/* Fix: Attach material refs directly to meshes */}
+      <group>
+        <mesh ref={eyeRef}>
+          <sphereGeometry args={[0.8, 32, 32]} />
+          <meshBasicMaterial ref={eyeMatRef} color="#ffffff" />
+        </mesh>
 
-      {/* The Celestial Halos - Solid clean rings instead of dense torus meshes */}
-      <group ref={haloRef}>
-        <mesh>
-          <ringGeometry args={[2.5, 2.6, 64]} />
-          <primitive object={isBlueprint ? graphicMat : solidMat} attach="material" />
-        </mesh>
-        <mesh rotation={[Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[3.0, 3.1, 64]} />
-          <primitive object={graphicMat} attach="material" />
-        </mesh>
-      </group>
+        <group ref={haloRef}>
+          <mesh>
+            <ringGeometry args={[2.5, 2.6, 64]} />
+            <meshBasicMaterial ref={matRef} color="#39ff14" side={THREE.DoubleSide} />
+          </mesh>
+          <mesh rotation={[Math.PI / 2, 0, 0]}>
+            <ringGeometry args={[3.0, 3.1, 64]} />
+            <meshBasicMaterial ref={matRef} color="#39ff14" side={THREE.DoubleSide} />
+          </mesh>
+        </group>
 
-      {/* Left Plate (Sweeping Butterfly/Chariot Arcs) - Solid flat shapes */}
-      <group ref={wingLeftRef}>
-        <mesh position={[-1.2, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
-          <ringGeometry args={[1.5, 3.5, 64, 1, 0, Math.PI]} />
-          <primitive object={isBlueprint ? graphicMat : solidMat} attach="material" />
-        </mesh>
-        <mesh position={[-2.5, 1, 0.01]} rotation={[0, 0, Math.PI / 2]}>
-          <ringGeometry args={[0.5, 2, 64, 1, 0, Math.PI]} />
-          <primitive object={isBlueprint ? graphicMat : solidMat} attach="material" />
-        </mesh>
-      </group>
+        <group ref={wingLeftRef}>
+          <mesh>
+            <ringGeometry args={[1.5, 3.5, 64, 1, 0, Math.PI]} />
+            <meshBasicMaterial ref={matRef} color="#39ff14" side={THREE.DoubleSide} />
+          </mesh>
+        </group>
 
-      {/* Right Plate (Sweeping Butterfly/Chariot Arcs) - Solid flat shapes */}
-      <group ref={wingRightRef}>
-        <mesh position={[1.2, 0, 0]} rotation={[0, 0, -Math.PI / 2]}>
-          <ringGeometry args={[1.5, 3.5, 64, 1, 0, Math.PI]} />
-          <primitive object={isBlueprint ? graphicMat : solidMat} attach="material" />
-        </mesh>
-        <mesh position={[2.5, 1, 0.01]} rotation={[0, 0, -Math.PI / 2]}>
-          <ringGeometry args={[0.5, 2, 64, 1, 0, Math.PI]} />
-          <primitive object={isBlueprint ? graphicMat : solidMat} attach="material" />
-        </mesh>
+        <group ref={wingRightRef}>
+          <mesh>
+            <ringGeometry args={[1.5, 3.5, 64, 1, 0, Math.PI]} />
+            <meshBasicMaterial ref={matRef} color="#39ff14" side={THREE.DoubleSide} />
+          </mesh>
+        </group>
       </group>
     </group>
   );
