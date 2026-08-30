@@ -38,10 +38,15 @@ export default function Home() {
         {/* The Civilization Architecture */}
         <WorldEngine />
 
-        {/* Ambient Ecosystem Lighting */}
-        <ambientLight intensity={0.1} />
-        <spotLight position={[20, 20, -50]} intensity={200} color="#f5f5dc" penumbra={1} distance={100} /> // Bone Ivory Light
-        <spotLight position={[-20, -20, 0]} intensity={100} color="#1a1a1a" penumbra={1} distance={80} />
+        {/* Cinematic Ecosystem Lighting */}
+        <ambientLight intensity={0.4} />
+        
+        {/* Central Bioluminescence illuminating the Cathedral Nave */}
+        <pointLight position={[0, 5, -10]} intensity={80} color="#f5f5dc" distance={40} decay={2} />
+        
+        {/* Heavy directional light raking across the pillars to reveal texture */}
+        <directionalLight position={[20, 20, 10]} intensity={1.5} color="#d1c7b7" />
+        <directionalLight position={[-20, 10, -20]} intensity={0.8} color="#1a1a1a" />
         
         <Effects />
       </Canvas>
