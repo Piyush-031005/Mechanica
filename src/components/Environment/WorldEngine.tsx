@@ -4,6 +4,7 @@ import { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { CyberMask } from "@/components/Artifacts/CyberMask";
+import { ArchiveKeepers } from "@/components/Environment/ArchiveKeepers";
 
 export function WorldEngine() {
   const numPillars = 150;
@@ -71,6 +72,9 @@ export function WorldEngine() {
           clearcoat={0.1}
         />
       </instancedMesh>
+
+      {/* Ambient Ecology */}
+      <ArchiveKeepers />
 
       {/* The Hero Object is now part of the world, not floating in a void */}
       {/* We place the DNA Helix deep inside the cathedral */}

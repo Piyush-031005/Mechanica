@@ -8,8 +8,10 @@ import * as THREE from "three";
 
 export function CyberMask() {
   const isMutated = useStore((state) => state.isDismantled);
-  const explosion = useStore((state) => state.explosion);
+  const infectionLevel = useStore((state) => state.infectionLevel);
+  const setInfectionLevel = useStore((state) => state.setInfectionLevel);
   const mutateProgress = useRef(0);
+  const localInfection = useRef(0);
   
   const groupRef = useRef<THREE.Group>(null);
   const instancedStrand1 = useRef<THREE.InstancedMesh>(null);
@@ -53,7 +55,7 @@ export function CyberMask() {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
-  useFrame((state) => {
+  useFrame((state, delta) => {
     const time = state.clock.elapsedTime;
     mutateProgress.current = THREE.MathUtils.lerp(mutateProgress.current, isMutated ? 1 : 0, 0.05);
     const m = mutateProgress.current;
@@ -66,24 +68,24 @@ export function CyberMask() {
       groupRef.current.scale.set(scaleX, 1, scaleX);
     }
 
-    // Material Colors based on state
-    const green = new THREE.Color('#39ff14');
-    const red = new THREE.Color('#ff0033');
+    // Material Colors based on state (Bone Ivory, Dried Crimson, Dark Graphite - Theme 01)
+    const boneIvory = new THREE.Color('#f5f5dc');
+    const driedCrimson = new THREE.Color('#8b0000');
+    
+    let maxProximity = 0;
 
     // Biological Awareness: Update instances
     for (let i = 0; i < numPairs; i++) {
-      // Base positions
       const p1 = positions1[i];
       const p2 = positions2[i];
       const rung = rungs[i];
 
       // Proximity Reaction (Cursor Awareness)
-      // Convert cursor to world space roughly
       const cursorTarget = new THREE.Vector3(mouse.current.x * 5, mouse.current.y * 5, 5);
       const distToCursor1 = p1.distanceTo(cursorTarget);
       
-      // The DNA literally bends towards the user if they hover near it
       const reaction1 = Math.max(0, 1 - distToCursor1 / 3) * (1 - m);
+      if (reaction1 > maxProximity) maxProximity = reaction1;
       
       // Update Strand 1
       dummy.position.copy(p1);
@@ -91,14 +93,14 @@ export function CyberMask() {
       dummy.scale.setScalar(1 + reaction1 * 0.5);
       dummy.updateMatrix();
       instancedStrand1.current!.setMatrixAt(i, dummy.matrix);
-      instancedStrand1.current!.setColorAt(i, new THREE.Color().lerpColors(green, red, m + reaction1));
+      instancedStrand1.current!.setColorAt(i, new THREE.Color().lerpColors(boneIvory, driedCrimson, m + reaction1 + infectionLevel));
 
       // Update Strand 2
       dummy.position.copy(p2);
       dummy.scale.setScalar(1);
       dummy.updateMatrix();
       instancedStrand2.current!.setMatrixAt(i, dummy.matrix);
-      instancedStrand2.current!.setColorAt(i, new THREE.Color().lerpColors(green, red, m));
+      instancedStrand2.current!.setColorAt(i, new THREE.Color().lerpColors(boneIvory, driedCrimson, m + infectionLevel));
 
       // Update Rungs
       const distance = rung.p1.distanceTo(rung.p2);
@@ -111,7 +113,7 @@ export function CyberMask() {
       instancedRungs.current!.setMatrixAt(i, dummy.matrix);
       
       // Break the bonds visually via color/opacity simulation
-      const rungColor = new THREE.Color().lerpColors(green, new THREE.Color(0,0,0), m);
+      const rungColor = new THREE.Color().lerpColors(boneIvory, new THREE.Color('#1a1a1a'), m);
       instancedRungs.current!.setColorAt(i, rungColor);
     }
     
@@ -121,15 +123,23 @@ export function CyberMask() {
     instancedStrand2.current!.instanceColor!.needsUpdate = true;
     instancedRungs.current!.instanceMatrix.needsUpdate = true;
     instancedRungs.current!.instanceColor!.needsUpdate = true;
+
+    // Infection Engine: Cursor proximity infects the local object, which propagates to the global ecosystem
+    if (maxProximity > 0.1) {
+      localInfection.current = THREE.MathUtils.lerp(localInfection.current, 1, delta * 2);
+    } else {
+      localInfection.current = THREE.MathUtils.lerp(localInfection.current, 0, delta * 0.5); // Slow decay (Environmental Memory)
+    }
+    setInfectionLevel(localInfection.current);
   });
 
   const physicalProps = {
-    roughness: 0.1,
-    metalness: 0.8,
-    transmission: 0.9, 
+    roughness: 0.8, // Bone-like texture
+    metalness: 0.1,
+    transmission: 0.1, 
     thickness: 0.5,
-    clearcoat: 1,
-    envMapIntensity: 2
+    clearcoat: 0.1,
+    envMapIntensity: 1
   };
 
   return (
