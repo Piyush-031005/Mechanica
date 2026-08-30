@@ -10,32 +10,28 @@ import { ArachnidCore } from "@/components/Artifacts/ArachnidCore";
 import { TheCore } from "@/components/Artifacts/TheCore";
 import { Effects } from "@/components/Effects/Effects";
 import { OmniBlueprintGrid } from "@/components/Environment/OmniBlueprintGrid";
-
-const ORGANS = [
-  { id: 0, title: "SYMBIOTE DNA", subtitle: "DNA SAMPLE 01" }, // Renamed to fit the new helix
-  { id: 1, title: "AERO GLIDER", subtitle: "DNA SAMPLE 02" },
-  { id: 2, title: "RADIOACTIVE SPIDER", subtitle: "DNA SAMPLE 03" },
-  { id: 3, title: "OMNI CORE", subtitle: "DNA SAMPLE 04" },
-];
+import { CinematicCamera } from "@/components/Camera/CinematicCamera";
 
 export default function Home() {
   const dialIndex = useStore((state) => state.dialIndex);
   const setDialIndex = useStore((state) => state.setDialIndex);
   const isMutated = useStore((state) => state.isDismantled);
   const toggleMutation = useStore((state) => state.toggleDismantle);
-  const triggerExplosion = useStore((state) => state.triggerGlobalExplosion);
 
-  const activeOrgan = ORGANS[dialIndex];
   const lastScrollTime = useRef(0);
 
+  // Interaction Language: The visitor learns by experimentation.
+  // Scrolling no longer snaps UI. It pushes the boundaries of the mutation.
   const handleWheel = (e: React.WheelEvent) => {
     const now = Date.now();
-    if (now - lastScrollTime.current > 800) { 
-      if (e.deltaY > 20) {
-        setDialIndex((dialIndex + 1) % 4);
+    if (now - lastScrollTime.current > 1500) { 
+      if (e.deltaY > 50) {
+        // Pushing forward transforms the environment organically
+        toggleMutation();
         lastScrollTime.current = now;
-      } else if (e.deltaY < -20) {
-        setDialIndex((dialIndex - 1 + 4) % 4);
+      } else if (e.deltaY < -50) {
+        // Pulling back rotates the dimensional space
+        setDialIndex((dialIndex + 1) % 4);
         lastScrollTime.current = now;
       }
     }
@@ -46,11 +42,12 @@ export default function Home() {
       onWheel={handleWheel}
       style={{ width: "100vw", height: "100vh", background: "var(--background)", overflow: "hidden", position: "relative" }}
     >
-      {/* 3D Canvas */}
+      {/* 3D Cinematic Canvas */}
       <Canvas
         camera={{ position: [0, 0, 15], fov: 45 }}
-        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }}
+        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
       >
+        <CinematicCamera />
         <OmniBlueprintGrid />
 
         <ambientLight intensity={0.2} />
@@ -68,104 +65,26 @@ export default function Home() {
         <Effects />
       </Canvas>
 
+      {/* Environmental Interface: The UI exists only when needed, fading out when the world breathes. */}
       <div style={{
         position: 'absolute',
-        top: 0, left: 0, width: '100%', height: '100%',
+        bottom: '8vh',
+        width: '100%',
+        textAlign: 'center',
         pointerEvents: 'none',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center'
+        color: isMutated ? 'rgba(255,0,51,0.5)' : 'rgba(57,255,20,0.5)',
+        transition: 'all 2s cubic-bezier(0.16, 1, 0.3, 1)', // Smooth organic fade
+        opacity: isMutated ? 0.3 : 0.8
       }}>
-        
-        <div style={{
-          width: '80vh', height: '80vh',
-          border: `2px solid ${isMutated ? 'var(--symbiote-red)' : 'var(--alien-green)'}`,
-          borderRadius: '50%',
-          position: 'relative',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          pointerEvents: 'auto',
-          transition: 'all 0.3s ease',
-          boxShadow: `0 0 50px ${isMutated ? 'rgba(255,0,51,0.2)' : 'rgba(57,255,20,0.2)'}`
+        <h1 style={{ 
+          fontSize: '12px', 
+          fontWeight: 300, 
+          letterSpacing: '0.4em', 
+          fontFamily: 'monospace',
+          textTransform: 'uppercase'
         }}>
-          {ORGANS.map((organ, index) => {
-            const angle = (index * 90) * (Math.PI / 180);
-            const x = Math.sin(angle) * 45;
-            const y = -Math.cos(angle) * 45;
-            const isActive = index === dialIndex;
-            
-            return (
-              <div 
-                key={organ.id}
-                onClick={() => setDialIndex(index)}
-                style={{
-                  position: 'absolute',
-                  top: `calc(50% + ${y}vh)`,
-                  left: `calc(50% + ${x}vh)`,
-                  transform: 'translate(-50%, -50%)',
-                  width: isActive ? '30px' : '15px',
-                  height: isActive ? '30px' : '15px',
-                  backgroundColor: isMutated ? 'var(--symbiote-red)' : 'var(--alien-green)',
-                  borderRadius: '50%',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  boxShadow: isActive ? `0 0 20px ${isMutated ? 'var(--symbiote-red)' : 'var(--alien-green)'}` : 'none'
-                }}
-              />
-            );
-          })}
-        </div>
-
-        <div style={{
-          position: 'absolute',
-          bottom: '10vh',
-          textAlign: 'center',
-          color: isMutated ? 'var(--symbiote-red)' : 'var(--alien-green)',
-          textShadow: `0 0 10px ${isMutated ? 'var(--symbiote-red)' : 'var(--alien-green)'}`,
-          transition: 'all 0.3s ease'
-        }}>
-          <h2 style={{ fontSize: '14px', letterSpacing: '0.3em', opacity: 0.7 }}>{activeOrgan.subtitle}</h2>
-          <h1 style={{ fontSize: '3vw', fontWeight: 900, letterSpacing: '0.1em', marginTop: '10px' }}>{activeOrgan.title}</h1>
-        </div>
-
-        <div style={{
-          position: 'absolute',
-          top: '5vh',
-          color: isMutated ? 'var(--symbiote-red)' : 'var(--alien-green)',
-          fontSize: '10px',
-          letterSpacing: '0.2em',
-          opacity: 0.5,
-          fontFamily: 'monospace'
-        }}>
-          [ SCROLL MOUSE WHEEL TO CYCLE BLUEPRINTS ]
-        </div>
-
-        <button
-          onClick={() => {
-            toggleMutation();
-            triggerExplosion();
-          }}
-          style={{
-            position: 'absolute',
-            bottom: '4vh',
-            padding: '15px 40px',
-            backgroundColor: 'transparent',
-            border: `1px solid ${isMutated ? 'var(--symbiote-red)' : 'var(--alien-green)'}`,
-            color: isMutated ? 'var(--symbiote-red)' : 'var(--alien-green)',
-            fontSize: '12px',
-            letterSpacing: '0.4em',
-            fontWeight: 800,
-            cursor: 'pointer',
-            pointerEvents: 'auto',
-            transition: 'all 0.3s ease',
-            textShadow: `0 0 10px ${isMutated ? 'var(--symbiote-red)' : 'var(--alien-green)'}`,
-            boxShadow: `inset 0 0 20px ${isMutated ? 'rgba(255,0,51,0.2)' : 'rgba(57,255,20,0.2)'}`
-          }}
-        >
-          {isMutated ? "REVERT SEQUENCE" : "INITIATE MUTATION"}
-        </button>
+          {isMutated ? "BIOLOGICAL MUTATION ACTIVE" : "STABLE ENVIRONMENT"}
+        </h1>
       </div>
     </main>
   );
