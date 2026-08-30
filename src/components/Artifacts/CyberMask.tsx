@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useMemo } from "react";
+import { useRef, useMemo, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
 import { useStore } from "@/store/useStore";
@@ -12,11 +12,10 @@ export function CyberMask() {
   const mutateProgress = useRef(0);
   
   const groupRef = useRef<THREE.Group>(null);
+  const instancedStrand1 = useRef<THREE.InstancedMesh>(null);
+  const instancedStrand2 = useRef<THREE.InstancedMesh>(null);
+  const instancedRungs = useRef<THREE.InstancedMesh>(null);
   
-  const strand1MatRef = useRef<THREE.MeshBasicMaterial>(null);
-  const strand2MatRef = useRef<THREE.MeshBasicMaterial>(null);
-  const rungMatRef = useRef<THREE.MeshBasicMaterial>(null);
-
   const numPairs = 40;
   
   // Mathematical positions for the double helix
@@ -25,7 +24,7 @@ export function CyberMask() {
     const p2 = [];
     const r = [];
     for (let i = 0; i < numPairs; i++) {
-      const t = (i / numPairs) * Math.PI * 4; // 2 full turns
+      const t = (i / numPairs) * Math.PI * 4; 
       const radius = 1.5;
       const y = (i - numPairs / 2) * 0.2;
       
@@ -42,90 +41,113 @@ export function CyberMask() {
     return { positions1: p1, positions2: p2, rungs: r };
   }, []);
 
+  const dummy = useMemo(() => new THREE.Object3D(), []);
+  const mouse = useRef(new THREE.Vector3(0, 0, 0));
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      mouse.current.x = (e.clientX / window.innerWidth) * 2 - 1;
+      mouse.current.y = -(e.clientY / window.innerHeight) * 2 + 1;
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
   useFrame((state) => {
     const time = state.clock.elapsedTime;
-    
-    mutateProgress.current = THREE.MathUtils.lerp(mutateProgress.current, isMutated ? 1 : 0, 0.1);
+    mutateProgress.current = THREE.MathUtils.lerp(mutateProgress.current, isMutated ? 1 : 0, 0.05);
     const m = mutateProgress.current;
 
+    // Organic World Movement
     if (groupRef.current) {
-      // Smooth elegant rotation
-      groupRef.current.rotation.y = time * 0.5 + (m * time);
-      groupRef.current.position.y = Math.sin(time) * 0.2;
-      
-      // When mutated, the DNA unzips (expands outward)
+      groupRef.current.rotation.y = time * 0.1 + (m * time * 2);
+      groupRef.current.position.y = Math.sin(time * 0.5) * 0.3;
       const scaleX = THREE.MathUtils.lerp(1, 2.5, m);
       groupRef.current.scale.set(scaleX, 1, scaleX);
     }
 
-    if (strand1MatRef.current && strand2MatRef.current && rungMatRef.current) {
-      const green = new THREE.Color('#39ff14').multiplyScalar(2); // Emissive boost
-      const red = new THREE.Color('#ff0033').multiplyScalar(2);
-      const black = new THREE.Color('#050505');
+    // Material Colors based on state
+    const green = new THREE.Color('#39ff14');
+    const red = new THREE.Color('#ff0033');
 
-      strand1MatRef.current.emissive.lerpColors(green, red, m);
-      strand1MatRef.current.color.lerpColors(new THREE.Color('#ffffff'), new THREE.Color('#330000'), m);
+    // Biological Awareness: Update instances
+    for (let i = 0; i < numPairs; i++) {
+      // Base positions
+      const p1 = positions1[i];
+      const p2 = positions2[i];
+      const rung = rungs[i];
 
-      strand2MatRef.current.emissive.lerpColors(green, black, m);
-      strand2MatRef.current.color.lerpColors(new THREE.Color('#ffffff'), black, m);
-
-      rungMatRef.current.emissive.lerpColors(green, red, m);
+      // Proximity Reaction (Cursor Awareness)
+      // Convert cursor to world space roughly
+      const cursorTarget = new THREE.Vector3(mouse.current.x * 5, mouse.current.y * 5, 5);
+      const distToCursor1 = p1.distanceTo(cursorTarget);
       
-      // Break the bonds when mutated
-      rungMatRef.current.opacity = THREE.MathUtils.lerp(0.9, 0.0, m);
+      // The DNA literally bends towards the user if they hover near it
+      const reaction1 = Math.max(0, 1 - distToCursor1 / 3) * (1 - m);
+      
+      // Update Strand 1
+      dummy.position.copy(p1);
+      dummy.position.z += reaction1; // Bulge towards camera
+      dummy.scale.setScalar(1 + reaction1 * 0.5);
+      dummy.updateMatrix();
+      instancedStrand1.current!.setMatrixAt(i, dummy.matrix);
+      instancedStrand1.current!.setColorAt(i, new THREE.Color().lerpColors(green, red, m + reaction1));
+
+      // Update Strand 2
+      dummy.position.copy(p2);
+      dummy.scale.setScalar(1);
+      dummy.updateMatrix();
+      instancedStrand2.current!.setMatrixAt(i, dummy.matrix);
+      instancedStrand2.current!.setColorAt(i, new THREE.Color().lerpColors(green, red, m));
+
+      // Update Rungs
+      const distance = rung.p1.distanceTo(rung.p2);
+      const center = new THREE.Vector3().addVectors(rung.p1, rung.p2).multiplyScalar(0.5);
+      const direction = new THREE.Vector3().subVectors(rung.p2, rung.p1).normalize();
+      dummy.position.copy(center);
+      dummy.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction);
+      dummy.scale.set(1, distance, 1);
+      dummy.updateMatrix();
+      instancedRungs.current!.setMatrixAt(i, dummy.matrix);
+      
+      // Break the bonds visually via color/opacity simulation
+      const rungColor = new THREE.Color().lerpColors(green, new THREE.Color(0,0,0), m);
+      instancedRungs.current!.setColorAt(i, rungColor);
     }
+    
+    instancedStrand1.current!.instanceMatrix.needsUpdate = true;
+    instancedStrand1.current!.instanceColor!.needsUpdate = true;
+    instancedStrand2.current!.instanceMatrix.needsUpdate = true;
+    instancedStrand2.current!.instanceColor!.needsUpdate = true;
+    instancedRungs.current!.instanceMatrix.needsUpdate = true;
+    instancedRungs.current!.instanceColor!.needsUpdate = true;
   });
 
-  // Premium Glass/Metal Material Base
   const physicalProps = {
     roughness: 0.1,
     metalness: 0.8,
-    transmission: 0.9, // Glass effect
+    transmission: 0.9, 
     thickness: 0.5,
     clearcoat: 1,
-    clearcoatRoughness: 0.1,
     envMapIntensity: 2
   };
 
   return (
     <group ref={groupRef}>
-      {/* STRAND 1 */}
-      {positions1.map((pos, i) => (
-        <mesh key={`s1-${i}`} position={pos}>
-          <sphereGeometry args={[0.2, 32, 32]} />
-          <meshPhysicalMaterial ref={i === 0 ? strand1MatRef : undefined} {...physicalProps} emissive="#39ff14" emissiveIntensity={0.5} />
-        </mesh>
-      ))}
+      <instancedMesh ref={instancedStrand1} args={[undefined, undefined, numPairs]}>
+        <sphereGeometry args={[0.2, 16, 16]} />
+        <meshPhysicalMaterial {...physicalProps} />
+      </instancedMesh>
 
-      {/* STRAND 2 */}
-      {positions2.map((pos, i) => (
-        <mesh key={`s2-${i}`} position={pos}>
-          <sphereGeometry args={[0.2, 32, 32]} />
-          <meshPhysicalMaterial ref={i === 0 ? strand2MatRef : undefined} {...physicalProps} emissive="#39ff14" emissiveIntensity={0.5} />
-        </mesh>
-      ))}
+      <instancedMesh ref={instancedStrand2} args={[undefined, undefined, numPairs]}>
+        <sphereGeometry args={[0.2, 16, 16]} />
+        <meshPhysicalMaterial {...physicalProps} />
+      </instancedMesh>
 
-      {/* RUNGS (BONDS) */}
-      {rungs.map((rung, i) => {
-        const distance = rung.p1.distanceTo(rung.p2);
-        const center = new THREE.Vector3().addVectors(rung.p1, rung.p2).multiplyScalar(0.5);
-        // Calculate rotation for cylinder
-        const direction = new THREE.Vector3().subVectors(rung.p2, rung.p1).normalize();
-        const quaternion = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction);
-
-        return (
-          <mesh key={`r-${i}`} position={center} quaternion={quaternion}>
-            <cylinderGeometry args={[0.04, 0.04, distance, 16]} />
-            <meshPhysicalMaterial ref={i === 0 ? rungMatRef : undefined} {...physicalProps} transmission={0.2} emissive="#39ff14" emissiveIntensity={1} transparent />
-          </mesh>
-        );
-      })}
-
-      <Html position={[2.5, 0, 0]} center style={{ pointerEvents: 'none' }}>
-        <div style={{ color: isMutated ? '#ff0033' : '#39ff14', fontFamily: 'monospace', fontSize: '10px', width: '220px', borderLeft: '1px solid currentColor', paddingLeft: '10px', textShadow: '0 0 10px currentColor' }}>
-          {isMutated ? 'DNA STRANDS UNZIPPING... HOST TAKEOVER' : 'STABLE SYMBIOTE DOUBLE HELIX'}
-        </div>
-      </Html>
+      <instancedMesh ref={instancedRungs} args={[undefined, undefined, numPairs]}>
+        <cylinderGeometry args={[0.04, 0.04, 1, 8]} />
+        <meshPhysicalMaterial {...physicalProps} transmission={0.2} transparent />
+      </instancedMesh>
     </group>
   );
 }
