@@ -205,18 +205,33 @@ export default function Home() {
 
       {/* FIXED 3D CANVAS */}
       <div style={{ position: "fixed", inset: 0, zIndex: 2, pointerEvents: "none" }}>
-        <Canvas gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.5 }}>
+        <Canvas gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.5, alpha: true }}>
           <PlungeScene scrollYProgress={scrollYProgress} />
         </Canvas>
       </div>
 
       {/* THE DESCENT CONTAINER (2300vh for 23 aliens) */}
-      <div style={{ position: "relative", zIndex: 3, width: "100%", height: `${ALIENS.length * 100}vh` }}>
+      <div style={{ position: "relative", zIndex: 3, width: "100%", height: `${ALIENS.length * 100}vh`, pointerEvents: "none" }}>
         
-        {/* Phase 3: Typographic Overlays will go here */}
-        <div style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)", textAlign: "center" }}>
-          <h1 style={{ ...bebas, fontSize: "8vw", color: "#fff", opacity: 0.1 }}>THE PLUNGE IS READY</h1>
-          <p style={{ ...mono, fontSize: "1vw", color: "#fff", opacity: 0.1 }}>Scroll to descend</p>
+        {ALIENS.map((alien, i) => (
+          <div key={alien.id} style={{ position: "absolute", top: `${i * 100}vh`, height: "100vh", width: "100%", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", mixBlendMode: "difference" }}>
+            
+            <motion.h1 
+              style={{ ...bebas, fontSize: "clamp(100px, 18vw, 300px)", lineHeight: 0.85, color: "#fff", margin: 0, letterSpacing: "-0.02em", whiteSpace: "nowrap" }}
+            >
+              {alien.name}
+            </motion.h1>
+
+            <motion.div style={{ ...tag, color: alien.color, marginTop: 24, fontSize: 14 }}>
+              SUBJECT // {alien.id}
+            </motion.div>
+
+          </div>
+        ))}
+        
+        {/* Intro Hint */}
+        <div style={{ position: "absolute", top: "80vh", width: "100%", textAlign: "center" }}>
+          <p style={{ ...mono, fontSize: 12, color: "rgba(255,255,255,0.3)" }}>Scroll to descend</p>
         </div>
 
       </div>
@@ -224,7 +239,7 @@ export default function Home() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap');
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        html, body { width: 100%; min-height: 100%; background: #020202; overflow-x: hidden; }
+        html, body { width: 100%; min-height: 100%; background: #000000; overflow-x: hidden; }
         ::selection { background: #fff; color: #000; }
         html.lenis { height: auto; }
         .lenis.lenis-smooth { scroll-behavior: auto; }
