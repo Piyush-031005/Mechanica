@@ -54,8 +54,23 @@ function AlienModel({ alien, index, active, scrollYProgress }: { alien: any, ind
   const ref = useRef<THREE.Group>(null);
   const clone = useRef<THREE.Group>(scene.clone()).current;
 
-  // Apply dramatic materials
+  // Apply dramatic materials and normalize sizes
   useEffect(() => {
+    // 1. Normalize Size & Center (so all models are perfectly massive regardless of their source file)
+    const box = new THREE.Box3().setFromObject(clone);
+    const size = new THREE.Vector3();
+    box.getSize(size);
+    
+    // We want every alien to be roughly 6 units tall.
+    const scaleFactor = 6 / size.y;
+    clone.scale.set(scaleFactor, scaleFactor, scaleFactor);
+    
+    // Center it
+    const center = new THREE.Vector3();
+    box.getCenter(center);
+    clone.position.sub(center.multiplyScalar(scaleFactor));
+
+    // 2. Apply Materials
     const c = new THREE.Color(alien.color);
     clone.traverse((o) => {
       const mesh = o as THREE.Mesh;
@@ -143,23 +158,58 @@ function PlungeScene({ scrollYProgress }: { scrollYProgress: any }) {
 // ─── THE STRETCHING WEB ────────────────────────────────
 function DescentWeb() {
   const { scrollYProgress } = useScroll();
-  const smoothProgress = useSpring(scrollYProgress, { damping: 20, stiffness: 100 });
+  const smoothProgress = useSpring(scrollYProgress, { damping: 15, stiffness: 60 });
   
-  // Stretch the line down as you scroll
-  const scaleY = useTransform(smoothProgress, [0, 1], [0.1, 1]);
+  // We use strokeDashoffset to "draw" the web downwards as you scroll
+  const strokeDashoffset = useTransform(smoothProgress, [0, 1], [1000, 0]);
 
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 1, pointerEvents: "none", display: "flex", justifyContent: "center" }}>
-      <div style={{ width: 1, height: "100%", background: "rgba(255,255,255,0.05)", position: "relative" }}>
-        <motion.div 
-          style={{ 
-            width: 2, height: "100%", background: "#fff", 
-            boxShadow: "0 0 20px #fff, 0 0 40px #fff",
-            transformOrigin: "top center",
-            scaleY: scaleY
-          }} 
+      <svg width="60" height="100%" viewBox="0 0 60 1000" preserveAspectRatio="none" style={{ overflow: "visible", opacity: 0.8 }}>
+        <defs>
+          <linearGradient id="webGlow" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="rgba(255,255,255,1)" />
+            <stop offset="20%" stopColor="rgba(255,255,255,0.4)" />
+            <stop offset="100%" stopColor="rgba(255,255,255,0.0)" />
+          </linearGradient>
+          <filter id="glow">
+             <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+             <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+             </feMerge>
+          </filter>
+        </defs>
+        
+        {/* Main tension strand */}
+        <motion.line 
+          x1="30" y1="0" x2="30" y2="1000" 
+          stroke="url(#webGlow)" strokeWidth="1.5" 
+          strokeDasharray="1000"
+          style={{ strokeDashoffset }}
+          filter="url(#glow)"
         />
-      </div>
+        
+        {/* Fraying organic strands mimicking a spider web */}
+        <motion.path 
+          d="M30,0 Q10,250 30,500 T30,1000" 
+          stroke="rgba(255,255,255,0.3)" strokeWidth="0.5" fill="none"
+          strokeDasharray="1000"
+          style={{ strokeDashoffset }}
+        />
+        <motion.path 
+          d="M30,0 Q50,150 30,300 T30,1000" 
+          stroke="rgba(255,255,255,0.5)" strokeWidth="0.8" fill="none"
+          strokeDasharray="1000"
+          style={{ strokeDashoffset }}
+        />
+        <motion.path 
+          d="M30,0 Q20,100 30,200 T30,1000" 
+          stroke="rgba(255,255,255,0.2)" strokeWidth="0.3" fill="none"
+          strokeDasharray="1000"
+          style={{ strokeDashoffset }}
+        />
+      </svg>
     </div>
   );
 }
