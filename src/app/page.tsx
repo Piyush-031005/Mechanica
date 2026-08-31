@@ -10,7 +10,7 @@ import IntroSequence from "@/components/IntroSequence";
 // ─── COMPLETE 23-ALIEN DATASET ─────────────────────────
 const ALIENS = [
   { id: "01", name: "DIAMONDHEAD",  color: "#00e5ff", file: "diamondhead_classic__low_poly__ben_10.glb", manualScale: 1.5, yOffset: -2 },
-  { id: "02", name: "FOUR ARMS",    color: "#e31f1f", file: "fourarms_ben_10_os.glb", manualScale: 350.0, yOffset: -5 },
+  { id: "02", name: "FOUR ARMS",    color: "#e31f1f", file: "fourarms_ben_10_os.glb", manualScale: 4000.0, yOffset: -5 },
   { id: "03", name: "XLR8",         color: "#00e676", file: "xlr8_young.glb", manualScale: 1.5, yOffset: -3 },
   { id: "04", name: "SWAMPFIRE",    color: "#ff6d00", file: "swampfire_ben_10.glb" },
   { id: "05", name: "CANNONBOLT",   color: "#ffd600", file: "canonbolt_ben_10.glb" },
