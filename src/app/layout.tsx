@@ -1,29 +1,37 @@
 import type { Metadata } from "next";
-import { Oswald, Noto_Sans_JP } from "next/font/google";
+import { Bebas_Neue, Inter, Space_Mono } from "next/font/google";
 import "./globals.css";
 
-const oswald = Oswald({
+const bebasNeue = Bebas_Neue({
+  weight: "400",
   subsets: ["latin"],
-  variable: "--font-oswald",
+  variable: "--font-bebas",
+  display: "swap",
 });
 
-const notoSansJP = Noto_Sans_JP({
+const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-noto-sans-jp",
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const spaceMono = Space_Mono({
+  weight: ["400", "700"],
+  subsets: ["latin"],
+  variable: "--font-mono",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "MECHANICA | The Luminous Cyber-Ecology",
-  description: "An unprecedented WebGL experience.",
+  title: "MECHANICA — Spider-Man × Ben 10",
+  description: "Where alien technology meets spider instinct. An Awwwards-level interactive experience.",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${oswald.variable} ${notoSansJP.variable}`}>
+    <html lang="en" className={`${bebasNeue.variable} ${inter.variable} ${spaceMono.variable}`}>
       <body>{children}</body>
     </html>
   );
