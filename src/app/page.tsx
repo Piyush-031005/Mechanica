@@ -5,6 +5,7 @@ import { useGLTF, Environment, ContactShadows, Float } from "@react-three/drei";
 import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import * as THREE from "three";
 import Lenis from "lenis";
+import IntroSequence from "@/components/IntroSequence";
 
 // ─── COMPLETE 23-ALIEN DATASET ─────────────────────────
 const ALIENS = [
@@ -54,15 +55,25 @@ function AlienModel({ alien, index, active, scrollYProgress }: { alien: any, ind
   const ref = useRef<THREE.Group>(null);
   const clone = useRef<THREE.Group>(scene.clone()).current;
 
-  // Apply dramatic materials and normalize sizes
+  // Apply dramatic materials and normalize sizes robustly
   useEffect(() => {
-    // 1. Normalize Size & Center (so all models are perfectly massive regardless of their source file)
-    const box = new THREE.Box3().setFromObject(clone);
+    // 1. Robust Normalize Size & Center (ignores invisible bones/cameras)
+    const box = new THREE.Box3();
+    clone.traverse((o) => {
+      const mesh = o as THREE.Mesh;
+      if (mesh.isMesh) {
+        box.expandByObject(mesh);
+      }
+    });
+    
     const size = new THREE.Vector3();
     box.getSize(size);
     
-    // We want every alien to be roughly 6 units tall.
-    const scaleFactor = 6 / size.y;
+    // Fallback if size is 0
+    const finalSize = size.y === 0 ? 1 : size.y;
+    
+    // We want every alien to be exactly 6 units tall.
+    const scaleFactor = 6 / finalSize;
     clone.scale.set(scaleFactor, scaleFactor, scaleFactor);
     
     // Center it
@@ -217,6 +228,8 @@ function DescentWeb() {
 // ─── MAIN PAGE (THE PLUNGE ARCHITECTURE) ───────────────
 export default function Home() {
   const [mounted, setMounted] = useState(false);
+  const [introFinished, setIntroFinished] = useState(false);
+  const lenisRef = useRef<Lenis | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -229,6 +242,9 @@ export default function Home() {
       wheelMultiplier: 1,
       touchMultiplier: 2,
     });
+    
+    lenisRef.current = lenis;
+    lenis.stop(); // Lock scroll initially
 
     function raf(time: number) {
       lenis.raf(time);
@@ -237,6 +253,12 @@ export default function Home() {
     requestAnimationFrame(raf);
     return () => lenis.destroy();
   }, []);
+
+  useEffect(() => {
+    if (introFinished && lenisRef.current) {
+      lenisRef.current.start(); // Unlock scroll when intro finishes
+    }
+  }, [introFinished]);
 
   const { scrollYProgress } = useScroll(); // Add this line here to pass to PlungeScene
 
@@ -248,9 +270,16 @@ export default function Home() {
 
   return (
     <>
-      {/* BACKGROUND NOISE & GRADIENT */}
-      <div style={{ position:"fixed", inset:0, background: "#020202", zIndex: 0 }} />
-      <div style={{ position:"fixed", inset:0, opacity:0.06, pointerEvents:"none", zIndex: 999, backgroundImage:`url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")` }} />
+      {!introFinished && <IntroSequence onComplete={() => setIntroFinished(true)} />}
+
+      {/* BACKGROUND NOISE & SPIDER-VERSE HALFTONE */}
+      <div style={{ position:"fixed", inset:0, background: "#050505", zIndex: 0 }} />
+      <div style={{ 
+        position:"fixed", inset:0, opacity:0.15, pointerEvents:"none", zIndex: 998, 
+        backgroundImage: "radial-gradient(#ff0055 1px, transparent 1px), radial-gradient(#00aaff 1px, transparent 1px)",
+        backgroundSize: "20px 20px", backgroundPosition: "0 0, 10px 10px"
+      }} />
+      <div style={{ position:"fixed", inset:0, opacity:0.04, pointerEvents:"none", zIndex: 999, backgroundImage:`url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")` }} />
 
       {/* THE WEB */}
       <DescentWeb />
@@ -269,12 +298,22 @@ export default function Home() {
           <div key={alien.id} style={{ position: "absolute", top: `${i * 100}vh`, height: "100vh", width: "100%", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", mixBlendMode: "difference" }}>
             
             <motion.h1 
-              style={{ ...bebas, fontSize: "clamp(100px, 18vw, 300px)", lineHeight: 0.85, color: "#fff", margin: 0, letterSpacing: "-0.02em", whiteSpace: "nowrap" }}
+              style={{ 
+                ...bebas, 
+                fontSize: "clamp(100px, 18vw, 300px)", 
+                lineHeight: 0.85, 
+                color: "#fff", 
+                margin: 0, 
+                letterSpacing: "-0.02em", 
+                whiteSpace: "nowrap",
+                // SPIDER-VERSE GLITCH EFFECT
+                textShadow: "4px 4px 0 #ff0055, -4px -4px 0 #00aaff"
+              }}
             >
               {alien.name}
             </motion.h1>
 
-            <motion.div style={{ ...tag, color: alien.color, marginTop: 24, fontSize: 14 }}>
+            <motion.div style={{ ...tag, color: alien.color, marginTop: 24, fontSize: 16, background: "#000", padding: "4px 12px", border: "1px solid " + alien.color }}>
               SUBJECT // {alien.id}
             </motion.div>
 
@@ -283,7 +322,7 @@ export default function Home() {
         
         {/* Intro Hint */}
         <div style={{ position: "absolute", top: "80vh", width: "100%", textAlign: "center" }}>
-          <p style={{ ...mono, fontSize: 12, color: "rgba(255,255,255,0.3)" }}>Scroll to descend</p>
+          <p style={{ ...mono, fontSize: 12, color: "#ff0055", letterSpacing: 4, textTransform: "uppercase" }}>Initiate Descent</p>
         </div>
 
       </div>
