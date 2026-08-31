@@ -11,12 +11,12 @@ function AnimatedOmnitrix({ stage }: { stage: number }) {
     <motion.div
       initial={{ scale: 0.5, opacity: 0 }}
       animate={{ 
-        scale: stage >= 1 ? 1.5 : 1, 
+        scale: stage >= 1 ? 2.5 : 1, 
         opacity: 1,
         filter: stage >= 1 ? "brightness(1.5) drop-shadow(0 0 20px #00ff33)" : "brightness(1) drop-shadow(0 0 0px #00ff33)"
       }}
       transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-      style={{ position: "absolute", zIndex: 1, width: 200, height: 200 }}
+      style={{ position: "absolute", zIndex: 1, width: 300, height: 300 }}
     >
       <svg viewBox="0 0 200 200" style={{ width: "100%", height: "100%" }}>
         <defs>

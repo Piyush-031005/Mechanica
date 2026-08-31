@@ -10,8 +10,8 @@ import IntroSequence from "@/components/IntroSequence";
 // ─── COMPLETE 23-ALIEN DATASET ─────────────────────────
 const ALIENS = [
   { id: "01", name: "DIAMONDHEAD",  color: "#00e5ff", file: "diamondhead_classic__low_poly__ben_10.glb", manualScale: 1.5, yOffset: -2 },
-  { id: "02", name: "FOUR ARMS",    color: "#e31f1f", file: "fourarms_ben_10_os.glb", manualScale: 150.0, yOffset: -6 },
-  { id: "03", name: "XLR8",         color: "#00e676", file: "xlr8_young.glb" },
+  { id: "02", name: "FOUR ARMS",    color: "#e31f1f", file: "fourarms_ben_10_os.glb", manualScale: 350.0, yOffset: -5 },
+  { id: "03", name: "XLR8",         color: "#00e676", file: "xlr8_young.glb", manualScale: 1.5, yOffset: -3 },
   { id: "04", name: "SWAMPFIRE",    color: "#ff6d00", file: "swampfire_ben_10.glb" },
   { id: "05", name: "CANNONBOLT",   color: "#ffd600", file: "canonbolt_ben_10.glb" },
   { id: "06", name: "JETRAY",       color: "#aa00ff", file: "jetray_-_ben_10_rigged.glb" },
@@ -320,27 +320,58 @@ export default function Home() {
       <div style={{ position: "relative", zIndex: 3, width: "100%", height: `${ALIENS.length * 100}vh`, pointerEvents: "none" }}>
         
         {ALIENS.map((alien, i) => (
-          <div key={alien.id} style={{ position: "absolute", top: `${i * 100}vh`, height: "100vh", width: "100%", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", mixBlendMode: "difference" }}>
+          <div key={alien.id} style={{ position: "absolute", top: `${i * 100}vh`, height: "100vh", width: "100%", display: "flex", pointerEvents: "none", mixBlendMode: "screen", padding: "40px" }}>
             
-            <motion.h1 
-              style={{ 
-                ...bebas, 
-                fontSize: "clamp(100px, 18vw, 300px)", 
-                lineHeight: 0.85, 
-                color: "#fff", 
-                margin: 0, 
-                letterSpacing: "-0.02em", 
-                whiteSpace: "nowrap",
-                // SPIDER-VERSE GLITCH EFFECT
-                textShadow: "4px 4px 0 #ff0055, -4px -4px 0 #00aaff"
-              }}
-            >
-              {alien.name}
-            </motion.h1>
+            {/* Tech Border Frame */}
+            <div style={{ position: "absolute", inset: "40px", border: "1px solid rgba(255,255,255,0.1)", zIndex: 0 }} />
+            
+            {/* Corner Accents */}
+            <div style={{ position: "absolute", top: "35px", left: "35px", width: "20px", height: "20px", borderTop: "2px solid " + alien.color, borderLeft: "2px solid " + alien.color }} />
+            <div style={{ position: "absolute", bottom: "35px", right: "35px", width: "20px", height: "20px", borderBottom: "2px solid " + alien.color, borderRight: "2px solid " + alien.color }} />
 
-            <motion.div style={{ ...tag, color: alien.color, marginTop: 24, fontSize: 16, background: "#000", padding: "4px 12px", border: "1px solid " + alien.color }}>
-              SUBJECT // {alien.id}
-            </motion.div>
+            {/* Left Vertical HUD */}
+            <div style={{ position: "absolute", left: "60px", top: "50%", transform: "translateY(-50%) rotate(180deg)", writingMode: "vertical-rl", display: "flex", alignItems: "center", gap: "20px" }}>
+              <div style={{ ...tag, color: "rgba(255,255,255,0.5)", fontSize: 12 }}>BIOMETRIC SCAN // SYSTEM ACTIVE</div>
+              <div style={{ width: "2px", height: "60px", background: alien.color, boxShadow: `0 0 10px ${alien.color}` }} />
+            </div>
+
+            {/* Top Right HUD */}
+            <div style={{ position: "absolute", top: "60px", right: "60px", textAlign: "right" }}>
+              <div style={{ ...tag, color: alien.color, fontSize: 14 }}>SUBJECT DATA // [{alien.id}]</div>
+              <div style={{ ...mono, color: "rgba(255,255,255,0.4)", fontSize: 10, marginTop: "5px" }}>LOC: 45.221 - SECTOR 7</div>
+            </div>
+
+            {/* Bottom Alien Designation */}
+            <div style={{ position: "absolute", bottom: "60px", left: "60px", display: "flex", flexDirection: "column", gap: "10px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
+                <div style={{ width: "40px", height: "2px", background: alien.color }} />
+                <motion.h1 
+                  style={{ 
+                    ...bebas, 
+                    fontSize: "4vw", 
+                    lineHeight: 1, 
+                    color: "#fff", 
+                    margin: 0, 
+                    letterSpacing: "0.05em",
+                    textShadow: `0 0 20px ${alien.color}`
+                  }}
+                >
+                  {alien.name}
+                </motion.h1>
+              </div>
+              <div style={{ ...tag, color: "rgba(255,255,255,0.6)", fontSize: 12, paddingLeft: "55px" }}>
+                ALIEN DNA SIGNATURE MATCH // CONFIRMED
+              </div>
+            </div>
+
+            {/* Center Reticle */}
+            <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", opacity: 0.1, zIndex: -1 }}>
+              <svg width="200" height="200" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="40" fill="none" stroke="#fff" strokeWidth="0.5" strokeDasharray="2 4" />
+                <circle cx="50" cy="50" r="30" fill="none" stroke="#fff" strokeWidth="0.5" />
+                <path d="M50 0 L50 100 M0 50 L100 50" stroke="#fff" strokeWidth="0.2" />
+              </svg>
+            </div>
 
           </div>
         ))}
