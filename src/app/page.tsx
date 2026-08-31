@@ -9,8 +9,8 @@ import IntroSequence from "@/components/IntroSequence";
 
 // ─── COMPLETE 23-ALIEN DATASET ─────────────────────────
 const ALIENS = [
-  { id: "01", name: "DIAMONDHEAD",  color: "#00e5ff", file: "diamondhead_classic__low_poly__ben_10.glb" },
-  { id: "02", name: "FOUR ARMS",    color: "#e31f1f", file: "fourarms_ben_10_os.glb" },
+  { id: "01", name: "DIAMONDHEAD",  color: "#00e5ff", file: "diamondhead_classic__low_poly__ben_10.glb", manualScale: 1.5, yOffset: -2 },
+  { id: "02", name: "FOUR ARMS",    color: "#e31f1f", file: "fourarms_ben_10_os.glb", manualScale: 150.0, yOffset: -6 },
   { id: "03", name: "XLR8",         color: "#00e676", file: "xlr8_young.glb" },
   { id: "04", name: "SWAMPFIRE",    color: "#ff6d00", file: "swampfire_ben_10.glb" },
   { id: "05", name: "CANNONBOLT",   color: "#ffd600", file: "canonbolt_ben_10.glb" },
@@ -58,39 +58,46 @@ function AlienModel({ alien, index, active, scrollYProgress }: { alien: any, ind
   // Apply dramatic materials and normalize sizes robustly
   useEffect(() => {
     // 1. Ultra-Robust Normalize Size & Center
-    // updateMatrixWorld is crucial before calculating manual bounds
-    clone.updateMatrixWorld(true);
     
-    const box = new THREE.Box3();
-    clone.traverse((o) => {
-      const mesh = o as THREE.Mesh;
-      if (mesh.isMesh && mesh.geometry) {
-        mesh.geometry.computeBoundingBox();
-        if (mesh.geometry.boundingBox) {
-           const meshBox = mesh.geometry.boundingBox.clone();
-           meshBox.applyMatrix4(mesh.matrixWorld);
-           // Only union if the bounding box is valid and not infinite
-           if (!meshBox.isEmpty() && meshBox.min.x > -10000) {
-              box.union(meshBox);
-           }
+    if (alien.manualScale) {
+      // Direct override for severely broken models
+      clone.scale.setScalar(alien.manualScale);
+      clone.position.set(0, alien.yOffset || 0, 0);
+    } else {
+      // updateMatrixWorld is crucial before calculating manual bounds
+      clone.updateMatrixWorld(true);
+      
+      const box = new THREE.Box3();
+      clone.traverse((o) => {
+        const mesh = o as THREE.Mesh;
+        if (mesh.isMesh && mesh.geometry) {
+          mesh.geometry.computeBoundingBox();
+          if (mesh.geometry.boundingBox) {
+             const meshBox = mesh.geometry.boundingBox.clone();
+             meshBox.applyMatrix4(mesh.matrixWorld);
+             // Only union if the bounding box is valid and not infinite
+             if (!meshBox.isEmpty() && meshBox.min.x > -10000) {
+                box.union(meshBox);
+             }
+          }
         }
-      }
-    });
-    
-    const size = new THREE.Vector3();
-    box.getSize(size);
-    
-    // Fallback if size is 0
-    const finalSize = size.y === 0 ? 1 : size.y;
-    
-    // We want every alien to be exactly 6 units tall.
-    const scaleFactor = 6 / finalSize;
-    clone.scale.set(scaleFactor, scaleFactor, scaleFactor);
-    
-    // Center it
-    const center = new THREE.Vector3();
-    box.getCenter(center);
-    clone.position.sub(center.multiplyScalar(scaleFactor));
+      });
+      
+      const size = new THREE.Vector3();
+      box.getSize(size);
+      
+      // Fallback if size is 0
+      const finalSize = size.y === 0 ? 1 : size.y;
+      
+      // We want every alien to be exactly 6 units tall.
+      const scaleFactor = 6 / finalSize;
+      clone.scale.set(scaleFactor, scaleFactor, scaleFactor);
+      
+      // Center it
+      const center = new THREE.Vector3();
+      box.getCenter(center);
+      clone.position.sub(center.multiplyScalar(scaleFactor));
+    }
 
     // 2. Apply Materials
     const c = new THREE.Color(alien.color);
@@ -284,7 +291,15 @@ export default function Home() {
       {!introFinished && <IntroSequence onComplete={() => setIntroFinished(true)} />}
 
       {/* BACKGROUND NOISE & SPIDER-VERSE HALFTONE */}
-      <div style={{ position:"fixed", inset:0, background: "#050505", zIndex: 0 }} />
+      <div style={{ 
+        position:"fixed", inset:0, zIndex: 0,
+        backgroundImage: `
+          radial-gradient(circle at center, transparent 0, #050505 85%),
+          repeating-radial-gradient(circle at center, transparent 0, transparent 40px, rgba(255, 0, 85, 0.08) 40px, rgba(255, 0, 85, 0.08) 41px),
+          repeating-conic-gradient(from 0deg at center, transparent 0deg, transparent 15deg, rgba(255, 0, 85, 0.08) 15deg, rgba(255, 0, 85, 0.08) 16deg)
+        `,
+        backgroundColor: "#050505"
+      }} />
       <div style={{ 
         position:"fixed", inset:0, opacity:0.15, pointerEvents:"none", zIndex: 998, 
         backgroundImage: "radial-gradient(#ff0055 1px, transparent 1px), radial-gradient(#00aaff 1px, transparent 1px)",
