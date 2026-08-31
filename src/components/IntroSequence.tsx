@@ -74,8 +74,11 @@ function AnimatedOmnitrix({ stage }: { stage: number }) {
 }
 
 function AnimatedSpider({ stage }: { stage: number }) {
-  // A high-tech geometric spider drawn with SVG line paths.
-  // It uses strokeDasharray and strokeDashoffset to "draw" itself in real-time.
+  // We use the user's highly detailed reference image but apply a math filter
+  // invert(1) turns white to black, black to white, and red to cyan.
+  // hue-rotate(180deg) turns cyan back into a glowing neon red.
+  // This perfectly transforms a white-bg diagram into a dark-mode cyberpunk hologram.
+  
   return (
     <motion.div
       initial={{ y: 0, scale: 0, opacity: 0 }}
@@ -103,45 +106,34 @@ function AnimatedSpider({ stage }: { stage: number }) {
         }}
       />
       
-      {/* Vector Circuit Spider */}
-      <svg viewBox="0 0 100 100" style={{ width: "100%", height: "100%", position: "relative", zIndex: 2 }}>
-        <defs>
-          <filter id="spiderGlow">
-            <feGaussianBlur stdDeviation="1.5" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-        </defs>
-        
-        {/* Body */}
-        <motion.path
-          d="M 50 15 L 65 30 L 65 60 L 50 85 L 35 60 L 35 30 Z"
-          fill="#111"
-          stroke="#ff0044"
-          strokeWidth="2"
-          filter="url(#spiderGlow)"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{ duration: 1, ease: "easeInOut" }}
+      {/* High-Tech Hologram Spider Image */}
+      <motion.div
+        style={{
+          width: 160, height: 160, position: "relative", zIndex: 2,
+          filter: "invert(1) hue-rotate(180deg) drop-shadow(0 0 10px rgba(255, 0, 50, 0.8))"
+        }}
+        initial={{ clipPath: "polygon(0 100%, 100% 100%, 100% 100%, 0 100%)" }}
+        animate={{ clipPath: "polygon(0 0%, 100% 0%, 100% 100%, 0 100%)" }}
+        transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
+      >
+        <img 
+          src="/assets/spider_user.png" 
+          alt="Spider" 
+          style={{ width: "100%", height: "100%", objectFit: "contain", mixBlendMode: "screen" }} 
         />
         
-        {/* Eyes / Core logic */}
-        <motion.circle cx="43" cy="35" r="3" fill="#fff" filter="url(#spiderGlow)" animate={{ opacity: [0.5, 1, 0.5] }} transition={{ duration: 2, repeat: Infinity }} />
-        <motion.circle cx="57" cy="35" r="3" fill="#fff" filter="url(#spiderGlow)" animate={{ opacity: [0.5, 1, 0.5] }} transition={{ duration: 2, repeat: Infinity, delay: 0.5 }} />
-        <motion.circle cx="50" cy="45" r="4" fill="#ff0044" filter="url(#spiderGlow)" animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 1, repeat: Infinity }} />
-
-        {/* Legs (Left Side) */}
-        <motion.path d="M 35 30 L 15 10 L 5 25" fill="none" stroke="#ff0044" strokeWidth="2" filter="url(#spiderGlow)" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.8, delay: 0.2 }} />
-        <motion.path d="M 35 45 L 10 45 L 5 60" fill="none" stroke="#ff0044" strokeWidth="2" filter="url(#spiderGlow)" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.8, delay: 0.3 }} />
-        <motion.path d="M 35 60 L 15 80 L 10 95" fill="none" stroke="#ff0044" strokeWidth="2" filter="url(#spiderGlow)" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.8, delay: 0.4 }} />
-
-        {/* Legs (Right Side) */}
-        <motion.path d="M 65 30 L 85 10 L 95 25" fill="none" stroke="#ff0044" strokeWidth="2" filter="url(#spiderGlow)" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.8, delay: 0.2 }} />
-        <motion.path d="M 65 45 L 90 45 L 95 60" fill="none" stroke="#ff0044" strokeWidth="2" filter="url(#spiderGlow)" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.8, delay: 0.3 }} />
-        <motion.path d="M 65 60 L 85 80 L 90 95" fill="none" stroke="#ff0044" strokeWidth="2" filter="url(#spiderGlow)" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.8, delay: 0.4 }} />
-      </svg>
+        {/* Holographic Scanline sweeping over the spider */}
+        <motion.div 
+          animate={{ y: [0, 160, 0] }}
+          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+          style={{
+            position: "absolute", top: 0, left: 0, width: "100%", height: 4,
+            background: "rgba(255, 0, 50, 0.8)",
+            boxShadow: "0 0 15px #ff0033",
+            zIndex: 3
+          }}
+        />
+      </motion.div>
     </motion.div>
   );
 }
