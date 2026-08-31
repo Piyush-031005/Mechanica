@@ -179,7 +179,6 @@ function PlungeScene({ scrollYProgress }: { scrollYProgress: any }) {
       ))}
 
       <ContactShadows position={[0, -6, 0]} opacity={0.8} scale={30} blur={4} color={currentAlien.color} />
-      <Environment preset="city" />
     </>
   );
 }
