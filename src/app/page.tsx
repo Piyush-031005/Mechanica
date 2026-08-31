@@ -188,11 +188,12 @@ export default function Home() {
     return () => lenis.destroy();
   }, []);
 
+  const { scrollYProgress } = useScroll(); // Add this line here to pass to PlungeScene
+
   if (!mounted) return null;
 
   const bebas = { fontFamily: "'Bebas Neue', sans-serif" };
   const mono  = { fontFamily: "'Space Mono', monospace" };
-  const { scrollYProgress } = useScroll(); // Add this line here to pass to PlungeScene
 
   return (
     <>
