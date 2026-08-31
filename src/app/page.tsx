@@ -194,6 +194,7 @@ export default function Home() {
 
   const bebas = { fontFamily: "'Bebas Neue', sans-serif" };
   const mono  = { fontFamily: "'Space Mono', monospace" };
+  const tag   = { ...mono, letterSpacing: ".3em", textTransform: "uppercase" as const };
 
   return (
     <>
