@@ -74,11 +74,8 @@ function AnimatedOmnitrix({ stage }: { stage: number }) {
 }
 
 function AnimatedSpider({ stage }: { stage: number }) {
-  // We use the user's highly detailed reference image but apply a math filter
-  // invert(1) turns white to black, black to white, and red to cyan.
-  // hue-rotate(180deg) turns cyan back into a glowing neon red.
-  // This perfectly transforms a white-bg diagram into a dark-mode cyberpunk hologram.
-  
+  // Ultra-Premium "Awwwards Style" Neural Net Spider
+  // Procedurally drawn using SVG paths with a constellation/cyberpunk aesthetic.
   return (
     <motion.div
       initial={{ y: 0, scale: 0, opacity: 0 }}
@@ -89,51 +86,71 @@ function AnimatedSpider({ stage }: { stage: number }) {
       }}
       transition={{ 
         y: { duration: stage >= 2 ? 0.6 : 0.5, ease: stage >= 2 ? "easeIn" : "easeOut" },
-        scale: { duration: 0.5, type: "spring", bounce: 0.5 },
-        opacity: { duration: 0.3 }
+        scale: { duration: 0.8, type: "spring", bounce: 0.4 },
+        opacity: { duration: 0.5 }
       }}
       style={{ 
         position: "absolute", zIndex: 5, display: "flex", justifyContent: "center", alignItems: "center",
-        width: 160, height: 160
+        width: 300, height: 300
       }}
     >
-      {/* Dynamic Web Line */}
+      {/* Dynamic Drop Web Line */}
       <motion.div 
         style={{ 
           position: "absolute", bottom: "50%", width: 2, height: 2000, 
           background: "rgba(255,255,255,1)", transformOrigin: "bottom", 
-          boxShadow: "0 0 15px #fff, 0 0 30px #ff0055", zIndex: 1 
+          boxShadow: "0 0 20px #fff, 0 0 40px #ff0044", zIndex: 1 
         }}
       />
       
-      {/* High-Tech Hologram Spider Image */}
-      <motion.div
-        style={{
-          width: 160, height: 160, position: "relative", zIndex: 2,
-          filter: "invert(1) hue-rotate(180deg) drop-shadow(0 0 10px rgba(255, 0, 50, 0.8))"
-        }}
-        initial={{ clipPath: "polygon(0 100%, 100% 100%, 100% 100%, 0 100%)" }}
-        animate={{ clipPath: "polygon(0 0%, 100% 0%, 100% 100%, 0 100%)" }}
-        transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
-      >
-        <img 
-          src="/assets/spider_user.png" 
-          alt="Spider" 
-          style={{ width: "100%", height: "100%", objectFit: "contain", mixBlendMode: "screen" }} 
-        />
+      {/* Awwwards-Style Neural Net Spider SVG */}
+      <svg viewBox="0 0 100 100" style={{ width: "100%", height: "100%", position: "relative", zIndex: 2, filter: "drop-shadow(0 0 15px rgba(255,0,50,0.8))" }}>
         
-        {/* Holographic Scanline sweeping over the spider */}
-        <motion.div 
-          animate={{ y: [0, 160, 0] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-          style={{
-            position: "absolute", top: 0, left: 0, width: "100%", height: 4,
-            background: "rgba(255, 0, 50, 0.8)",
-            boxShadow: "0 0 15px #ff0033",
-            zIndex: 3
-          }}
+        {/* Fangs */}
+        <motion.polyline points="47,35 45,20" fill="none" stroke="#ff0044" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.5, delay: 0.2 }} />
+        <motion.polyline points="53,35 55,20" fill="none" stroke="#ff0044" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.5, delay: 0.2 }} />
+        
+        {/* Left Legs */}
+        <motion.polyline points="45,40 25,20 5,30" fill="none" stroke="#ff0044" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.5, delay: 0.4 }} />
+        <motion.polyline points="42,45 15,35 2,50" fill="none" stroke="#ff0044" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.5, delay: 0.5 }} />
+        <motion.polyline points="42,50 15,55 5,75" fill="none" stroke="#ff0044" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.5, delay: 0.6 }} />
+        <motion.polyline points="45,55 25,75 15,95" fill="none" stroke="#ff0044" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.5, delay: 0.7 }} />
+
+        {/* Right Legs */}
+        <motion.polyline points="55,40 75,20 95,30" fill="none" stroke="#ff0044" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.5, delay: 0.4 }} />
+        <motion.polyline points="58,45 85,35 98,50" fill="none" stroke="#ff0044" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.5, delay: 0.5 }} />
+        <motion.polyline points="58,50 85,55 95,75" fill="none" stroke="#ff0044" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.5, delay: 0.6 }} />
+        <motion.polyline points="55,55 75,75 85,95" fill="none" stroke="#ff0044" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.5, delay: 0.7 }} />
+
+        {/* Abdomen (Geometric core) */}
+        <motion.polygon points="50,90 35,70 38,55 62,55 65,70" fill="rgba(255,0,50,0.1)" stroke="#ff0044" strokeWidth="1.5" strokeLinejoin="round" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.5, delay: 0.8 }} />
+        
+        {/* Cephalothorax (Head) */}
+        <motion.polygon points="50,30 40,40 42,55 58,55 60,40" fill="rgba(255,0,50,0.2)" stroke="#ff0044" strokeWidth="2" strokeLinejoin="round" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.5, delay: 0.9 }} />
+
+        {/* Glowing Neural Nodes */}
+        {[
+          [50, 90], [35, 70], [65, 70], [38, 55], [62, 55], // Abdomen nodes
+          [50, 30], [40, 40], [60, 40], // Head nodes
+          [25, 20], [15, 35], [15, 55], [25, 75], // Left leg joints
+          [75, 20], [85, 35], [85, 55], [75, 75]  // Right leg joints
+        ].map((pos, i) => (
+          <motion.circle 
+            key={i} cx={pos[0]} cy={pos[1]} r="1.5" fill="#fff"
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 2, delay: 1 + i * 0.05, repeat: Infinity }}
+          />
+        ))}
+
+        {/* Central Power Core */}
+        <motion.circle 
+          cx="50" cy="45" r="4" fill="#fff" 
+          initial={{ scale: 0 }}
+          animate={{ scale: [1, 1.2, 1], filter: ["blur(2px)", "blur(6px)", "blur(2px)"] }}
+          transition={{ duration: 1.5, delay: 1, repeat: Infinity }}
         />
-      </motion.div>
+      </svg>
     </motion.div>
   );
 }
