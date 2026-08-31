@@ -1,37 +1,24 @@
 "use client";
 import { useEffect, useRef, useState, Suspense } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { useGLTF, Environment, ContactShadows, Float, useProgress, Html } from "@react-three/drei";
+import { useGLTF, Environment, ContactShadows, Float } from "@react-three/drei";
 import { motion, AnimatePresence } from "framer-motion";
 import * as THREE from "three";
 
 // ─── DATA ───────────────────────────────────────────────
 const ALIENS = [
-  { name: "DIAMONDHEAD", power: "Crystal Physiology",    planet: "Petropia",      color: "#00e5ff", model: "/modals/diamondhead_classic__low_poly__ben_10.glb", scale: 3.2, ry: 0 },
-  { name: "FOUR ARMS",   power: "Enhanced Strength",     planet: "Khoros",        color: "#e31f1f", model: "/modals/fourarms_ben_10_os.glb",                     scale: 2.6, ry: 0 },
-  { name: "XLR8",        power: "Mach 5 Velocity",       planet: "Kinet",         color: "#00e676", model: "/modals/xlr8_young.glb",                             scale: 3.0, ry: 0 },
-  { name: "SWAMPFIRE",   power: "Pyro-Plant Control",    planet: "Methanos",      color: "#ff6d00", model: "/modals/swampfire_ben_10.glb",                       scale: 2.8, ry: 0 },
-  { name: "CANNONBOLT",  power: "Armodrillo Shell",      planet: "Arburia",       color: "#ffd600", model: "/modals/canonbolt_ben_10.glb",                       scale: 3.0, ry: 0 },
-  { name: "JETRAY",      power: "Mach 10 Flight",        planet: "Aeropela",      color: "#aa00ff", model: "/modals/jetray_-_ben_10_rigged.glb",                 scale: 2.3, ry: 0 },
-  { name: "WILDMUTT",    power: "Hyperactive Senses",    planet: "Vulpin",        color: "#ff8f00", model: "/modals/wildmutt_ben_10_vilgax_attacks_fan_model.glb", scale: 3.0, ry: 0 },
-  { name: "SPIDERMONKEY",power: "Prehensile Web Silk",   planet: "Arachna",       color: "#4fc3f7", model: "/modals/spidermonkey.glb",                           scale: 2.8, ry: 0 },
+  { name: "DIAMONDHEAD", power: "Crystal Physiology",    planet: "Petropia",      color: "#00e5ff", model: "/modals/diamondhead_classic__low_poly__ben_10.glb", scale: 2.2 },
+  { name: "FOUR ARMS",   power: "Enhanced Strength",     planet: "Khoros",        color: "#e31f1f", model: "/modals/fourarms_ben_10_os.glb",                     scale: 1.8 },
+  { name: "XLR8",        power: "Mach 5 Velocity",       planet: "Kinet",         color: "#00e676", model: "/modals/xlr8_young.glb",                             scale: 2.0 },
+  { name: "SWAMPFIRE",   power: "Pyro-Plant Control",    planet: "Methanos",      color: "#ff6d00", model: "/modals/swampfire_ben_10.glb",                       scale: 1.9 },
+  { name: "CANNONBOLT",  power: "Armodrillo Shell",      planet: "Arburia",       color: "#ffd600", model: "/modals/canonbolt_ben_10.glb",                       scale: 2.0 },
+  { name: "JETRAY",      power: "Mach 10 Flight",        planet: "Aeropela",      color: "#aa00ff", model: "/modals/jetray_-_ben_10_rigged.glb",                 scale: 1.6 },
+  { name: "WILDMUTT",    power: "Hyperactive Senses",    planet: "Vulpin",        color: "#ff8f00", model: "/modals/wildmutt_ben_10_vilgax_attacks_fan_model.glb", scale: 2.0 },
+  { name: "SPIDERMONKEY",power: "Prehensile Web Silk",   planet: "Arachna",       color: "#4fc3f7", model: "/modals/spidermonkey.glb",                           scale: 1.9 },
 ];
 
-// ─── LOADER ─────────────────────────────────────────────
-function Loader() {
-  const { progress } = useProgress();
-  return (
-    <Html center>
-      <div style={{
-        fontFamily: "'Space Mono', monospace", fontSize: 9,
-        letterSpacing: ".3em", color: "rgba(255,255,255,0.4)",
-        textTransform: "uppercase"
-      }}>
-        {Math.round(progress)}%
-      </div>
-    </Html>
-  );
-}
+// ─── LOADER (no useProgress — avoids setState-in-render error) ──
+function Loader() { return null; }
 
 // ─── 3D MODEL ───────────────────────────────────────────
 function AlienMesh({ url, scale, color }: { url: string; scale: number; color: string }) {
@@ -107,6 +94,10 @@ function useWebCanvas(ref: React.RefObject<HTMLCanvasElement | null>, color: str
 
 // ─── MAIN PAGE ──────────────────────────────────────────
 export default function Home() {
+  // ── mounted guard: prevents SSR/hydration mismatch ──
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   const [active, setActive] = useState(0);
   const [prev, setPrev] = useState(0);
   const curDot = useRef<HTMLDivElement>(null);
@@ -127,6 +118,9 @@ export default function Home() {
   }, []);
 
   const select = (i: number) => { setPrev(active); setActive(i); };
+
+  // ── Block render until client-side (avoids hydration mismatch) ──
+  if (!mounted) return null;
 
   return (
     <>
