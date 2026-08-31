@@ -9,8 +9,8 @@ import IntroSequence from "@/components/IntroSequence";
 
 // ─── COMPLETE 23-ALIEN DATASET ─────────────────────────
 const ALIENS = [
-  { id: "01", name: "DIAMONDHEAD",  color: "#00e5ff", file: "diamondhead_classic__low_poly__ben_10.glb", manualScale: 4.5, yOffset: -5 },
-  { id: "02", name: "FOUR ARMS",    color: "#e31f1f", file: "fourarms_ben_10_os.glb", manualScale: 25.0, yOffset: -8 },
+  { id: "01", name: "DIAMONDHEAD",  color: "#00e5ff", file: "diamondhead_classic__low_poly__ben_10.glb" },
+  { id: "02", name: "FOUR ARMS",    color: "#e31f1f", file: "fourarms_ben_10_os.glb" },
   { id: "03", name: "XLR8",         color: "#00e676", file: "xlr8_young.glb" },
   { id: "04", name: "SWAMPFIRE",    color: "#ff6d00", file: "swampfire_ben_10.glb" },
   { id: "05", name: "CANNONBOLT",   color: "#ffd600", file: "canonbolt_ben_10.glb" },
@@ -57,35 +57,40 @@ function AlienModel({ alien, index, active, scrollYProgress }: { alien: any, ind
 
   // Apply dramatic materials and normalize sizes robustly
   useEffect(() => {
-    if (alien.manualScale) {
-      // 1A. Manual Override for broken models
-      clone.scale.set(alien.manualScale, alien.manualScale, alien.manualScale);
-      clone.position.set(0, alien.yOffset || 0, 0);
-    } else {
-      // 1B. Robust Normalize Size & Center (ignores invisible bones/cameras)
-      const box = new THREE.Box3();
-      clone.traverse((o) => {
-        const mesh = o as THREE.Mesh;
-        if (mesh.isMesh) {
-          box.expandByObject(mesh);
+    // 1. Ultra-Robust Normalize Size & Center
+    // updateMatrixWorld is crucial before calculating manual bounds
+    clone.updateMatrixWorld(true);
+    
+    const box = new THREE.Box3();
+    clone.traverse((o) => {
+      const mesh = o as THREE.Mesh;
+      if (mesh.isMesh && mesh.geometry) {
+        mesh.geometry.computeBoundingBox();
+        if (mesh.geometry.boundingBox) {
+           const meshBox = mesh.geometry.boundingBox.clone();
+           meshBox.applyMatrix4(mesh.matrixWorld);
+           // Only union if the bounding box is valid and not infinite
+           if (!meshBox.isEmpty() && meshBox.min.x > -10000) {
+              box.union(meshBox);
+           }
         }
-      });
-      
-      const size = new THREE.Vector3();
-      box.getSize(size);
-      
-      // Fallback if size is 0
-      const finalSize = size.y === 0 ? 1 : size.y;
-      
-      // We want every alien to be exactly 6 units tall.
-      const scaleFactor = 6 / finalSize;
-      clone.scale.set(scaleFactor, scaleFactor, scaleFactor);
-      
-      // Center it
-      const center = new THREE.Vector3();
-      box.getCenter(center);
-      clone.position.sub(center.multiplyScalar(scaleFactor));
-    }
+      }
+    });
+    
+    const size = new THREE.Vector3();
+    box.getSize(size);
+    
+    // Fallback if size is 0
+    const finalSize = size.y === 0 ? 1 : size.y;
+    
+    // We want every alien to be exactly 6 units tall.
+    const scaleFactor = 6 / finalSize;
+    clone.scale.set(scaleFactor, scaleFactor, scaleFactor);
+    
+    // Center it
+    const center = new THREE.Vector3();
+    box.getCenter(center);
+    clone.position.sub(center.multiplyScalar(scaleFactor));
 
     // 2. Apply Materials
     const c = new THREE.Color(alien.color);

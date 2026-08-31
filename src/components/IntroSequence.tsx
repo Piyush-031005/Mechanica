@@ -36,7 +36,7 @@ export default function IntroSequence({ onComplete }: { onComplete: () => void }
 
       <div style={{ position: "relative", width: 400, height: 400, display: "flex", justifyContent: "center", alignItems: "center" }}>
         
-        {/* Hyper-realistic Omnitrix Base */}
+        {/* Hyper-realistic Omnitrix Base (User's Image) */}
         <motion.div 
           initial={{ scale: 0.5, opacity: 0 }}
           animate={{ 
@@ -47,7 +47,8 @@ export default function IntroSequence({ onComplete }: { onComplete: () => void }
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           style={{ position: "absolute", zIndex: 1, mixBlendMode: "screen" }}
         >
-          <img src="/assets/omnitrix.jpg" alt="Omnitrix" style={{ width: 300, height: 300, borderRadius: "50%" }} />
+          {/* We use omnitrix_user_2.jpg as it is the pure dial image */}
+          <img src="/assets/omnitrix_user_2.jpg" alt="Omnitrix" style={{ width: 300, height: 300, borderRadius: "50%", objectFit: "contain" }} />
         </motion.div>
 
         {/* Center Blinding Light (when activating) */}
@@ -57,7 +58,7 @@ export default function IntroSequence({ onComplete }: { onComplete: () => void }
           style={{ position: "absolute", width: 50, height: 50, background: "#00ff33", filter: "blur(20px)", borderRadius: "50%", zIndex: 2 }}
         />
         
-        {/* The Realistic Cyber-Spider */}
+        {/* The Realistic Cyber-Spider (User's Image) */}
         <motion.div
           initial={{ y: 0, scale: 0, opacity: 0 }}
           animate={{ 
@@ -71,7 +72,7 @@ export default function IntroSequence({ onComplete }: { onComplete: () => void }
             opacity: { duration: 0.3 }
           }}
           style={{ 
-            position: "absolute", zIndex: 5, mixBlendMode: "screen", display: "flex", justifyContent: "center"
+            position: "absolute", zIndex: 5, display: "flex", justifyContent: "center", alignItems: "center"
           }}
         >
           {/* Dynamic Web line drawn as the spider drops */}
@@ -79,11 +80,13 @@ export default function IntroSequence({ onComplete }: { onComplete: () => void }
             style={{ 
               position: "absolute", bottom: "50%", width: 2, height: 2000, 
               background: "rgba(255,255,255,0.9)", transformOrigin: "bottom", 
-              boxShadow: "0 0 15px #fff, 0 0 30px #ff0055" 
+              boxShadow: "0 0 15px #fff, 0 0 30px #ff0055", zIndex: 1 
             }}
           />
+          {/* White backdrop to make the multiply-blend spider visible on black background */}
+          <div style={{ position: "absolute", width: 140, height: 140, background: "#fff", borderRadius: "50%", filter: "blur(10px)", zIndex: 2 }} />
           {/* High-res Spider Image */}
-          <img src="/assets/spider.jpg" alt="Spider" style={{ width: 120, height: 120, position: "relative", zIndex: 2 }} />
+          <img src="/assets/spider_user.png" alt="Spider" style={{ width: 140, height: 140, position: "relative", zIndex: 3, mixBlendMode: "multiply", objectFit: "contain" }} />
         </motion.div>
       </div>
     </motion.div>
