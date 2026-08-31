@@ -4,8 +4,6 @@ import { useRef, useEffect } from "react";
 import { useStore } from "@/store/useStore";
 
 export function CinematicCamera() {
-  const scrollProgress = useStore((state) => state.scrollProgress);
-  
   const mouse = useRef({ x: 0, y: 0, velocity: 0 });
   const lastMouse = useRef({ x: 0, y: 0 });
   const lastMoveTime = useRef(Date.now());
@@ -38,46 +36,42 @@ export function CinematicCamera() {
     // Time Engine / Idle Psychology
     const timeSinceLastMove = (Date.now() - lastMoveTime.current) / 1000;
     
-    // Determine Camera Emotion
     if (mouse.current.velocity > 0.05) {
-      cameraState.current = "FEARFUL"; // Visitor moving erratically, camera pulls back/stiffens
+      cameraState.current = "FEARFUL"; 
     } else if (timeSinceLastMove > 5) {
-      cameraState.current = "MEDITATIVE"; // Visitor stopped. The world takes over.
+      cameraState.current = "MEDITATIVE";
     } else {
-      cameraState.current = "OBSERVANT"; // Visitor exploring slowly. Camera follows.
+      cameraState.current = "OBSERVANT"; 
     }
 
-    // Calculate Target Position based on Emotion
-    let targetX = mouse.current.x * 2;
-    let targetY = mouse.current.y * 2;
-    let targetZ = 15 - scrollProgress; // Base scroll travel
+    // Parallax Orbit Target
+    let targetX = mouse.current.x * 4;
+    let targetY = 2 + mouse.current.y * 2;
+    let targetZ = 12;
 
     if (cameraState.current === "MEDITATIVE") {
-      // The world breathes and drifts autonomously
       idleTime.current += delta;
-      targetX = Math.sin(idleTime.current * 0.2) * 5;
-      targetY = Math.cos(idleTime.current * 0.15) * 3;
-      targetZ += Math.sin(idleTime.current * 0.1) * 2;
+      targetX = Math.sin(idleTime.current * 0.2) * 6;
+      targetY = 2 + Math.cos(idleTime.current * 0.15) * 4;
+      targetZ = 12 + Math.sin(idleTime.current * 0.1) * 3;
     } else if (cameraState.current === "FEARFUL") {
-      // Pull back defensively
-      targetZ += 2;
+      targetZ += 3;
     }
 
-    // Physical Laws: Inertia and Mass (Dampened spring interpolation)
-    const springSpeed = cameraState.current === "FEARFUL" ? 3.0 : 1.0; // Snaps back if fearful, drifts if observant
+    // Physical Laws: Inertia and Mass
+    const springSpeed = cameraState.current === "FEARFUL" ? 3.0 : 1.5;
     state.camera.position.x = THREE.MathUtils.lerp(state.camera.position.x, targetX, delta * springSpeed);
     state.camera.position.y = THREE.MathUtils.lerp(state.camera.position.y, targetY, delta * springSpeed);
     state.camera.position.z = THREE.MathUtils.lerp(state.camera.position.z, targetZ, delta * springSpeed);
     
-    // Look at the origin, or slightly shift focus based on idle state
-    const lookTarget = new THREE.Vector3(0, 0, -scrollProgress);
+    // Always observe the Symbiote Core
+    const lookTarget = new THREE.Vector3(0, 2, 0);
     if (cameraState.current === "MEDITATIVE") {
-      lookTarget.x = Math.sin(idleTime.current * 0.3);
-      lookTarget.y = Math.cos(idleTime.current * 0.3);
+      lookTarget.x = Math.sin(idleTime.current * 0.3) * 0.5;
+      lookTarget.y = 2 + Math.cos(idleTime.current * 0.3) * 0.5;
     }
     state.camera.lookAt(lookTarget);
     
-    // Decay velocity
     mouse.current.velocity = THREE.MathUtils.lerp(mouse.current.velocity, 0, 0.1);
   });
 
