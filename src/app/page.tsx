@@ -10,7 +10,7 @@ import IntroSequence from "@/components/IntroSequence";
 // ─── COMPLETE 23-ALIEN DATASET ─────────────────────────
 const ALIENS = [
   { id: "01", name: "DIAMONDHEAD",  color: "#00e5ff", file: "diamondhead_classic__low_poly__ben_10.glb", manualScale: 1.5, yOffset: -2 },
-  { id: "02", name: "FOUR ARMS",    color: "#e31f1f", file: "fourarms_ben_10_os.glb", manualScale: 150000.0, yOffset: -10 },
+  { id: "02", name: "FOUR ARMS",    color: "#e31f1f", file: "fourarms_ben_10_os.glb", manualScale: 2.5, yOffset: -1.5 },
   { id: "03", name: "XLR8",         color: "#00e676", file: "xlr8_young.glb" },
   { id: "04", name: "SWAMPFIRE",    color: "#ff6d00", file: "swampfire_ben_10.glb" },
   { id: "05", name: "CANNONBOLT",   color: "#ffd600", file: "canonbolt_ben_10.glb" },
@@ -59,11 +59,7 @@ function AlienModel({ alien, index, active, scrollYProgress }: { alien: any, ind
   useEffect(() => {
     // 1. Ultra-Robust Normalize Size & Center
     
-    if (alien.manualScale) {
-      // Direct override for severely broken models
-      clone.scale.setScalar(alien.manualScale);
-      clone.position.set(0, alien.yOffset || 0, 0);
-    } else {
+    if (!alien.manualScale) {
       // updateMatrixWorld is crucial before calculating manual bounds
       clone.updateMatrixWorld(true);
       
@@ -109,7 +105,7 @@ function AlienModel({ alien, index, active, scrollYProgress }: { alien: any, ind
         if (mat?.roughness !== undefined) mat.roughness = 0.3; // Shiny and dramatic
       }
     });
-  }, [clone, alien.color]);
+  }, [clone, alien]);
 
   useFrame((state, dt) => {
     if (ref.current) {
@@ -142,7 +138,11 @@ function AlienModel({ alien, index, active, scrollYProgress }: { alien: any, ind
 
   return (
     <group ref={ref} visible={active === index}>
-      <primitive object={clone} />
+      <primitive 
+        object={clone} 
+        scale={alien.manualScale ? alien.manualScale : undefined} 
+        position-y={alien.manualScale ? (alien.yOffset || 0) : undefined}
+      />
     </group>
   );
 }
