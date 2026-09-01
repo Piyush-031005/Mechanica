@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState, Suspense } from "react";
+import { useEffect, useRef, useState, Suspense, useMemo } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useGLTF, Environment, ContactShadows, Float } from "@react-three/drei";
 import { motion, useScroll, useTransform, useSpring } from "framer-motion";
