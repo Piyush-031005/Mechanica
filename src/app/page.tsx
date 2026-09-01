@@ -10,8 +10,8 @@ import IntroSequence from "@/components/IntroSequence";
 // ─── COMPLETE 23-ALIEN DATASET ─────────────────────────
 const ALIENS = [
   { id: "01", name: "DIAMONDHEAD",  color: "#00e5ff", file: "diamondhead_classic__low_poly__ben_10.glb", manualScale: 1.5, yOffset: -2 },
-  { id: "02", name: "FOUR ARMS",    color: "#e31f1f", file: "fourarms_ben_10_os.glb", manualScale: 2.5, yOffset: -1.5 },
-  { id: "03", name: "XLR8",         color: "#00e676", file: "xlr8_young.glb" },
+  { id: "02", name: "FOUR ARMS",    color: "#e31f1f", file: "fourarms_ben_10_os.glb", manualScale: 15000.0, yOffset: -5 },
+  { id: "03", name: "XLR8",         color: "#00e676", file: "xlr8_young.glb", manualScale: 0.01, yOffset: -2 },
   { id: "04", name: "SWAMPFIRE",    color: "#ff6d00", file: "swampfire_ben_10.glb" },
   { id: "05", name: "CANNONBOLT",   color: "#ffd600", file: "canonbolt_ben_10.glb" },
   { id: "06", name: "JETRAY",       color: "#aa00ff", file: "jetray_-_ben_10_rigged.glb" },
@@ -58,11 +58,12 @@ function AlienModel({ alien, index, active, scrollYProgress }: { alien: any, ind
   // Apply dramatic materials and normalize sizes robustly
   useEffect(() => {
     // 1. Ultra-Robust Normalize Size & Center
+    clone.updateMatrixWorld(true);
     
-    if (!alien.manualScale) {
-      // updateMatrixWorld is crucial before calculating manual bounds
-      clone.updateMatrixWorld(true);
-      
+    if (alien.manualScale) {
+      clone.scale.set(alien.manualScale, alien.manualScale, alien.manualScale);
+      clone.position.set(0, alien.yOffset || 0, 0);
+    } else {
       const box = new THREE.Box3();
       clone.traverse((o) => {
         const mesh = o as THREE.Mesh;
@@ -138,11 +139,7 @@ function AlienModel({ alien, index, active, scrollYProgress }: { alien: any, ind
 
   return (
     <group ref={ref} visible={active === index}>
-      <primitive 
-        object={clone} 
-        scale={alien.manualScale ? alien.manualScale : undefined} 
-        position-y={alien.manualScale ? (alien.yOffset || 0) : undefined}
-      />
+      <primitive object={clone} />
     </group>
   );
 }
