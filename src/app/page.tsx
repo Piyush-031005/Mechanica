@@ -10,12 +10,12 @@ import IntroSequence from "@/components/IntroSequence";
 // ─── COMPLETE 23-ALIEN DATASET ─────────────────────────
 const ALIENS = [
   { id: "01", name: "DIAMONDHEAD",  color: "#00e5ff", file: "diamondhead_classic__low_poly__ben_10.glb", manualScale: 1.5, yOffset: -2 },
-  { id: "02", name: "FOUR ARMS",    color: "#e31f1f", file: "fourarms_ben_10_os.glb", manualScale: 15000.0, yOffset: -5 },
+  { id: "02", name: "FOUR ARMS",    color: "#e31f1f", file: "fourarms_ben_10_os.glb", manualScale: 25000.0, yOffset: -5 },
   { id: "03", name: "XLR8",         color: "#00e676", file: "xlr8_young.glb", manualScale: 0.01, yOffset: -2 },
   { id: "04", name: "SWAMPFIRE",    color: "#ff6d00", file: "swampfire_ben_10.glb" },
   { id: "05", name: "CANNONBOLT",   color: "#ffd600", file: "canonbolt_ben_10.glb" },
   { id: "06", name: "JETRAY",       color: "#aa00ff", file: "jetray_-_ben_10_rigged.glb" },
-  { id: "07", name: "WILDMUTT",     color: "#ff8f00", file: "wildmutt_ben_10_vilgax_attacks_fan_model.glb" },
+  { id: "07", name: "WILDMUTT",     color: "#ff8f00", file: "wildmutt_ben_10_vilgax_attacks_fan_model.glb", manualScale: 25000.0, yOffset: -3 },
   { id: "08", name: "SPIDERMONKEY", color: "#4fc3f7", file: "spidermonkey.glb" },
   { id: "09", name: "AMPHIBIAN",    color: "#00b0ff", file: "amphibian_-_ben10.glb" },
   { id: "10", name: "ARMODRILLO",   color: "#ffb300", file: "armodrillo.glb" },
@@ -55,14 +55,14 @@ function AlienModel({ alien, index, active, scrollYProgress }: { alien: any, ind
   const ref = useRef<THREE.Group>(null);
   const clone = useRef<THREE.Group>(scene.clone()).current;
 
-  // Apply dramatic materials and normalize sizes robustly
-  useEffect(() => {
-    // 1. Ultra-Robust Normalize Size & Center
+  const { computedScale, computedY } = useMemo(() => {
     clone.updateMatrixWorld(true);
-    
+    let finalScale = 1;
+    let finalY = 0;
+
     if (alien.manualScale) {
-      clone.scale.set(alien.manualScale, alien.manualScale, alien.manualScale);
-      clone.position.set(0, alien.yOffset || 0, 0);
+      finalScale = alien.manualScale;
+      finalY = alien.yOffset || 0;
     } else {
       const box = new THREE.Box3();
       clone.traverse((o) => {
@@ -72,8 +72,7 @@ function AlienModel({ alien, index, active, scrollYProgress }: { alien: any, ind
           if (mesh.geometry.boundingBox) {
              const meshBox = mesh.geometry.boundingBox.clone();
              meshBox.applyMatrix4(mesh.matrixWorld);
-             // Only union if the bounding box is valid and not infinite
-             if (!meshBox.isEmpty() && meshBox.min.x > -10000) {
+             if (!meshBox.isEmpty() && meshBox.min.x > -10000 && meshBox.max.x < 10000) {
                 box.union(meshBox);
              }
           }
@@ -82,21 +81,25 @@ function AlienModel({ alien, index, active, scrollYProgress }: { alien: any, ind
       
       const size = new THREE.Vector3();
       box.getSize(size);
+      const h = size.y === 0 ? 1 : size.y;
       
-      // Fallback if size is 0
-      const finalSize = size.y === 0 ? 1 : size.y;
+      // If auto-scaler produces insane results, fallback to 1
+      if (h > 1000 || h < 0.01) {
+        finalScale = 1;
+      } else {
+        finalScale = 6 / h;
+      }
       
-      // We want every alien to be exactly 6 units tall.
-      const scaleFactor = 6 / finalSize;
-      clone.scale.set(scaleFactor, scaleFactor, scaleFactor);
-      
-      // Center it
       const center = new THREE.Vector3();
       box.getCenter(center);
-      clone.position.sub(center.multiplyScalar(scaleFactor));
+      finalY = -center.y * finalScale;
     }
 
-    // 2. Apply Materials
+    return { computedScale: finalScale, computedY: finalY };
+  }, [clone, alien]);
+
+  // Apply dramatic materials
+  useEffect(() => {
     const c = new THREE.Color(alien.color);
     clone.traverse((o) => {
       const mesh = o as THREE.Mesh;
@@ -114,7 +117,6 @@ function AlienModel({ alien, index, active, scrollYProgress }: { alien: any, ind
       ref.current.rotation.y += dt * 0.2;
       
       // Calculate local progress for this specific alien's segment
-      // The total scroll space is divided into 23 segments.
       const segmentSize = 1 / ALIENS.length;
       const startProgress = index * segmentSize;
       const endProgress = (index + 1) * segmentSize;
@@ -125,7 +127,6 @@ function AlienModel({ alien, index, active, scrollYProgress }: { alien: any, ind
       localProgress = THREE.MathUtils.clamp(localProgress, -1, 1);
 
       // Scale: start tiny deep in the background, become MASSIVE when active
-      // Base scale will be large (e.g. 3.0), we modulate it based on distance from center
       const distance = Math.abs(localProgress); // 0 when perfectly centered, 1 when off edge
       
       const targetScale = distance > 0.8 ? 0.01 : THREE.MathUtils.lerp(4.0, 0.5, distance);
@@ -133,13 +134,13 @@ function AlienModel({ alien, index, active, scrollYProgress }: { alien: any, ind
       
       // Y Position: As you scroll past, it rises and falls
       const targetY = -localProgress * 15; // Moves heavily on Y axis
-      ref.current.position.y = THREE.MathUtils.lerp(ref.current.position.y, targetY - 2, 0.1); // -2 is base offset
+      ref.current.position.y = THREE.MathUtils.lerp(ref.current.position.y, targetY - 2, 0.1);
     }
   });
 
   return (
     <group ref={ref} visible={active === index}>
-      <primitive object={clone} />
+      <primitive object={clone} scale={computedScale} position-y={computedY} />
     </group>
   );
 }
