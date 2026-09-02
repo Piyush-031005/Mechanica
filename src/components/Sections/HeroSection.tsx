@@ -1,6 +1,7 @@
 "use client";
 import { motion } from "framer-motion";
 import { OmnitrixDial } from "../OmnitrixDial";
+import { MagneticButton } from "../UI/MagneticButton";
 
 export function HeroSection() {
   const bebas = { fontFamily: "'Bebas Neue', sans-serif" };
@@ -51,25 +52,28 @@ export function HeroSection() {
           Accessing the most powerful device in the universe. Contains the DNA of 1,000,912 sapient species from across the Milky Way Galaxy. 
         </p>
 
-        <motion.div 
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          style={{ 
-            marginTop: "40px",
-            padding: "15px 40px", 
-            border: "1px solid #00ff33", 
-            background: "rgba(0,255,51,0.1)",
-            color: "#00ff33",
-            cursor: "pointer",
-            ...tag,
-            boxShadow: "0 0 20px rgba(0,255,51,0.2)"
-          }}
+        <MagneticButton 
           onClick={() => {
             window.scrollBy({ top: window.innerHeight, behavior: 'smooth' });
           }}
         >
-          Initiate Uplink Sequence
-        </motion.div>
+          <motion.div 
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            style={{ 
+              marginTop: "40px",
+              padding: "15px 40px", 
+              border: "1px solid #00ff33", 
+              background: "rgba(0,255,51,0.1)",
+              color: "#00ff33",
+              cursor: "pointer",
+              ...tag,
+              boxShadow: "0 0 20px rgba(0,255,51,0.2)"
+            }}
+          >
+            Initiate Uplink Sequence
+          </motion.div>
+        </MagneticButton>
       </motion.div>
       
       {/* Scroll indicator */}
@@ -81,6 +85,23 @@ export function HeroSection() {
         <div style={{ ...mono, fontSize: 10, color: "rgba(255,255,255,0.3)" }}>SCROLL</div>
         <div style={{ width: 1, height: 40, background: "linear-gradient(to bottom, rgba(255,255,255,0.3), transparent)" }} />
       </motion.div>
+
+      {/* DNA Scanner Sweep Effect */}
+      <motion.div
+        animate={{ top: ["-10%", "110%"] }}
+        transition={{ duration: 3, ease: "linear", repeat: Infinity, repeatDelay: 2 }}
+        style={{
+          position: "absolute",
+          left: 0,
+          width: "100%",
+          height: "2px",
+          background: "linear-gradient(90deg, transparent, #00ff33, transparent)",
+          boxShadow: "0 0 20px 2px rgba(0, 255, 51, 0.5)",
+          zIndex: 99,
+          pointerEvents: "none",
+          opacity: 0.5
+        }}
+      />
     </section>
   );
 }
