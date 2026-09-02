@@ -9,13 +9,13 @@ import IntroSequence from "@/components/IntroSequence";
 
 // ─── COMPLETE 23-ALIEN DATASET ─────────────────────────
 const ALIENS = [
-  { id: "01", name: "DIAMONDHEAD",  color: "#00e5ff", file: "diamondhead_classic__low_poly__ben_10.glb", manualScale: 1.5, yOffset: -2 },
-  { id: "02", name: "FOUR ARMS",    color: "#e31f1f", file: "fourarms_ben_10_os.glb", manualScale: 25000.0, yOffset: -5 },
-  { id: "03", name: "XLR8",         color: "#00e676", file: "xlr8_young.glb", manualScale: 0.01, yOffset: -2 },
+  { id: "01", name: "DIAMONDHEAD",  color: "#00e5ff", file: "diamondhead_classic__low_poly__ben_10.glb" },
+  { id: "02", name: "FOUR ARMS",    color: "#e31f1f", file: "fourarms_ben_10_os.glb", manualScale: 35000, manualY: -3 },
+  { id: "03", name: "XLR8",         color: "#00e676", file: "xlr8_young.glb", manualScale: 0.001, manualY: -3 },
   { id: "04", name: "SWAMPFIRE",    color: "#ff6d00", file: "swampfire_ben_10.glb" },
   { id: "05", name: "CANNONBOLT",   color: "#ffd600", file: "canonbolt_ben_10.glb" },
   { id: "06", name: "JETRAY",       color: "#aa00ff", file: "jetray_-_ben_10_rigged.glb" },
-  { id: "07", name: "WILDMUTT",     color: "#ff8f00", file: "wildmutt_ben_10_vilgax_attacks_fan_model.glb", manualScale: 25000.0, yOffset: -3 },
+  { id: "07", name: "WILDMUTT",     color: "#ff8f00", file: "wildmutt_ben_10_vilgax_attacks_fan_model.glb" },
   { id: "08", name: "SPIDERMONKEY", color: "#4fc3f7", file: "spidermonkey.glb" },
   { id: "09", name: "AMPHIBIAN",    color: "#00b0ff", file: "amphibian_-_ben10.glb" },
   { id: "10", name: "ARMODRILLO",   color: "#ffb300", file: "armodrillo.glb" },
@@ -65,6 +65,8 @@ function AlienModel({ alien, index, active, scrollYProgress }: { alien: any, ind
       finalY = alien.yOffset || 0;
     } else {
       const box = new THREE.Box3();
+      let validBoundsFound = false;
+
       clone.traverse((o) => {
         const mesh = o as THREE.Mesh;
         if (mesh.isMesh && mesh.geometry) {
@@ -72,8 +74,15 @@ function AlienModel({ alien, index, active, scrollYProgress }: { alien: any, ind
           if (mesh.geometry.boundingBox) {
              const meshBox = mesh.geometry.boundingBox.clone();
              meshBox.applyMatrix4(mesh.matrixWorld);
-             if (!meshBox.isEmpty() && meshBox.min.x > -10000 && meshBox.max.x < 10000) {
+             
+             // Calculate size of this specific mesh's bounding box
+             const meshSize = new THREE.Vector3();
+             meshBox.getSize(meshSize);
+
+             // Filter out infinite/broken bounding boxes (common in exported SkinnedMeshes)
+             if (!meshBox.isEmpty() && meshBox.min.x > -10000 && meshBox.max.x < 10000 && meshSize.length() < 500) {
                 box.union(meshBox);
+                validBoundsFound = true;
              }
           }
         }
@@ -81,21 +90,24 @@ function AlienModel({ alien, index, active, scrollYProgress }: { alien: any, ind
       
       const size = new THREE.Vector3();
       box.getSize(size);
-      const h = size.y === 0 ? 1 : size.y;
       
-      // If auto-scaler produces insane results, fallback to 1
-      if (h > 1000 || h < 0.01) {
-        finalScale = 1;
-      } else {
-        finalScale = 6 / h;
-      }
+      // If we didn't find ANY valid bounds (or size is 0), fallback to 1
+      const h = (!validBoundsFound || size.y === 0) ? 1 : size.y;
+      
+      finalScale = 6 / h;
       
       const center = new THREE.Vector3();
       box.getCenter(center);
       finalY = -center.y * finalScale;
+      
+      console.log(`[Scaler] ${alien.name}: validBounds=${validBoundsFound}, sizeY=${size.y}, h=${h}, scale=${finalScale}, y=${finalY}`);
     }
-
-    return { computedScale: finalScale, computedY: finalY };
+    
+    // If manual override exists, ignore computed bounds entirely for that axis
+    const s = alien.manualScale !== undefined ? alien.manualScale : finalScale;
+    const y = alien.manualY !== undefined ? alien.manualY : finalY;
+    
+    return { computedScale: s, computedY: y };
   }, [clone, alien]);
 
   // Apply dramatic materials
@@ -181,13 +193,14 @@ function PlungeScene({ scrollYProgress }: { scrollYProgress: any }) {
   );
 }
 
+import { MotionValue } from "framer-motion";
+
 // ─── THE STRETCHING WEB ────────────────────────────────
-function DescentWeb() {
-  const { scrollYProgress } = useScroll();
+function DescentWeb({ scrollYProgress }: { scrollYProgress: MotionValue<number> }) {
   const smoothProgress = useSpring(scrollYProgress, { damping: 15, stiffness: 60 });
   
   // We use strokeDashoffset to "draw" the web downwards as you scroll
-  const strokeDashoffset = useTransform(smoothProgress, [0, 1], [1000, 0]);
+  const strokeDashoffset = useTransform(smoothProgress, [0, 1], ["1000px", "0px"]);
 
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 1, pointerEvents: "none", display: "flex", justifyContent: "center" }}>
@@ -219,32 +232,52 @@ function DescentWeb() {
         {/* Fraying organic strands mimicking a spider web */}
         <motion.path 
           d="M30,0 Q10,250 30,500 T30,1000" 
-          stroke="rgba(255,255,255,0.3)" strokeWidth="0.5" fill="none"
+          stroke="rgba(255,0,0,0.3)" strokeWidth="0.5" fill="none"
           strokeDasharray="1000"
           style={{ strokeDashoffset }}
         />
         <motion.path 
           d="M30,0 Q50,150 30,300 T30,1000" 
-          stroke="rgba(255,255,255,0.5)" strokeWidth="0.8" fill="none"
+          stroke="rgba(255,0,0,0.5)" strokeWidth="0.8" fill="none"
           strokeDasharray="1000"
           style={{ strokeDashoffset }}
         />
         <motion.path 
           d="M30,0 Q20,100 30,200 T30,1000" 
-          stroke="rgba(255,255,255,0.2)" strokeWidth="0.3" fill="none"
+          stroke="rgba(255,0,0,0.2)" strokeWidth="0.3" fill="none"
           strokeDasharray="1000"
           style={{ strokeDashoffset }}
         />
+        
+        {/* The Mechanical Spider crawling down */}
+        <motion.g style={{ y: useTransform(smoothProgress, [0, 1], [0, 950]) }}>
+          <circle cx="30" cy="20" r="4" fill="#000" stroke="#ff0000" strokeWidth="1.5" filter="url(#glow)"/>
+          <circle cx="30" cy="14" r="2" fill="#ff0000" />
+          {/* Spider Legs */}
+          <path d="M26,18 L18,12 L14,16" stroke="#ff0000" strokeWidth="1" fill="none" />
+          <path d="M34,18 L42,12 L46,16" stroke="#ff0000" strokeWidth="1" fill="none" />
+          <path d="M25,20 L15,22 L10,28" stroke="#ff0000" strokeWidth="1" fill="none" />
+          <path d="M35,20 L45,22 L50,28" stroke="#ff0000" strokeWidth="1" fill="none" />
+          <path d="M26,22 L18,30 L16,38" stroke="#ff0000" strokeWidth="1" fill="none" />
+          <path d="M34,22 L42,30 L44,38" stroke="#ff0000" strokeWidth="1" fill="none" />
+          <path d="M28,24 L24,34 L22,42" stroke="#ff0000" strokeWidth="1" fill="none" />
+          <path d="M32,24 L36,34 L38,42" stroke="#ff0000" strokeWidth="1" fill="none" />
+        </motion.g>
       </svg>
     </div>
   );
 }
+
+import { HeroSection } from "../components/Sections/HeroSection";
+import { LoreSection } from "../components/Sections/LoreSection";
+import { Footer } from "../components/Sections/Footer";
 
 // ─── MAIN PAGE (THE PLUNGE ARCHITECTURE) ───────────────
 export default function Home() {
   const [mounted, setMounted] = useState(false);
   const [introFinished, setIntroFinished] = useState(false);
   const lenisRef = useRef<Lenis | null>(null);
+  const plungeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -275,10 +308,12 @@ export default function Home() {
     }
   }, [introFinished]);
 
-  const { scrollYProgress } = useScroll(); // Add this line here to pass to PlungeScene
+  const { scrollYProgress } = useScroll({
+    target: plungeRef,
+    offset: ["start start", "end end"]
+  });
 
-  if (!mounted) return null;
-
+  // removed mounted check to fix framer motion ref hydration
   const bebas = { fontFamily: "'Bebas Neue', sans-serif" };
   const mono  = { fontFamily: "'Space Mono', monospace" };
   const tag   = { ...mono, letterSpacing: ".3em", textTransform: "uppercase" as const };
@@ -304,19 +339,22 @@ export default function Home() {
       }} />
       <div style={{ position:"fixed", inset:0, opacity:0.04, pointerEvents:"none", zIndex: 999, backgroundImage:`url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")` }} />
 
-      {/* THE WEB */}
-      <DescentWeb />
-
-      {/* FIXED 3D CANVAS */}
-      <div style={{ position: "fixed", inset: 0, zIndex: 2, pointerEvents: "none" }}>
-        <Canvas gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.5, alpha: true }}>
-          <PlungeScene scrollYProgress={scrollYProgress} />
-        </Canvas>
-      </div>
+      <HeroSection />
+      <LoreSection />
 
       {/* THE DESCENT CONTAINER (2300vh for 23 aliens) */}
-      <div style={{ position: "relative", zIndex: 3, width: "100%", height: `${ALIENS.length * 100}vh`, pointerEvents: "none" }}>
+      <div ref={plungeRef} style={{ position: "relative", zIndex: 3, width: "100%", height: `${ALIENS.length * 100}vh` }}>
         
+        {/* STICKY 3D CANVAS FOR PLUNGE */}
+        <div style={{ position: "sticky", top: 0, height: "100vh", width: "100%", zIndex: 1, pointerEvents: "none" }}>
+          <Canvas gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.5, alpha: true }}>
+            <PlungeScene scrollYProgress={scrollYProgress} />
+          </Canvas>
+        </div>
+
+        {/* THE WEB - Moved inside the container so it visually stretches down */}
+        <DescentWeb scrollYProgress={scrollYProgress} />
+
         {ALIENS.map((alien, i) => (
           <div key={alien.id} style={{ position: "absolute", top: `${i * 100}vh`, height: "100vh", width: "100%", display: "flex", pointerEvents: "none", mixBlendMode: "screen", padding: "40px" }}>
             
@@ -373,13 +411,9 @@ export default function Home() {
 
           </div>
         ))}
-        
-        {/* Intro Hint */}
-        <div style={{ position: "absolute", top: "80vh", width: "100%", textAlign: "center" }}>
-          <p style={{ ...mono, fontSize: 12, color: "#ff0055", letterSpacing: 4, textTransform: "uppercase" }}>Initiate Descent</p>
-        </div>
-
       </div>
+
+      <Footer />
 
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap');
