@@ -271,6 +271,7 @@ function DescentWeb({ scrollYProgress }: { scrollYProgress: MotionValue<number> 
 import { HeroSection } from "../components/Sections/HeroSection";
 import { LoreSection } from "../components/Sections/LoreSection";
 import { Footer } from "../components/Sections/Footer";
+import { AnomalySection } from "../components/Sections/AnomalySection";
 
 // ─── MAIN PAGE (THE PLUNGE ARCHITECTURE) ───────────────
 export default function Home() {
@@ -341,6 +342,9 @@ export default function Home() {
 
       <HeroSection />
       <LoreSection />
+
+      {/* ANOMALY SECTION (Interactive Artifacts) */}
+      <AnomalySection />
 
       {/* THE DESCENT CONTAINER (2300vh for 23 aliens) */}
       <div ref={plungeRef} style={{ position: "relative", zIndex: 3, width: "100%", height: `${ALIENS.length * 100}vh` }}>
