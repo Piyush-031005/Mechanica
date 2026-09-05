@@ -1,9 +1,12 @@
 "use client";
-import { useEffect, useRef, useState, Suspense, useMemo } from "react";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import React, { useRef, useState, useEffect, useMemo, Suspense } from "react";
+import { Canvas, useFrame, useThree, useGraph } from "@react-three/fiber";
 import { useGLTF, Environment, ContactShadows, Float } from "@react-three/drei";
 import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import * as THREE from "three";
+import { SkeletonUtils } from "three-stdlib";
+import { EffectComposer, Bloom, ChromaticAberration, Noise } from "@react-three/postprocessing";
+import { DNAParticles } from "../components/Environment/DNAParticles";
 import Lenis from "lenis";
 import IntroSequence from "@/components/IntroSequence";
 
@@ -147,6 +150,26 @@ function AlienModel({ alien, index, active, scrollYProgress }: { alien: any, ind
       // Y Position: As you scroll past, it rises and falls
       const targetY = -localProgress * 15; // Moves heavily on Y axis
       ref.current.position.y = THREE.MathUtils.lerp(ref.current.position.y, targetY - 2, 0.1);
+
+      // --- NEW 3D TECH: Holographic Wireframe Transition ---
+      // When the alien is far away (distance > 0.3), it looks like a wireframe hologram assembling.
+      // When it gets close (distance <= 0.3), it solidifies.
+      if (clone) {
+        const shouldBeWireframe = distance > 0.3;
+        clone.traverse((child: any) => {
+          if (child.isMesh && child.material) {
+            // Apply dramatic fade out if it's very far
+            child.material.transparent = true;
+            child.material.opacity = distance > 0.7 ? 0 : (1 - distance);
+
+            // Toggle wireframe based on proximity
+            if (child.material.wireframe !== shouldBeWireframe) {
+              child.material.wireframe = shouldBeWireframe;
+              child.material.needsUpdate = true;
+            }
+          }
+        });
+      }
     }
   });
 
@@ -184,11 +207,26 @@ function PlungeScene({ scrollYProgress }: { scrollYProgress: any }) {
       <directionalLight position={[-10, -10, 10]} intensity={2.0} color="#ffffff" />
       <pointLight position={[0, -2, 5]} intensity={50} color={currentAlien.color} distance={20} decay={2} />
       
+      {/* DNA Particle Tunnel Environment */}
+      <DNAParticles scrollYProgress={scrollYProgress} />
+
       {ALIENS.map((alien, i) => (
         <AlienMesh key={alien.id} alien={alien} index={i} active={active} scrollYProgress={scrollYProgress} />
       ))}
 
       <ContactShadows position={[0, -6, 0]} opacity={0.8} scale={30} blur={4} color={currentAlien.color} />
+
+      {/* Cinematic Post-Processing */}
+      <EffectComposer disableNormalPass multisampling={4}>
+        <Bloom luminanceThreshold={0.2} mipmapBlur intensity={1.5} radius={0.4} />
+        <Noise opacity={0.03} />
+        <ChromaticAberration 
+          offset={new THREE.Vector2(0.002, 0.002)} 
+          opacity={0.5} 
+          radialModulation={true} 
+          modulationOffset={0.5}
+        />
+      </EffectComposer>
     </>
   );
 }
